@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 import pickle
 import os
 
+from src.utils import print_hist
+
 qsd1 = "/home/yeray142/Desktop/Team4/data/qsd1_w1"
+bbdd = '/home/yeray142/Desktop/Team4/data/BBDD'
 
 with open(qsd1 + "/gt_corresps.pkl", 'rb') as f:
     y = pickle.load(f)  # Ground truth
@@ -22,17 +25,14 @@ def compute_descriptors(imgs_path):
                 img_lab = cv.cvtColor(img, cv.COLOR_BGR2Lab)
                 img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
-                # Compute histograms
-                hist_lab = cv.calcHist([img_lab], [0], None, [100], [0, 100])
-                hist_hsv = cv.calcHist([img_hsv], [0], None, [256], [0, 256])
-
-                #plt.plot(hist_lab)
-                print(hist_lab)
-                plt.bar(range(len(hist_lab)), hist_lab[0])
-                plt.show()
+                # Print histograms just if needed
+                print_hist(img_lab, ['L channel', 'a channel', 'b channel'], filename)
+                print_hist(img_hsv, ["Hue channel", "Saturation channel", "Value channel"], filename, color="green")
 
 
-compute_descriptors(qsd1)
+
+
+compute_descriptors(bbdd)
 
 
 
