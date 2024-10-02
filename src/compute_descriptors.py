@@ -12,9 +12,6 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Base 
 qsd1 = os.path.join(base_path, "data", "qsd1_w1")
 bbdd = os.path.join(base_path, "data", "BBDD")
 
-with open(qsd1 + "/gt_corresps.pkl", 'rb') as f:
-	y = pickle.load(f)  # Ground truth
-
 
 def compute_histogram(img, channels, bins, ranges):
 	# Compute histogram and normalize

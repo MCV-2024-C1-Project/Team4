@@ -12,6 +12,7 @@ def compute_similarities(query_hist, bbdd_histograms, method, k=1):
         distance = compare_histograms(query_hist, bbdd_hist, method)
         results.append((idx, distance))
     results.sort(key=lambda x: x[1])
-    print(results[:k])
+    results_idx = [result[0] for result in results]
+    return results[:k], results_idx[:k]
 
 
