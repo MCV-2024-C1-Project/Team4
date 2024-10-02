@@ -8,9 +8,6 @@ from enum import Enum
 from utils import plot_hist_from_img, plot_hist_from_list
 from metrics import compare_histograms
 
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Base directory
-qsd1 = os.path.join(base_path, "data", "qsd1_w1")
-bbdd = os.path.join(base_path, "data", "BBDD")
 
 def compute_histogram(img, channels, bins, ranges):
 	# Compute histogram
@@ -81,7 +78,3 @@ def compute_descriptors(imgs_path):
 		pickle.dump(lab_histograms, f)
 	with open(os.path.join(imgs_path, 'hsv_histograms.pkl'), 'wb') as f:
 		pickle.dump(hsv_histograms, f)
-
-
-compute_descriptors(bbdd)
-#compute_descriptors(qsd1)

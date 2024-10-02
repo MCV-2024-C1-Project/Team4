@@ -1,0 +1,43 @@
+import os
+import cv2 as cv
+import argparse
+
+from utils import plot_hist_task1
+
+# Function to calculate the histogram based on the descriptor type
+def calculate_descriptor(image, descriptor_type):
+    if descriptor_type == 'hist_lab':
+        img_lab = cv.cvtColor(image, cv.COLOR_BGR2Lab)
+        plot_hist_task1(image, img_lab, 'Lab')
+    elif descriptor_type == 'hist_hsv':
+        img_hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+        plot_hist_task1(image, img_hsv, 'HSV')
+    else:
+        print(f"Descriptor {descriptor_type} not recognized. Use 'hist_lab' or 'hist_hsv'.")
+
+# Main function
+def main():
+    # Script arguments
+    parser = argparse.ArgumentParser(description="Calculate image descriptors")
+    parser.add_argument("image_filename", help="Image filename (e.g., 00001.jpg)")
+    parser.add_argument("descriptor_type", help="Descriptor type (e.g., hist_lab or hist_hsv)")
+    args = parser.parse_args()
+
+    # Paths
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Base directory
+    qsd1 = os.path.join(base_path, "data", "qsd1_w1")
+
+    image_path = os.path.join(qsd1, args.image_filename)
+
+    # Load the image
+    img = cv.imread(image_path)
+    
+    if img is None:
+        print(f"Could not load image {args.image_filename}")
+        return
+
+    # Calculate descriptor
+    calculate_descriptor(img, args.descriptor_type)
+
+if __name__ == "__main__":
+    main()
