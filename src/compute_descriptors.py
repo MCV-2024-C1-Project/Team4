@@ -83,15 +83,4 @@ def compute_descriptors(imgs_path):
 
 
 compute_descriptors(bbdd)
-compute_descriptors(qsd1)
-
-def test():
-	with open(os.path.join(qsd1, 'hsv_histograms.pkl'), 'rb') as f:
-		qsd1_hists = pickle.load(f)
-	with open(os.path.join(bbdd, 'hsv_histograms.pkl'), 'rb') as f:
-		bbdd_hists = pickle.load(f)
-
-	# Compare histograms
-	print(compare_histograms(qsd1_hists[2], bbdd_hists[120], cv.HISTCMP_HELLINGER))
-
-test()
+#compute_descriptors(qsd1)
