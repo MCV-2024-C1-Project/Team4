@@ -38,7 +38,7 @@ def plot_hist_from_list(histograms, index, color_space='Lab'):
         plt.bar(range(256), L_hist, color='black')
         plt.title('L Channel Histogram')
         plt.xlabel('Intensity Value')
-        plt.ylabel('Frequency')
+        plt.ylabel('Number of pixels')
 
         plt.subplot(1, 3, 2)
         plt.bar(range(256), a_hist, color='red')
@@ -81,3 +81,78 @@ def plot_hist_from_list(histograms, index, color_space='Lab'):
     # Display the plots
     plt.tight_layout()
     plt.show()
+
+
+def plot_hist_task1(original_image, image_colorspace, color_space='Lab'):
+      from compute_descriptors import compute_histogram
+      plt.figure(figsize= (20,10))
+
+      #Plot the original image
+      plt.subplot(2,2,1)
+      plt.imshow(cv.cvtColor(original_image, cv.COLOR_BGR2RGB))
+      plt.title('Original Image')
+      plt.axis('off')
+
+      # Plot the image in the specified color space
+      plt.subplot(2, 2, 2)
+      plt.imshow(image_colorspace)
+      plt.title(f'{color_space} Image')
+      plt.axis('off')
+
+
+      if color_space == 'Lab':
+        # Lab histograms are the first three parts of the concatenated histogram
+        L_hist = compute_histogram(image_colorspace, [0], [256], [0, 256])
+        a_hist = compute_histogram(image_colorspace, [1], [256], [0, 256])
+        b_hist = compute_histogram(image_colorspace, [2], [256], [0, 256])
+
+        # Plot each channel
+        plt.subplot(2, 3, 4)
+        plt.bar(range(256), L_hist, color='black')
+        plt.title('L Channel Histogram')
+        plt.xlabel('Intensity Value')
+        plt.ylabel('Number of pixels')
+
+        plt.subplot(2, 3, 5)
+        plt.bar(range(256), a_hist, color='red')
+        plt.title('a Channel Histogram')
+        plt.xlabel('Intensity Value')
+        
+
+        plt.subplot(2, 3, 6)
+        plt.bar(range(256), b_hist, color='blue')
+        plt.title('b Channel Histogram')
+        plt.xlabel('Intensity Value')
+    
+
+      elif color_space == 'HSV':
+        # HSV histograms follow Lab histograms, assuming the size of each bin
+        H_hist = compute_histogram(image_colorspace, [0], [180], [0, 180])
+        S_hist = compute_histogram(image_colorspace, [1], [256], [0, 256])
+        V_hist = compute_histogram(image_colorspace, [2], [256], [0, 256])
+       
+        plt.subplot(2, 3, 4)
+        plt.bar(range(180), H_hist, color='orange')
+        plt.title('Hue Channel Histogram')
+        plt.xlabel('Hue Value')
+        plt.ylabel('Number of pixels')
+
+        plt.subplot(2, 3, 5)
+        plt.bar(range(256), S_hist, color='green')
+        plt.title('Saturation Channel Histogram')
+        plt.xlabel('Intensity Value')
+        
+
+        plt.subplot(2, 3, 6)
+        plt.bar(range(256), V_hist, color='purple')
+        plt.title('Value Channel Histogram')
+        plt.xlabel('Intensity Value')
+       
+
+      else:
+        print("Invalid color space. Please choose 'Lab' or 'HSV'.")
+        return
+
+    # Display the plots
+      plt.tight_layout(pad= 3.0)
+      plt.show()

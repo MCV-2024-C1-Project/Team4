@@ -12,8 +12,12 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Base 
 qsd1 = os.path.join(base_path, "data", "qsd1_w1")
 bbdd = os.path.join(base_path, "data", "BBDD")
 
-
 def compute_histogram(img, channels, bins, ranges):
+	# Compute histogram
+	hist = cv.calcHist([img], channels, None, bins, ranges)
+	return hist.flatten()
+
+def compute_histogram_norm(img, channels, bins, ranges):
 	# Compute histogram and normalize
 	hist = cv.calcHist([img], channels, None, bins, ranges)
 	cv.normalize(hist, hist)
@@ -44,15 +48,15 @@ def compute_descriptors(imgs_path):
 
 			# Compute histograms for each channel and concatenate them
 			lab_hist = np.concatenate(
-				[compute_histogram(img_lab, [0], [256], [0, 256]),
-				 compute_histogram(img_lab, [1], [256], [0, 256]),
-				 compute_histogram(img_lab, [2], [256], [0, 256])]
+				[compute_histogram_norm(img_lab, [0], [256], [0, 256]),
+				 compute_histogram_norm(img_lab, [1], [256], [0, 256]),
+				 compute_histogram_norm(img_lab, [2], [256], [0, 256])]
 			)
 
 			hsv_hist = np.concatenate(
-				[compute_histogram(img_hsv, [0], [180], [0, 180]),
-				 compute_histogram(img_hsv, [1], [256], [0, 256]),
-				 compute_histogram(img_hsv, [2], [256], [0, 256])]
+				[compute_histogram_norm(img_hsv, [0], [180], [0, 180]),
+				 compute_histogram_norm(img_hsv, [1], [256], [0, 256]),
+				 compute_histogram_norm(img_hsv, [2], [256], [0, 256])]
 			)
 
 
@@ -68,7 +72,7 @@ def compute_descriptors(imgs_path):
 			hsv_histograms[index] = hsv_hist
 
 			# Show histograms (just if needed)
-			# plot_hist_from_list(lab_histograms, index, color_space='Lab')
+			#plot_hist_from_list(lab_histograms, index, color_space='Lab')
 
 	# print(compare_histograms(lab_histograms[29], lab_histograms[24]))
 
