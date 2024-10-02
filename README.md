@@ -35,6 +35,27 @@ To be done
 ### Steps
 To be done
 
+#### Task 1:  Museum and query image descriptors (BBDD & QSD1)
+
+- **Index the Database:** Generate descriptors offline.
+  ```bash
+  python .\compute_db_descriptors.py
+
+- **Compute image descriptors (QSD1):**
+  
+  Methods:
+   - **Color space CieLab:** Histograms for the L, a, and b channels.
+     
+     Example command:
+     ```bash
+     python .\compute_img_descriptors.py 00001.jpg hist_lab
+     
+   - **Color space HSV histogram:** Histograms for the Hue, Saturation, and Value channels.
+     
+     Example command:
+     ```bash
+     python .\compute_img_descriptors.py 00001.jpg hist_hsv
+     
 ## What's included
 
 Within the download you'll find the following directories and files, logically grouping common assets. You'll see something like this:
