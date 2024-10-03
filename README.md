@@ -30,7 +30,8 @@ To be done
 This section will guide you through the installation process of the project and its testing.
 
 ### Prerequisites
-To be done
+The following prerequisites must be followed:
+- Python >= v3.8
 
 ### Steps
 To be done
@@ -82,11 +83,14 @@ The measures used are implemented using the OpenCV library with the function cv:
 Within the download you'll find the following directories and files, logically grouping common assets. You'll see something like this:
 
     ```text
-    eymo-cloud-rs/
+    MCV-2024-C1-Project/
     ├── evaluation/
     │   ├── bbox_iou.py
     │   └── evaluation_funcs.py
-    ├── evaluation/
+    ├── src/
+    │   ├── average_precision.py
+    │   └── ...
+    ├── utils/
     │   ├── plot_results.py
     │   └── print_dict.py
     ```
