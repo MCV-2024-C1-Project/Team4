@@ -5,18 +5,18 @@ import argparse
 from utils import plot_hist_task1
 
 
-def calculate_descriptor(image, descriptor_type):
+def calculate_descriptor(img, image_filename, descriptor_type):
     """
     Calculate the histogram based on the descriptor type
     :param image: image to calculate the histogram
     :param descriptor_type: descriptor type (e.g., hist_lab or hist_hsv)
     """
     if descriptor_type == 'hist_lab':
-        img_lab = cv.cvtColor(image, cv.COLOR_BGR2Lab)
-        plot_hist_task1(image, img_lab, 'Lab')
+        img_lab = cv.cvtColor(img, cv.COLOR_BGR2Lab)
+        plot_hist_task1(img,image_filename, img_lab, 'Lab')
     elif descriptor_type == 'hist_hsv':
-        img_hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
-        plot_hist_task1(image, img_hsv, 'HSV')
+        img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+        plot_hist_task1(img,image_filename, img_hsv, 'HSV')
     else:
         print(f"Descriptor {descriptor_type} not recognized. Use 'hist_lab' or 'hist_hsv'.")
 
@@ -43,7 +43,7 @@ def main():
         return
 
     # Calculate descriptor
-    calculate_descriptor(img, args.descriptor_type)
+    calculate_descriptor(img, args.image_filename, args.descriptor_type)
 
 if __name__ == "__main__":
     main()

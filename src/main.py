@@ -23,7 +23,7 @@ def main():
 	img = cv.imread(image_path)
 	
 	# Modify according to the method used
-	color_space = "HSV"					# or "HSV"
+	color_space = "HSV"					# "Lab" or "HSV"
 	k_value1 = 1							
 	k_value2 = 5
 
@@ -36,9 +36,10 @@ def main():
 	plot_hist_task1(img,image_filename, img_hsv, 'HSV')
 
 	# Task 2: : Implement / compute similarity measures to compare images
+	# Task 3: Implement retrieval system (retrieve top K results)
+
 	compute_descriptors(qsd1, color_space)
 
-	# Task 3: Implement retrieval system (retrieve top K results)
 	with open(os.path.join(qsd1, color_space+'_histograms.pkl'), 'rb') as f:
 		qsd1_histograms = pickle.load(f)
 
