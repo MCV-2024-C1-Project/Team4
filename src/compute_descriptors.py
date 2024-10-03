@@ -1,27 +1,32 @@
 import cv2 as cv
 import numpy as np
-import matplotlib.pyplot as plt
 import pickle
 import os
 
-from enum import Enum
 from utils import plot_hist_from_img, plot_hist_from_list
 from metrics import compare_histograms
 
 
-def compute_histogram(img, channels, bins, ranges):
-	# Compute histogram
+def compute_histogram(img, channels, bins, ranges, normalized=False):
+	"""
+	Compute histogram of an image
+	:param img: image
+	:param channels: channels to compute the histogram
+	:param bins: number of bins
+	:param ranges: range of values
+	:param normalized: if True, normalize the histogram. Default is False
+	"""
 	hist = cv.calcHist([img], channels, None, bins, ranges)
-	return hist.flatten()
-
-def compute_histogram_norm(img, channels, bins, ranges):
-	# Compute histogram and normalize
-	hist = cv.calcHist([img], channels, None, bins, ranges)
-	cv.normalize(hist, hist)
+	if normalized:
+		cv.normalize(hist, hist)
 	return hist.flatten()
 
 
 def compute_descriptors(imgs_path):
+	"""
+	Compute histograms for each image in the dataset and save them to a pickle file
+	:param imgs_path: path to the dataset
+	"""
 	# Array to store histograms
 	lab_histograms = []
 	hsv_histograms = []
@@ -40,22 +45,21 @@ def compute_descriptors(imgs_path):
 			img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
 			# Print histograms (just if needed)
-			#plot_hist_from_img(img_lab, ['L channel', 'a channel', 'b channel'], filename)
-			#plot_hist_from_img(img_hsv, ["Hue channel", "Saturation channel", "Value channel"], filename, color="green")
+			# plot_hist_from_img(img_lab, ['L channel', 'a channel', 'b channel'], filename)
+			# plot_hist_from_img(img_hsv, ["Hue channel", "Saturation channel", "Value channel"], filename, color="green")
 
 			# Compute histograms for each channel and concatenate them
 			lab_hist = np.concatenate(
-				[compute_histogram_norm(img_lab, [0], [256], [0, 256]),
-				 compute_histogram_norm(img_lab, [1], [256], [0, 256]),
-				 compute_histogram_norm(img_lab, [2], [256], [0, 256])]
+				[compute_histogram(img_lab, [0], [256], [0, 256], normalized=True),
+				 compute_histogram(img_lab, [1], [256], [0, 256], normalized=True),
+				 compute_histogram(img_lab, [2], [256], [0, 256], normalized=True)]
 			)
 
 			hsv_hist = np.concatenate(
-				[compute_histogram_norm(img_hsv, [0], [180], [0, 180]),
-				 compute_histogram_norm(img_hsv, [1], [256], [0, 256]),
-				 compute_histogram_norm(img_hsv, [2], [256], [0, 256])]
+				[compute_histogram(img_hsv, [0], [180], [0, 180], normalized=True),
+				 compute_histogram(img_hsv, [1], [256], [0, 256], normalized=True),
+				 compute_histogram(img_hsv, [2], [256], [0, 256], normalized=True)]
 			)
-
 
 			# Extract the index from the filename and store histogram at the correct position
 			index = int(filename.split('_')[-1].split('.')[0])
@@ -68,8 +72,8 @@ def compute_descriptors(imgs_path):
 				hsv_histograms.extend([None] * (index + 1 - len(hsv_histograms)))
 			hsv_histograms[index] = hsv_hist
 
-			# Show histograms (just if needed)
-			#plot_hist_from_list(lab_histograms, index, color_space='Lab')
+		# Show histograms (just if needed)
+		# plot_hist_from_list(lab_histograms, index, color_space='Lab')
 
 	# print(compare_histograms(lab_histograms[29], lab_histograms[24]))
 
