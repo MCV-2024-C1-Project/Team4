@@ -95,20 +95,21 @@ def plot_hist_from_list(histograms, index, color_space='Lab'):
 	plt.show()
 
 
-def plot_hist_task1(original_image, image_colorspace, color_space='Lab'):
+def plot_hist_task1(original_image, image_filename, image_colorspace, color_space='Lab'):
 	"""
-	Plot histograms for the specified color space of the input image.
-	:param original_image: Original image
-	:param image_colorspace: Image in the specified color space
-	:param color_space: Color space of the image. Default is 'Lab'.
-	"""
+    Plot histograms for the specified color space of the input image.
+    :param original_image: Original image
+    :param image_filename: Name of the input image
+    :param image_colorspace: Image in the specified color space
+    :param color_space: Color space of the image. Default is 'Lab'.
+    """
 	from compute_descriptors import compute_histogram
 	plt.figure(figsize=(20, 10))
 
 	# Plot the original image
 	plt.subplot(2, 2, 1)
 	plt.imshow(cv.cvtColor(original_image, cv.COLOR_BGR2RGB))
-	plt.title('Original Image')
+	plt.title(f'Original Image - {image_filename}')
 	plt.axis('off')
 
 	# Plot the image in the specified color space
