@@ -25,15 +25,16 @@ def calculate_descriptor(img, image_filename, descriptor_type):
 def main():
     # Script arguments
     parser = argparse.ArgumentParser(description="Calculate image descriptors")
+    parser.add_argument("query_path", help="Path to the query dataset")
     parser.add_argument("image_filename", help="Image filename (e.g., 00001.jpg)")
     parser.add_argument("descriptor_type", help="Descriptor type (e.g., hist_lab or hist_hsv)")
     args = parser.parse_args()
 
     # Paths
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Base directory
-    qsd1 = os.path.join(base_path, "data", "qsd1_w1")
+    q_path = os.path.join(base_path, args.query_path)
 
-    image_path = os.path.join(qsd1, args.image_filename)
+    image_path = os.path.join(q_path, args.image_filename)
 
     # Load the image
     img = cv.imread(image_path)

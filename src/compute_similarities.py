@@ -1,24 +1,40 @@
 from metrics import compare_histograms
+import cv2 as cv
 
 
-def compute_similarities(query_hist, bbdd_histograms, method, measure: str="distance", k: int = 1):
-	"""
-	Computes the similarities between the query histogram and the BBDD histograms
-	:param query_hist: query histogram
-	:param bbdd_histograms: list of BBDD histograms
-	:param method: method to compute the similarity
-	:param k: number of results to return. Default is 1
-	:return: ...
-	"""
-	results = []
-	for idx, bbdd_hist in enumerate(bbdd_histograms):
+def compute_similarities(query_hist, bbdd_histograms, similarity_measure, k: int = 1):
+    """
+    Computes the similarities between the query histogram and the BBDD histograms
+    :param query_hist: query histogram
+    :param bbdd_histograms: list of BBDD histograms
+    :param similarity_measure: measure to compute the similarity 
+    :param k: number of results to return. Default is 1
+    :return: top k results and their indices
+    """
 
-		distance = compare_histograms(query_hist, bbdd_hist, method)
-		results.append((idx, distance))
+    # similarity_measure -> cv.HISTCMP_CORREL, cv.HISTCMP_CHISQR, cv.HISTCMP_INTERSECT, 
+    #                       cv.HISTCMP_BHATTACHARYYA, cv.HISTCMP_HELLINGER,
+    #                       cv.HISTCMP_CHISQR_ALT, cv.HISTCMP_KL_DIV
 
-	if measure == "similarity": results.sort(key=lambda x: x[1], reverse=True)
-	else: results.sort(key=lambda x: x[1])
+    measure_type = "distance"
 
-	results_idx = [result[0] for result in results]
-	
-	return results[:k], results_idx[:k]
+    # Check if the measure is a similarity measure
+    if similarity_measure == cv.HISTCMP_CORREL or similarity_measure == cv.HISTCMP_INTERSECT:
+        measure_type = "similarity"
+
+    results = []
+    for idx, bbdd_hist in enumerate(bbdd_histograms):
+        # Compute the distance/similarity between the query histogram and the BBDD histogram
+        distance = compare_histograms(query_hist, bbdd_hist, similarity_measure)
+        results.append((idx, distance))
+
+    # Sort the results depending on whether it's a distance or similarity measure
+    if measure_type == "similarity":
+        results.sort(key=lambda x: x[1], reverse=True)  # Similarity: higher values are better
+    else:
+        results.sort(key=lambda x: x[1])  # Distance: lower values are better
+
+    # Get the indices of the results
+    results_idx = [result[0] for result in results]
+
+    return results[:k], results_idx[:k]
