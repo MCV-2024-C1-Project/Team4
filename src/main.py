@@ -8,8 +8,7 @@ from compute_descriptors import compute_descriptors
 from average_precision import mapk
 from utils import plot_hist_task1
 
-# Get the paths of the folders containing the query set development (QST1), 
-# the paintings dataset (BBDD), and the query set test (QST1)
+# Get the path of the folder containing the paintings dataset (BBDD)
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 bbdd_path = os.path.join(base_path, "data", "BBDD")
 	
@@ -28,6 +27,8 @@ def main():
 	query_path = args.query_path
 	is_test = args.is_test == "True"
 
+	# If we are not testing, we get the provided GT to evaluate the results 
+	# obatined for the QSD1
 	if not is_test:
 		with open(query_path + "/gt_corresps.pkl", 'rb') as f:
 			y = pickle.load(f)
@@ -91,6 +92,7 @@ def main():
 		print(f"mAP@{k_value} for {color_space}: {mapk(y, res_m, k_value)}")
 
 	# Task 4: Create predictions for blind challenge (QST1)
+	#	   -> Save the 'blind' results for the test query set 
 	if is_test:
 		subdirectory_path = os.path.join(query_path, color_space)
 		os.makedirs(subdirectory_path, exist_ok=True)
