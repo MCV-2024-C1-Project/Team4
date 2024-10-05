@@ -18,7 +18,7 @@
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
 - [Tasks](#tasks)
-  - [Task 1: Museum and query image descriptors (BBDD & QSD1)](#task-1-museum-and-query-image-descriptors-bbdd--qsd1)
+  - [Task 1: Museum and query image descriptors (BBDD \& QSD1)](#task-1-museum-and-query-image-descriptors-bbdd--qsd1)
   - [Task 2: Selection and implementation of similarity measures to compare images](#task-2-selection-and-implementation-of-similarity-measures-to-compare-images)
   - [Task 3: Implement retrieval system (retrieve top K results)](#task-3-implement-retrieval-system-retrieve-top-k-results)
     - [Parameters](#parameters)
@@ -46,7 +46,7 @@ The following prerequisites must be followed:
 
 ## Tasks
 
-### Task 1:  Museum and query image descriptors (BBDD & QSD1)
+### Task 1: Museum and query image descriptors (BBDD & QSD1)
 
 - **Index the Database (BBDD):** Generate descriptors offline and saves them in a `.pkl` file.
   ```bash
@@ -71,7 +71,7 @@ The following prerequisites must be followed:
      ```
      ![Figure_2](https://github.com/user-attachments/assets/e6f45adb-9c68-478c-bc40-266303ba2558)
 
-### Task 2:  Selection and implementation of similarity measures to compare images
+### Task 2: Selection and implementation of similarity measures to compare images
 
 The measures used are implemented using the OpenCV library with the function ```cv::compareHist```, that compares two dense or two sparse histograms using the specified method.
 
