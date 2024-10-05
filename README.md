@@ -18,12 +18,15 @@
 - [Installation](#installation)
     - [Prerequisites](#prerequisites)
 - [What's included](#whats-included)
+- [Team Members](#team-members)
 - [License](#license)
 
 
 ## Introduction
 
-To be done
+This project was developed as part of the Master's program in Computer Vision in Barcelona, specifically for the course **C1: Introduction to Human and Computer Vision** during the first academic semester. 
+
+The aim of the project is to implement computer vision techniques to retrieve query images from a museum database. By utilizing methods such as feature extraction and histogram comparison, the system is designed to accurately identify and retrieve artworks based on visual content, thereby enhancing the accessibility and exploration of museum collections.
 
 ## Installation
 
@@ -62,7 +65,7 @@ The following prerequisites must be followed:
 
 ### Task 2:  Selection and implementation of similarity measures to compare images
 
-The measures used are implemented using the OpenCV library with the function cv::compareHist, that compares two dense or two sparse histograms using the specified method.
+The measures used are implemented using the OpenCV library with the function ```cv::compareHist```, that compares two dense or two sparse histograms using the specified method.
 
 - **Color space CieLab:** The optimal similarity measure is the Hellinger/Bhattacharyya distance:
   
@@ -139,7 +142,16 @@ The best results are obtained using the following methods:
 | **Lab - Hellinger Distance**    | 0.43333333333333335 | 0.4972222222222223 |
 | **HSV - Alternative Chi Square** | 0.4666666666666667 | 0.5372222222222223 |
 
+### Task 4: Processing the QST1 Testing Dataset
 
+To apply the algorithm to the QST1 testing dataset, you need to set the `is_test` flag to `True` in the program's configuration. When `is_test` is enabled, the program will perform image comparisons based on your chosen parameters and save the retrieval results in a pickle file. 
+
+Terminal command example for testing dataset:
+```bash
+python .\main.py Lab HISTCMP_HELLINGER 10 data\qst1_w1 True
+```
+
+Since the testing dataset does not have ground truth labels, the Mean Average Precision (mAP@k) cannot be calculated for this task.
      
 ## What's included
 
@@ -157,6 +169,15 @@ Within the download you'll find the following directories and files, logically g
     │   ├── plot_results.py
     │   └── print_dict.py
     ```
+
+## Team Members
+
+This project was developed by the following team members:
+
+- **[Judit Salavedra](https://github.com/juditsalavedra)**
+- **[Judith Caldés](https://github.com/judithcaldes)**
+- **[Carme Corbi](https://github.com/carmecorbi)**
+- **[Yeray Cordero](https://github.com/yeray142)**
 
 ## License
 The MIT License (MIT). Please see [LICENSE File](LICENSE) for more information.
