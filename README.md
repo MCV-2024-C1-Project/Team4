@@ -11,15 +11,15 @@
 </p>
 
 
-## Table Of Contents
+## Table of Contents
 
-- [Table of contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
-- [What's included](#whats-included)
+  - [Setup](#setup)
+- [Project Structure](#project-structure)
 - [Tasks](#tasks)
-  - [Task 1: Museum and query image descriptors (BBDD \& QSD1)](#task-1-museum-and-query-image-descriptors-bbdd--qsd1)
+  - [Task 1: Museum and query image descriptors (BBDD & QSD1)](#task-1-museum-and-query-image-descriptors-bbdd--qsd1)
   - [Task 2: Selection and implementation of similarity measures to compare images](#task-2-selection-and-implementation-of-similarity-measures-to-compare-images)
   - [Task 3: Implement retrieval system (retrieve top K results)](#task-3-implement-retrieval-system-retrieve-top-k-results)
     - [Parameters](#parameters)
