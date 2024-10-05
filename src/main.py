@@ -75,12 +75,13 @@ def main():
 	for query_img_h in query_histograms:
 		res_m.append(compute_similarities(query_img_h, bbdd_histograms, similarity_function, k_value)[1])
 	
-	# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
-	with open(os.path.join(q_path, color_space +'_'+ similarity_measure + '_' + str(k_value) + '_results.pkl'), 'wb') as f:
-		pickle.dump(res_m, f)
-
-	# Evaluate the results using mAP@K if we are not in testing mode
+	# If we are not in testing mode
 	if not is_test:
+		# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
+		with open(os.path.join(q_path, color_space +'_'+ similarity_measure + '_' + str(k_value) + '_results.pkl'), 'wb') as f:
+			pickle.dump(res_m, f)
+
+		# Evaluate the results using mAP@K if we are not in testing mode	
 		print(f"mAP@{k_value} for {color_space}: {mapk(y, res_m, k_value)}")
 
 	## Task 4: Create predictions for blind challenge (QST1)
