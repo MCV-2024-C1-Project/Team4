@@ -11,12 +11,13 @@
 </p>
 
 
-## Table of contents
+## Table Of Contents
 
 - [Table of contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
+- [What's included](#whats-included)
 - [Tasks](#tasks)
   - [Task 1: Museum and query image descriptors (BBDD \& QSD1)](#task-1-museum-and-query-image-descriptors-bbdd--qsd1)
   - [Task 2: Selection and implementation of similarity measures to compare images](#task-2-selection-and-implementation-of-similarity-measures-to-compare-images)
@@ -25,7 +26,6 @@
     - [Process Description](#process-description)
     - [Best Result Methods](#best-result-methods)
   - [Task 4: Processing the QST1 Testing Dataset](#task-4-processing-the-qst1-testing-dataset)
-- [What's included](#whats-included)
 - [Team Members](#team-members)
 - [License](#license)
 
@@ -44,6 +44,66 @@ This section will guide you through the installation process of the project and 
 The following prerequisites must be followed:
 - Python >= v3.8
 
+### Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/MCV-2024-C1-Project/Team4.git
+   ```
+   
+2. **Create a virtual environment:**
+   ```bash
+   python -m venv env
+   ```
+
+3. **Activate the virtual environment:**
+    - On Windows:
+      ```bash
+      .\env\Scripts\activate
+      ```
+    - On MacOS/Linux:
+      ```bash
+      source env/bin/activate
+      ```
+
+4. **Install the dependencies:**
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+   
+## Project Structure
+
+Within the downloaded repository, you'll find the following directories and files, logically grouping common assets. The data folders need to be downloaded and decompressed from the provided links:
+
+- **BBDD:** [Download here](https://e-aules.uab.cat/2024-25/pluginfile.php/398404/mod_page/content/186/BBDD.zip)
+- **qsd1_w1:** [Download here](https://e-aules.uab.cat/2024-25/pluginfile.php/398404/mod_page/content/186/qsd1_w1.zip?time=1602013828018)
+- **qst1_w1:** [Download here](https://e-aules.uab.cat/2024-25/mod/resource/view.php?id=176342)
+
+Once downloaded and extracted, the project structure will look like this:
+
+    Team4/
+    ├── data/
+    │   ├── BBDD/
+    │   ├── qsd1_w1/
+    │   └── qst1_w1/
+    ├── evaluation/
+    │   ├── bbox_iou.py
+    │   └── evaluation_funcs.py
+    ├── src/
+    │   ├── average_precision.py
+    │   ├── compute_db_descriptors.py
+    │   ├── compute_descriptors.py
+    │   ├── compute_img_descriptors.py
+    │   ├── compute_similarities.py
+    │   ├── main.py
+    │   ├── metrics.py
+    │   └── utils.py
+    ├── utils/
+    │   ├── plot_results.py
+    │   └── print_dict.py
+
+    
 ## Tasks
 
 ### Task 1: Museum and query image descriptors (BBDD & QSD1)
@@ -166,23 +226,6 @@ python .\main.py HSV HISTCMP_CHISQR_ALT 10 data\qst1_w1 True
 ```
 
 Since the testing dataset does not have ground truth labels, the Mean Average Precision (mAP@k) cannot be calculated for this task.
-     
-## What's included
-
-Within the download you'll find the following directories and files, logically grouping common assets. You'll see something like this:
-
-    ```text
-    MCV-2024-C1-Project/
-    ├── evaluation/
-    │   ├── bbox_iou.py
-    │   └── evaluation_funcs.py
-    ├── src/
-    │   ├── average_precision.py
-    │   └── ...
-    ├── utils/
-    │   ├── plot_results.py
-    │   └── print_dict.py
-    ```
 
 ## Team Members
 
