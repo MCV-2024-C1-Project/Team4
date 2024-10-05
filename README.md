@@ -146,9 +146,15 @@ The best results are obtained using the following methods:
 
 To apply the algorithm to the QST1 testing dataset, you need to set the `is_test` flag to `True` in the program's configuration. When `is_test` is enabled, the program will perform image comparisons based on your chosen parameters and save the retrieval results in a pickle file. 
 
-Terminal command example for testing dataset:
+The terminal commands for testing dataset with our two methods are:
+
+- **Method 1: Lab - Hellinger Distance**
 ```bash
 python .\main.py Lab HISTCMP_HELLINGER 10 data\qst1_w1 True
+```
+- **Method 2: HSV - Alternative Chi Square**
+```bash
+python .\main.py HSV HISTCMP_CHISQR_ALT 10 data\qst1_w1 True
 ```
 
 Since the testing dataset does not have ground truth labels, the Mean Average Precision (mAP@k) cannot be calculated for this task.
