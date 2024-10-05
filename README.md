@@ -40,7 +40,7 @@ The following prerequisites must be followed:
 
 ### Task 1:  Museum and query image descriptors (BBDD & QSD1)
 
-- **Index the Database (BBDD):** Generate descriptors offline.
+- **Index the Database (BBDD):** Generate descriptors offline and saves them in a `.pkl` file.
   ```bash
   python .\compute_db_descriptors.py
   ```
@@ -102,11 +102,11 @@ The following parameters need to be passed via the command line when running the
 
 #### Process Description:
 
-This function first computes the image descriptors for all images in QST1 and saves them in a `.pkl` file, based on the specified color space argument.
+This function first computes the image descriptors (CieLab Histograms or HSV histograms) for all images in QST1 and saves them in a `.pkl` file, based on the specified color space argument.
 
 Next, it reads the `.pkl` files containing the computed image descriptors for both the query dataset (QST1) and the museum dataset (BBDD, computed offline).
 
-For each image in the query set (QST1), it calculates the similarity measure against all museum images (BBDD).
+For each image in the query set (QST1), it calculates the similarity measure against all museum images (BBDD) and stores the top K indices of the most similar museum images for each query image in a `.pkl` file (saved in the path specified by the `query_path` parameter).
 
 Finally, the evaluation of the system is conducted using **mAP@K (mean Average Precision at K)**, which involves calculating the Average Precision for each value of `k` from `1` to `K` (AP@K) and then taking the mean across all queries (mAP@K).
 
