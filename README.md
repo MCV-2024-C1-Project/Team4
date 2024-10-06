@@ -207,8 +207,8 @@ The best results are obtained using the following methods:
 
 | Method                          | mAP@1          | mAP@5           |
 |---------------------------------|----------------|------------------|
-| **Lab - Hellinger Distance**    | 0.43333333333333335 | 0.4972222222222223 |
-| **HSV - Alternative Chi Square** | 0.4666666666666667 | 0.5372222222222223 |
+| **Lab - Hellinger Distance**    | 0.433          | 0.497 |
+| **HSV - Alternative Chi Square** | 0.467         | 0.537 |
 
 ### Task 4: Processing the QST1 Testing Dataset
 
