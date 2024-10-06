@@ -2,19 +2,15 @@ from metrics import compare_histograms
 import cv2 as cv
 
 
-def compute_similarities(query_hist, bbdd_histograms, similarity_measure, k: int = 1):
+def compute_similarities(query_hist, bbdd_histograms, similarity_measure, k: int = 1) -> tuple[list, list]:
     """
-    Computes the similarities between the query histogram and the BBDD histograms
-    :param query_hist: query histogram
-    :param bbdd_histograms: list of BBDD histograms
-    :param similarity_measure: measure to compute the similarity 
-    :param k: number of results to return. Default is 1
-    :return: top k results and their indices
+    Computes the similarities between a query histogram and the BBDD histograms
+    :param query_hist: query histogram.
+    :param bbdd_histograms: list of BBDD histograms.
+    :param similarity_measure: measure to compute the similarity .
+    :param k: number of results to return. 
+    :return: top k results and the indices of the associated images in the BBDD
     """
-
-    # similarity_measure -> cv.HISTCMP_CORREL, cv.HISTCMP_CHISQR, cv.HISTCMP_INTERSECT, 
-    #                       cv.HISTCMP_BHATTACHARYYA, cv.HISTCMP_HELLINGER,
-    #                       cv.HISTCMP_CHISQR_ALT, cv.HISTCMP_KL_DIV
 
     measure_type = "distance"
 
@@ -26,15 +22,18 @@ def compute_similarities(query_hist, bbdd_histograms, similarity_measure, k: int
     for idx, bbdd_hist in enumerate(bbdd_histograms):
         # Compute the distance/similarity between the query histogram and the BBDD histogram
         distance = compare_histograms(query_hist, bbdd_hist, similarity_measure)
+        # save a tuple conatining the index identifying the image of the BBDD with which the 
+        # query image is compared and the distance/similarity score obtained
         results.append((idx, distance))
 
     # Sort the results depending on whether it's a distance or similarity measure
     if measure_type == "similarity":
         results.sort(key=lambda x: x[1], reverse=True)  # Similarity: higher values are better
     else:
-        results.sort(key=lambda x: x[1])  # Distance: lower values are better
+        results.sort(key=lambda x: x[1])                # Distance: lower values are better
 
     # Get the indices of the results
     results_idx = [result[0] for result in results]
 
+    # Return the k best matches
     return results[:k], results_idx[:k]

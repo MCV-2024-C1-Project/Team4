@@ -1,15 +1,15 @@
 import cv2 as cv
 import matplotlib.pyplot as plt
 
-
-def plot_hist_from_img(img, channels_list: list[str], name: str, color: str = "blue"):
+def plot_hist_from_img(img, channels_list: list[str], name: str, color: str = "blue") -> None:
 	"""
 	Plot histograms for the specified channels of the input image.
 	:param img: Input image
 	:param channels_list: List of channel names
 	:param name: Name of the image
-	:param color: Color of the histogram bars. Default is blue.
+	:param color: Color of the histogram bars.
 	"""
+
 	img_split = cv.split(img)
 	assert (len(channels_list) == len(img_split))
 
@@ -26,13 +26,14 @@ def plot_hist_from_img(img, channels_list: list[str], name: str, color: str = "b
 	plt.show()
 
 
-def plot_hist_from_list(histograms, index, color_space='Lab'):
+def plot_hist_from_list(histograms, index: int, color_space: str = 'Lab') -> None:
 	"""
 	Plot histograms for the specified index of the input list of histograms.
 	:param histograms: List of histograms
 	:param index: Index of the histogram to plot
-	:param color_space: Color space of the histograms. Default is 'Lab'.
+	:param color_space: Color space of the histograms.
 	"""
+
 	assert index < len(histograms) or histograms[index] is not None, \
 		f"Index {index} is out of range or has no histogram data."
 
@@ -64,9 +65,9 @@ def plot_hist_from_list(histograms, index, color_space='Lab'):
 
 	elif color_space == 'HSV':
 		# HSV histograms follow Lab histograms, assuming the size of each bin
-		H_hist = histogram[768:768 + 180]
-		S_hist = histogram[768 + 180:768 + 180 + 256]
-		V_hist = histogram[768 + 180 + 256:768 + 180 + 256 + 256]
+		H_hist = histogram[768 : 768+180]
+		S_hist = histogram[768+180 : 768+180+256]
+		V_hist = histogram[768+180+256 : 768+180+256+256]
 
 		# Plot each channel
 		plt.figure(figsize=(15, 5))
@@ -95,14 +96,15 @@ def plot_hist_from_list(histograms, index, color_space='Lab'):
 	plt.show()
 
 
-def plot_hist_task1(original_image, image_filename, image_colorspace, color_space='Lab'):
+def plot_hist_task1(original_image, image_filename: str, image_colorspace, color_space: str = 'Lab') -> None:
 	"""
     Plot histograms for the specified color space of the input image.
-    :param original_image: Original image
-    :param image_filename: Name of the input image
-    :param image_colorspace: Image in the specified color space
-    :param color_space: Color space of the image. Default is 'Lab'.
+    :param original_image: Original image.
+    :param image_filename: Name of the input image.
+    :param image_colorspace: Image in the specified color space.
+    :param color_space: Color space of the image.
     """
+	
 	from compute_descriptors import compute_histogram
 	plt.figure(figsize=(20, 10))
 
@@ -119,7 +121,7 @@ def plot_hist_task1(original_image, image_filename, image_colorspace, color_spac
 	plt.axis('off')
 
 	if color_space == 'Lab':
-		# Lab histograms are the first three parts of the concatenated histogram
+		# Compute Lab histograms 
 		L_hist = compute_histogram(image_colorspace, [0], [256], [0, 256])
 		a_hist = compute_histogram(image_colorspace, [1], [256], [0, 256])
 		b_hist = compute_histogram(image_colorspace, [2], [256], [0, 256])
@@ -142,7 +144,7 @@ def plot_hist_task1(original_image, image_filename, image_colorspace, color_spac
 		plt.xlabel('Intensity Value')
 
 	elif color_space == 'HSV':
-		# HSV histograms follow Lab histograms, assuming the size of each bin
+		# Compute HSV histograms 
 		H_hist = compute_histogram(image_colorspace, [0], [180], [0, 180])
 		S_hist = compute_histogram(image_colorspace, [1], [256], [0, 256])
 		V_hist = compute_histogram(image_colorspace, [2], [256], [0, 256])

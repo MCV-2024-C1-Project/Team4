@@ -5,11 +5,12 @@ import argparse
 from utils import plot_hist_task1
 
 
-def calculate_descriptor(img, image_filename, descriptor_type):
+def calculate_descriptor(img, image_filename: str, descriptor_type: str) -> None:
     """
     Calculate the histogram based on the descriptor type
     :param image: image to calculate the histogram
-    :param descriptor_type: descriptor type (e.g., hist_lab or hist_hsv)
+    :param image_filename: filename of the image
+    :param descriptor_type: descriptor type according to the selected color space (e.g., hist_lab or hist_hsv)
     """
     if descriptor_type == 'hist_lab':
         img_lab = cv.cvtColor(img, cv.COLOR_BGR2Lab)
@@ -43,7 +44,7 @@ def main():
         print(f"Could not load image {args.image_filename}")
         return
 
-    # Calculate descriptor
+    # Calculate descriptor and plot histograms for image img
     calculate_descriptor(img, args.image_filename, args.descriptor_type)
 
 if __name__ == "__main__":
