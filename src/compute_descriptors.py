@@ -7,7 +7,7 @@ from utils import plot_hist_from_img, plot_hist_from_list
 from metrics import compare_histograms
 
 
-def compute_histogram(img, channels, bins, ranges, normalized=False) -> np.ndarray:
+def compute_histogram(img, channels, bins, ranges, normalized=True) -> np.ndarray:
 	"""
 	Computes the histogram of an image
 	:param img: image

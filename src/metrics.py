@@ -1,4 +1,5 @@
 import cv2 as cv
+import numpy as np
 
 
 def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
@@ -11,4 +12,13 @@ def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
 	:param method: Comparison method chosen for the application
 	:return: distance/similarity score based on the chosen method 
 	"""
-	return cv.compareHist(hist1, hist2, method)
+
+	if method == 10:
+		dist =  np.sum((np.abs(hist1 - hist2)))
+	elif method == 20:
+		dist = np.sum(np.log(1+np.abs(hist1-hist2)))
+	elif method == 30:
+		dist = np.sum((np.abs(hist1 - hist2) / (hist1 + hist2 + 1e-10)))
+	else:
+		dist = cv.compareHist(hist1, hist2, method)
+	return dist

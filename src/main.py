@@ -28,7 +28,8 @@ def main():
 	q_path = os.path.join(base_path, args.query_path)
 	is_test = args.is_test == "True"
 
-	# Select the appropriate similarity measure based on the command line argument
+	# Select the appropriate similarity measure based on the command line argument. 
+	# For those distances that we have defined manually, we have assigned them a numerical ID.
 	if similarity_measure == "HISTCMP_CORREL":
 		similarity_function = cv.HISTCMP_CORREL
 	elif similarity_measure == "HISTCMP_CHISQR":
@@ -43,6 +44,12 @@ def main():
 		similarity_function = cv.HISTCMP_CHISQR_ALT
 	elif similarity_measure == "HISTCMP_KL_DIV":
 		similarity_function = cv.HISTCMP_KL_DIV
+	elif similarity_measure == "Manhattan":
+		similarity_function = 10
+	elif similarity_measure == "Lorentzian":
+		similarity_function = 20
+	elif similarity_measure == "Canberra":
+		similarity_function = 30
 	else:
 		raise ValueError(f"Unknown similarity measure: {similarity_measure}")
 

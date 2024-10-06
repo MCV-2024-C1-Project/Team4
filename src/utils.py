@@ -122,32 +122,32 @@ def plot_hist_task1(original_image, image_filename: str, image_colorspace, color
 
 	if color_space == 'Lab':
 		# Compute Lab histograms 
-		L_hist = compute_histogram(image_colorspace, [0], [256], [0, 256])
-		a_hist = compute_histogram(image_colorspace, [1], [256], [0, 256])
-		b_hist = compute_histogram(image_colorspace, [2], [256], [0, 256])
+		L_hist = compute_histogram(image_colorspace, [0], [256], [0, 256],normalized=False)
+		a_hist = compute_histogram(image_colorspace, [1], [256], [0, 256],normalized=False)
+		b_hist = compute_histogram(image_colorspace, [2], [256], [0, 256],normalized=False)
 
 		# Plot each channel
 		plt.subplot(2, 3, 4)
 		plt.bar(range(256), L_hist, color='black')
 		plt.title('L Channel Histogram')
-		plt.xlabel('Intensity Value')
+		plt.xlabel('Lightness Value')
 		plt.ylabel('Number of pixels')
 
 		plt.subplot(2, 3, 5)
 		plt.bar(range(256), a_hist, color='red')
 		plt.title('a Channel Histogram')
-		plt.xlabel('Intensity Value')
+		plt.xlabel('a* Value')
 
 		plt.subplot(2, 3, 6)
 		plt.bar(range(256), b_hist, color='blue')
 		plt.title('b Channel Histogram')
-		plt.xlabel('Intensity Value')
+		plt.xlabel('b* Value')
 
 	elif color_space == 'HSV':
 		# Compute HSV histograms 
-		H_hist = compute_histogram(image_colorspace, [0], [180], [0, 180])
-		S_hist = compute_histogram(image_colorspace, [1], [256], [0, 256])
-		V_hist = compute_histogram(image_colorspace, [2], [256], [0, 256])
+		H_hist = compute_histogram(image_colorspace, [0], [180], [0, 180], normalized=False)
+		S_hist = compute_histogram(image_colorspace, [1], [256], [0, 256], normalized=False)
+		V_hist = compute_histogram(image_colorspace, [2], [256], [0, 256], normalized=False)
 
 		plt.subplot(2, 3, 4)
 		plt.bar(range(180), H_hist, color='orange')
@@ -158,12 +158,12 @@ def plot_hist_task1(original_image, image_filename: str, image_colorspace, color
 		plt.subplot(2, 3, 5)
 		plt.bar(range(256), S_hist, color='green')
 		plt.title('Saturation Channel Histogram')
-		plt.xlabel('Intensity Value')
+		plt.xlabel('Saturation Value')
 
 		plt.subplot(2, 3, 6)
 		plt.bar(range(256), V_hist, color='purple')
 		plt.title('Value Channel Histogram')
-		plt.xlabel('Intensity Value')
+		plt.xlabel('Value')
 
 	else:
 		print("Invalid color space. Please choose 'Lab' or 'HSV'.")
