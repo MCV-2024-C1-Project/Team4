@@ -1,8 +1,15 @@
+from typing import Any
+
 from metrics import compare_histograms
 import cv2 as cv
 
 
-def compute_similarities(query_hist, bbdd_histograms, similarity_measure, k: int = 1) -> tuple[list, list]:
+class MeasureType:
+    DISTANCE = "distance"
+    SIMILARITY = "similarity"
+
+
+def compute_similarities(query_hist: Any, bbdd_histograms: Any, similarity_measure: Any, k: int = 1) -> tuple[list, list]:
     """
     Computes the similarities between a query histogram and the BBDD histograms
     :param query_hist: query histogram.
@@ -12,11 +19,11 @@ def compute_similarities(query_hist, bbdd_histograms, similarity_measure, k: int
     :return: top k results and the indices of the associated images in the BBDD
     """
 
-    measure_type = "distance"
+    measure_type = MeasureType.DISTANCE
 
     # Check if the measure is a similarity measure
     if similarity_measure == cv.HISTCMP_CORREL or similarity_measure == cv.HISTCMP_INTERSECT:
-        measure_type = "similarity"
+        measure_type = MeasureType.SIMILARITY
 
     results = []
     for idx, bbdd_hist in enumerate(bbdd_histograms):
@@ -27,7 +34,7 @@ def compute_similarities(query_hist, bbdd_histograms, similarity_measure, k: int
         results.append((idx, distance))
 
     # Sort the results depending on whether it's a distance or similarity measure
-    if measure_type == "similarity":
+    if measure_type == MeasureType.SIMILARITY:
         results.sort(key=lambda x: x[1], reverse=True)  # Similarity: higher values are better
     else:
         results.sort(key=lambda x: x[1])                # Distance: lower values are better

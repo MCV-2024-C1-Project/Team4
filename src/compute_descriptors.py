@@ -1,3 +1,5 @@
+from typing import Sequence, Any
+
 import cv2 as cv
 import numpy as np
 import pickle
@@ -7,7 +9,7 @@ from utils import plot_hist_from_img, plot_hist_from_list
 from metrics import compare_histograms
 
 
-def compute_histogram(img, channels, bins, ranges, normalized=True) -> np.ndarray:
+def compute_histogram(img: Any, channels: Sequence[int], bins: Sequence[int], ranges: Sequence[float], normalized: bool = True) -> np.ndarray:
 	"""
 	Computes the histogram of an image
 	:param img: image
@@ -45,13 +47,12 @@ def compute_descriptors(imgs_path: str, color_space: str = "HSV") -> None:
 		img_bgr = cv.imread(os.path.join(imgs_path, filename))
 
 		# Change color space (only 2 options are possible)
-		if color_space == "Lab": 
+		if color_space == "Lab":
 			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2Lab)
 			bins_channel1 = 256
-		elif color_space == "HSV": 
+		elif color_space == "HSV":
 			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HSV)
 			bins_channel1 = 180
-
 
 		# Print histograms (just if needed)
 		# plot_hist_from_img(img, ['channel_1', 'channel_2', 'channel_3'], filename)
@@ -70,13 +71,11 @@ def compute_descriptors(imgs_path: str, color_space: str = "HSV") -> None:
 			histograms.extend([None] * (index + 1 - len(histograms)))
 		histograms[index] = hist
 
-		# Show histograms (just if needed)
-		# plot_hist_from_list(histograms, index, color_space=color_space)
+	# Show histograms (just if needed)
+	# plot_hist_from_list(histograms, index, color_space=color_space)
 
 	# print(compare_histograms(histograms[29], histograms[24]))
 
 	# Save histograms to a pickle file
-	with open(os.path.join(imgs_path, color_space +'_histograms.pkl'), 'wb') as f:
+	with open(os.path.join(imgs_path, color_space + '_histograms.pkl'), 'wb') as f:
 		pickle.dump(histograms, f)
-
-

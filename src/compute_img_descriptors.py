@@ -1,25 +1,38 @@
 import os
+from enum import Enum
+from typing import Any
+
 import cv2 as cv
 import argparse
 
 from utils import plot_hist_task1
 
 
-def calculate_descriptor(img, image_filename: str, descriptor_type: str) -> None:
+class DescriptorType(Enum):
+    HIST_LAB = 'hist_lab'
+    HIST_HSV = 'hist_hsv'
+
+
+def calculate_descriptor(img: Any, image_filename: str, descriptor_type: str) -> None:
     """
     Calculate the histogram based on the descriptor type
-    :param image: image to calculate the histogram
+    :param img: image to calculate the histogram
     :param image_filename: filename of the image
     :param descriptor_type: descriptor type according to the selected color space (e.g., hist_lab or hist_hsv)
     """
-    if descriptor_type == 'hist_lab':
+    try:
+        # Convert the string descriptor to the DescriptorType enum
+        descriptor_enum = DescriptorType(descriptor_type)
+    except ValueError:
+        print(f"Descriptor {descriptor_type} not recognized. Use 'hist_lab' or 'hist_hsv'.")
+        return
+
+    if descriptor_enum == DescriptorType.HIST_LAB:
         img_lab = cv.cvtColor(img, cv.COLOR_BGR2Lab)
         plot_hist_task1(img,image_filename, img_lab, 'Lab')
-    elif descriptor_type == 'hist_hsv':
+    elif descriptor_enum == DescriptorType.HIST_HSV:
         img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
         plot_hist_task1(img,image_filename, img_hsv, 'HSV')
-    else:
-        print(f"Descriptor {descriptor_type} not recognized. Use 'hist_lab' or 'hist_hsv'.")
 
 
 # Main function
@@ -39,10 +52,7 @@ def main():
 
     # Load the image
     img = cv.imread(image_path)
-    
-    if img is None:
-        print(f"Could not load image {args.image_filename}")
-        return
+    assert img is not None, f"Image {args.image_filename} not found in {args.query_path}"
 
     # Calculate descriptor and plot histograms for image img
     calculate_descriptor(img, args.image_filename, args.descriptor_type)

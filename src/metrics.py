@@ -1,5 +1,17 @@
+from enum import Enum
+
 import cv2 as cv
 import numpy as np
+
+
+class Metrics(Enum):
+	"""
+	Enum class to define the different comparison methods for
+	histograms.
+	"""
+	MANHATTAN = 10
+	LORENTZIAN = 20
+	CANBERRA = 30
 
 
 def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
@@ -13,11 +25,11 @@ def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
 	:return: distance/similarity score based on the chosen method 
 	"""
 
-	if method == 10:
-		dist =  np.sum((np.abs(hist1 - hist2)))
-	elif method == 20:
+	if method == Metrics.MANHATTAN:
+		dist = np.sum((np.abs(hist1 - hist2)))
+	elif method == Metrics.LORENTZIAN:
 		dist = np.sum(np.log(1+np.abs(hist1-hist2)))
-	elif method == 30:
+	elif method == Metrics.CANBERRA:
 		dist = np.sum((np.abs(hist1 - hist2) / (hist1 + hist2 + 1e-10)))
 	else:
 		dist = cv.compareHist(hist1, hist2, method)

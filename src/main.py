@@ -6,11 +6,13 @@ import argparse
 from compute_similarities import compute_similarities
 from compute_descriptors import compute_descriptors
 from average_precision import mapk
+from metrics import Metrics
 
 # Get the path of the folder containing the museum dataset (BBDD)
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 bbdd_path = os.path.join(base_path, "data", "BBDD")
-	
+
+
 def main():
 
 	# Read the color space, similarity measure, k value, query dataset path, and test flag from the command line
@@ -45,11 +47,11 @@ def main():
 	elif similarity_measure == "HISTCMP_KL_DIV":
 		similarity_function = cv.HISTCMP_KL_DIV
 	elif similarity_measure == "Manhattan":
-		similarity_function = 10
+		similarity_function = Metrics.MANHATTAN
 	elif similarity_measure == "Lorentzian":
-		similarity_function = 20
+		similarity_function = Metrics.LORENTZIAN
 	elif similarity_measure == "Canberra":
-		similarity_function = 30
+		similarity_function = Metrics.CANBERRA
 	else:
 		raise ValueError(f"Unknown similarity measure: {similarity_measure}")
 
