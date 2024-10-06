@@ -133,19 +133,22 @@ Once downloaded and extracted, the project structure will look like this:
 
 ### Task 2: Selection and implementation of similarity measures to compare images
 
-The measures used are implemented using the OpenCV library with the function ```cv::compareHist```, that compares two dense or two sparse histograms using the specified method.
+The measures used are implemented using the OpenCV library with the function ```cv::compareHist```, that compares two dense or two sparse histograms using the specified method, or have been manually defined.
 
-- **Color space CieLab:** The optimal similarity measure is the Hellinger/Bhattacharyya distance:
+- **Color space CieLab:** The optimal similarity measure is the Lorentzian distance:
   
-  <img src="https://github.com/user-attachments/assets/bc26e2ec-7512-4c4a-ba61-73d87d73fc17" alt="image" width="300"/>
+  <img src="https://github.com/user-attachments/assets/40107771-8524-47d8-92d6-3708a4a571a6" alt="image" width="300"/>
 
-  `measure = cv.HISTCMP_HELLINGER`
 
-- **Color space HSV:** The optimal similarity measure is the Alternative Chi-Square distance:
+  `measure = Lorentzian`
 
-  <img src="https://github.com/user-attachments/assets/44885a21-38c6-4eff-86b9-f216f6ed36fb" alt="image" width="300"/>
+- **Color space HSV:** The optimal similarity measure is the Canberra distance:
 
-  `measure = cv.HISTCMP_CHISQR_ALT`
+  <img src="https://github.com/user-attachments/assets/f210d0cb-031a-4cb3-97a1-d80614962dd5" alt="image" width="300"/>
+
+
+
+  `measure = Canberra`
 
 ### Task 3: Implement retrieval system (retrieve top K results)
 
@@ -164,6 +167,9 @@ The following parameters need to be passed via the command line when running the
   - `HISTCMP_HELLINGER`
   - `HISTCMP_CHISQR_ALT`
   - `HISTCMP_KL_DIV`
+  - `Manhattan`
+  - `Lorentzian`
+  - `Canberra`
 - `k_value`: The number of top results to retrieve. Example: `1`, `5`.
 - `query_path`: The path to the query dataset.
 - `is_test`: A flag to indicate if the model is in testing mode. Options: `True` (without ground truth) or `False` (with ground truth).
@@ -185,30 +191,30 @@ This metric indicates how effectively the system returns the results for each ca
 
 The best results are obtained using the following methods:
 
-- **Method 1: Lab - Hellinger Distance**
+- **Method 1: Lab - Lorentzian Distance**
 
   Terminal commands for `k=1` and `k=5`:
 
   ```bash
-  python .\main.py Lab HISTCMP_HELLINGER 1 data\qsd1_w1 False
-  python .\main.py Lab HISTCMP_HELLINGER 5 data\qsd1_w1 False
+  python .\main.py Lab Lorentzian 1 data\qsd1_w1 False
+  python .\main.py Lab Lorentzian 5 data\qsd1_w1 False
   ```
 
-- **Method 2: HSV - Alternative Chi Square**
+- **Method 2: HSV - Canberra Distance**
 
   Terminal commands for `k=1` and `k=5`:
   
   ```bash
-  python .\main.py HSV HISTCMP_CHISQR_ALT 1 data\qsd1_w1 False
-  python .\main.py HSV HISTCMP_CHISQR_ALT 5 data\qsd1_w1 False
+  python .\main.py HSV Canberra 1 data\qsd1_w1 False
+  python .\main.py HSV Canberra 5 data\qsd1_w1 False
   ```
 
 #### Results
 
 | Method                          | mAP@1          | mAP@5           |
 |---------------------------------|----------------|------------------|
-| **Lab - Hellinger Distance**    | 0.433          | 0.497 |
-| **HSV - Alternative Chi Square** | 0.467         | 0.537 |
+| **Lab - Lorentzian Distance**    | 0.533          | 0.582 |
+| **HSV - Canberra Distance** | 0.700         | 0.734 |
 
 ### Task 4: Processing the QST1 Testing Dataset
 
@@ -216,13 +222,13 @@ To apply the algorithm to the QST1 testing dataset, you need to set the `is_test
 
 The terminal commands for testing dataset with our two methods are:
 
-- **Method 1: Lab - Hellinger Distance**
+- **Method 1: Lab - Lorentzian Distance**
 ```bash
-python .\main.py Lab HISTCMP_HELLINGER 10 data\qst1_w1 True
+python .\main.py Lab Lorentzian 10 data\qst1_w1 True
 ```
-- **Method 2: HSV - Alternative Chi Square**
+- **Method 2: HSV - Canberra Distance**
 ```bash
-python .\main.py HSV HISTCMP_CHISQR_ALT 10 data\qst1_w1 True
+python .\main.py HSV Canberra 10 data\qst1_w1 True
 ```
 
 Since the testing dataset does not have ground truth labels, the Mean Average Precision (mAP@k) cannot be calculated for this task.
