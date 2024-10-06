@@ -144,7 +144,8 @@ The measures used are implemented using the OpenCV library with the function ```
 
 - **Color space HSV:** The optimal similarity measure is the Canberra distance:
 
-  <img src="https://github.com/user-attachments/assets/4c41d8dc-43fa-41d2-9abd-4eb07fb37fe1" alt="image" width="300"/>
+  <img src="https://github.com/user-attachments/assets/f210d0cb-031a-4cb3-97a1-d80614962dd5" alt="image" width="300"/>
+
 
 
   `measure = Canberra`
