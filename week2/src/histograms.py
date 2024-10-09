@@ -79,8 +79,11 @@ bins = 32
 ranges = [0,180,0,256,0,256]
 k_value = 5
 histograms = block_histogram(image, block_size, bins,ranges)
-similarity_function = Metrics.CANBERRA
-print(compute_similarities(histograms, bbdd_histograms, similarity_function, k_value))
+similarity_function = cv.HISTCMP_CHISQR
+top_k_results, top_k_indices = compute_similarities(histograms, bbdd_histograms, similarity_function, k_value)
+
+print("Top K Results:", top_k_results)
+print("Top K Indices:", top_k_indices)
 
 
 

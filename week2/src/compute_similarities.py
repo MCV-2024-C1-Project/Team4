@@ -27,11 +27,16 @@ def compute_similarities(query_hist: Any, bbdd_histograms: Any, similarity_measu
 
     results = []
     for idx, bbdd_hist in enumerate(bbdd_histograms):
+        total_distance = 0
         # Compute the distance/similarity between the query histogram and the BBDD histogram
-        distance = compare_histograms(query_hist, bbdd_hist, similarity_measure)
+        for query_block_hist, bbdd_block_hist in zip(query_hist, bbdd_hist):
+            distance = compare_histograms(query_block_hist, bbdd_block_hist, similarity_measure)
+            total_distance += distance  # Sum distances for all blocks
+            average_distance = total_distance / len(query_hist)  # Or len(bbdd_hist) depending on your approach
+        results.append((idx, average_distance))
         # save a tuple conatining the index identifying the image of the BBDD with which the 
         # query image is compared and the distance/similarity score obtained
-        results.append((idx, distance))
+        
 
     # Sort the results depending on whether it's a distance or similarity measure
     if measure_type == MeasureType.SIMILARITY:
