@@ -39,8 +39,8 @@ def precision(gt_mask,pred_mask):
 	gt_mask = np.array(gt_mask)
 	pred_mask = np.array(pred_mask)
 
-	TP = np.sum((pred_mask == 1) & (gt_mask == 1))
-	FP = np.sum((pred_mask == 1) & (gt_mask == 0))
+	TP = np.sum((pred_mask == 255) & (gt_mask == 255))
+	FP = np.sum((pred_mask == 255) & (gt_mask == 0))
 
 	precision = TP/ (TP+FP) if (TP + FP) != 0 else 0
 
@@ -50,8 +50,8 @@ def recall(gt_mask,pred_mask):
 	gt_mask = np.array(gt_mask)
 	pred_mask = np.array(pred_mask)
 
-	TP = np.sum((pred_mask == 1) & (gt_mask == 1))
-	FN = np.sum((pred_mask == 0) & (gt_mask == 1))
+	TP = np.sum((pred_mask == 255) & (gt_mask == 255))
+	FN = np.sum((pred_mask == 0) & (gt_mask == 255))
 
 	recall = TP/ (TP+FN) if (TP + FN) != 0 else 0
 
@@ -66,3 +66,11 @@ def f1_measure(gt_mask, pred_mask):
 
 	return f1_measure
 
+def example():
+#EXAMPLE
+	gt_mask = cv.imread('C:/Users/34634/Downloads/C1/Team4/week2/data/qsd2_w2/qsd2_w1/00000.png')
+	pred_mask = cv.imread('C:/Users/34634/Downloads/C1/Team4/week2/data/qsd2_w2/qsd2_w1/mask_00000.png')
+
+	print('Precision: ', precision(gt_mask,pred_mask))
+	print('Recall: ', recall(gt_mask,pred_mask))
+	print('F1-measure', f1_measure(gt_mask,pred_mask))
