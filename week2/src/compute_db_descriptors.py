@@ -24,11 +24,11 @@ def main():
 		# Change color space (only 2 options are possible)
 		if color_space == "Lab":
 			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2Lab)
-			bins_channel1 = 256
+			bins_channel1 = 64
 			ranges = [0,256,0,256,0,256]
 		elif color_space == "HSV":
 			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HSV)
-			bins_channel1 = 32
+			bins_channel1 = 64
 			ranges = [0,180,0,256,0,256]
 
 		hist = block_histogram(img,total_blocks,bins_channel1,ranges)
