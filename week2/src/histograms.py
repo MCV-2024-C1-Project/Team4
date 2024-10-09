@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 from compute_descriptors import compute_histogram
-
+from mpl_toolkits.mplot3d import Axes3D
 
 def compute_histogram3d(img, channels, bins, ranges, normalized: bool = True):
     hist = cv.calcHist([img], channels, None, bins, ranges)
@@ -25,23 +25,60 @@ def block_histogram(img,total_blocks,bins,ranges):
     for y in range(blocks_per_dim):
         for x in range(blocks_per_dim):
             block = img[y*block_size_y:(y+1)*block_size_y , x*block_size_x:(x+1)*block_size_x]
-            hist = compute_histogram3d(block,[0, 1, 2], [bins, bins, bins], ranges, normalized=True)
+            hist = compute_histogram3d(block,[0, 1, 2], [bins, bins, bins], ranges, normalized= True)
             histograms.append(hist)
     return histograms 
+
+# Visualizar los histogramas 3D de cada bloque
+def plot_histograms_3d(histograms, blocks_per_dim, bins):
+      # Crear la cuadrícula de bins
+    bin_edges = np.arange(bins+1)
+    x, y, z = np.meshgrid(bin_edges[:-1], bin_edges[:-1], bin_edges[:-1])
+
+    # Ravel las dimensiones para obtener los puntos 3D
+    x = x.ravel()
+    y = y.ravel()
+    z = z.ravel()
+
+    # Crear subplots para cada histograma
+    for idx, hist in enumerate(histograms):
+        fig = plt.figure(figsize=(8, 8))  # Tamaño de la figura para cada bloque
+        ax = fig.add_subplot(111, projection='3d')
+        
+        hist_values = hist.ravel()
+        
+
+
+        # Crear los puntos del histograma como scatter plot
+        scatter = ax.scatter3D(x, y, z, c=hist_values, cmap='viridis', marker='o',s=hist_values * 50)
+        colorbar = fig.colorbar(scatter, ax=ax, shrink=0.5, aspect=10)
+        colorbar.set_label('Probability')
+        
+        ax.set_xlabel('R')
+        ax.set_ylabel('G')
+        ax.set_zlabel('B')
+        ax.set_title(f'Block {idx+1}')
+
+    plt.tight_layout()
+    plt.show()
 
 
 image = cv.imread('../../data/qsd1_w2/qsd1_w1/00001.jpg')
 
+image = cv.cvtColor(image,cv.COLOR_BGR2RGB)
+
 
 block_size = 4  
-bins = 32  
+bins = 32
 
 ranges = [0,256,0,256,0,256]
 
 # Obtener la lista de histogramas 3D
 histograms = block_histogram(image, block_size, bins,ranges)
 
-print(len(histograms))
+plot_histograms_3d(histograms, int(block_size/2), bins)
+
+
 
 
 
