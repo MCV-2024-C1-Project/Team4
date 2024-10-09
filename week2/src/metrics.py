@@ -34,3 +34,35 @@ def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
 	else:
 		dist = cv.compareHist(hist1, hist2, method)
 	return dist
+
+def precision(gt_mask,pred_mask):
+	gt_mask = np.array(gt_mask)
+	pred_mask = np.array(pred_mask)
+
+	TP = np.sum((pred_mask == 1) & (gt_mask == 1))
+	FP = np.sum((pred_mask == 1) & (gt_mask == 0))
+
+	precision = TP/ (TP+FP) if (TP + FP) != 0 else 0
+
+	return precision
+
+def recall(gt_mask,pred_mask):
+	gt_mask = np.array(gt_mask)
+	pred_mask = np.array(pred_mask)
+
+	TP = np.sum((pred_mask == 1) & (gt_mask == 1))
+	FN = np.sum((pred_mask == 0) & (gt_mask == 1))
+
+	recall = TP/ (TP+FN) if (TP + FN) != 0 else 0
+
+	return recall
+
+
+def f1_measure(gt_mask, pred_mask):
+	p = precision(gt_mask,pred_mask)
+	r = recall(gt_mask,pred_mask)
+	
+	f1_measure = (2*p*r)/(p + r) if (p+r) !=0 else 0
+
+	return f1_measure
+
