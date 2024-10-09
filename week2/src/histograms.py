@@ -1,14 +1,18 @@
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
+import os
+from compute_similarities import compute_similarities
 from compute_descriptors import compute_histogram
 from mpl_toolkits.mplot3d import Axes3D
+from metrics import Metrics
 
 def compute_histogram3d(img, channels, bins, ranges, normalized: bool = True):
     hist = cv.calcHist([img], channels, None, bins, ranges)
     if normalized:
         cv.normalize(hist, hist)
-    return hist.flatten()
+    return hist
 
 def block_histogram(img,total_blocks,bins,ranges):
 
@@ -64,19 +68,21 @@ def plot_histograms_3d(histograms, blocks_per_dim, bins):
 
 
 image = cv.imread('../../data/qsd1_w2/qsd1_w1/00001.jpg')
-
-image = cv.cvtColor(image,cv.COLOR_BGR2RGB)
-
+image = cv.cvtColor(image,cv.COLOR_BGR2HSV)
+color_space = "HSV"
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+bbdd_path = os.path.join(base_path, "data", "BBDD")
+with open(os.path.join(bbdd_path, color_space+'_histograms.pkl'), 'rb') as f:
+		bbdd_histograms = pickle.load(f)
 
 block_size = 4  
 bins = 32
-
-ranges = [0,256,0,256,0,256]
-
-# Obtener la lista de histogramas 3D
+ranges = [0,180,0,256,0,256]
+k_value = 5
 histograms = block_histogram(image, block_size, bins,ranges)
+similarity_function = Metrics.CANBERRA
+print(compute_similarities(histograms, bbdd_histograms, similarity_function, k_value))
 
-plot_histograms_3d(histograms, int(block_size/2), bins)
 
 
 
