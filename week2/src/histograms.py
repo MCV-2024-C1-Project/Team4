@@ -34,7 +34,7 @@ def block_histogram(img,total_blocks,bins,ranges):
             block = img[n*block_size_n:(n+1)*block_size_n , m*block_size_m:(m+1)*block_size_m]
             hist, hist_vect = compute_histogram3d(block,[0, 1, 2], [bins, bins, bins], ranges, normalized= True)
             histograms.append(hist_vect)
-
+            print("1st block 3D Histogram")
             plot_histogram_3d(hist, bins)
     return histograms 
 
@@ -56,13 +56,13 @@ def plot_histogram_3d(histogram, bins):
     hist_values = histogram.ravel()
 
     # Crear los puntos del histograma como scatter plot
-    scatter = ax.scatter3D(x, y, z, c=hist_values, cmap='viridis', marker='o',s=hist_values * 1)
+    scatter = ax.scatter3D(x, y, z, c=hist_values, cmap='viridis', marker='o',s=hist_values * 50)
     colorbar = fig.colorbar(scatter, ax=ax, shrink=0.5, aspect=10)
     colorbar.set_label('Probability')
         
     ax.set_xlabel('H')
-    ax.set_ylabel('V')
-    ax.set_zlabel('S')
+    ax.set_ylabel('s')
+    ax.set_zlabel('V')
     plt.tight_layout()
     plt.show()
 
