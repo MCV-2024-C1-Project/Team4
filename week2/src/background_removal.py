@@ -25,7 +25,6 @@ def fill_surrounded_pixels(foreground):
 	return new_mask
 
 
-
 def main():
 	# Get the image path argument
 	parser = argparse.ArgumentParser(description="Remove background from an image")
@@ -43,26 +42,27 @@ def main():
 
 	# Take S and remove any value that is less than half
 	s = myimage_hsv[:, :, 1]
-	s = np.where(s < 127, 0, 1)  # Any value below 127 will be excluded
+	s = np.where(s < 100, 0, 1)  # Any value below 127 will be excluded
 
 	# We increase the brightness of the image and then mod by 255
 	v = (myimage_hsv[:, :, 2] + 127) % 255
-	v = np.where(v > 255, 1, 0)  # Any value above 127 will be part of our mask
+	v = np.where(v > 255, 1, 0)  # Any value above 255 will be part of our mask
 
 	# Combine our two masks based on S and V into a single "Foreground"
 	foreground = np.where(s + v > 0, 1, 0).astype(np.uint8)
 	foreground[:10, :] = 0; foreground[-10:, :] = 0; foreground[:, :10] = 0; foreground[:, -10:] = 0
 	foreground = fill_surrounded_pixels(foreground)
-	print(foreground)
-
-	# Show foreground mask
 	cv.imshow("Foreground Mask", foreground * 255)
 	cv.waitKey(0)
 
-	background = np.where(foreground == 0, 255, 0).astype(np.uint8)  # Invert foreground to get background in uint8
-	print(background)
+	kernel = np.ones((5, 5), np.uint8)
+	opening = cv.morphologyEx(foreground, cv.MORPH_OPEN, kernel)
+	foreground = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernel)
+	cv.imshow("Foreground Mask with Opening/Closing", foreground * 255)
+	cv.waitKey(0)
 
 	# Show background mask
+	background = np.where(foreground == 0, 255, 0).astype(np.uint8)  # Invert foreground to get background in uint8
 	background = cv.cvtColor(background, cv.COLOR_GRAY2BGR)  # Convert background back into BGR space
 	cv.imshow("Background Mask", background)
 	cv.waitKey(0)
