@@ -1,3 +1,8 @@
+'''
+Compute the 3D Histograms for each image in the BBDD. Each 3D histogram is saved 
+as a list of length n_bins³ (assuming n_bins is the same for the three channels).
+Histograms are saved in a .pkl file.
+'''
 import os
 import cv2 as cv
 import pickle
@@ -6,32 +11,48 @@ from compute_descriptors import compute_descriptors
 from histograms import block_histogram
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+# Modify according to which case we want to evaluate
+COLOR_SPACE = "RGB"
+NUM_BLOCKS = 16
+NUM_BINS = 32
 
 def main():
 	# Compute descriptors for the BBDD images (offline)
 	imgs_path = os.path.join(base_path, "data", "BBDD")
+	# Get all the images of the BBDD that have extension '.jpg'
 	files = [f for f in os.listdir(imgs_path) if f.endswith('.jpg')]
 	files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
-	color_space = "HSV"
-	total_blocks = 4
+
 	histograms = []
 	for filename in files:
-
 		# Read image (by default the color space of the loaded image is BGR) 
 		img_bgr = cv.imread(os.path.join(imgs_path, filename))
 
 		# Change color space (only 2 options are possible)
-		if color_space == "Lab":
+		if COLOR_SPACE == "Lab":
 			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2Lab)
-			bins_channel1 = 64
 			ranges = [0,256,0,256,0,256]
-		elif color_space == "HSV":
+		elif COLOR_SPACE == "HSV":
 			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HSV)
-			bins_channel1 = 64
 			ranges = [0,180,0,256,0,256]
+		elif COLOR_SPACE == "RGB":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2RGB)
+			ranges = [0,256,0,256,0,256]
+		elif COLOR_SPACE == "HLS":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HLS)
+			ranges = [0,256,0,256,0,256]
+		elif COLOR_SPACE == "Luv":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2Luv)
+			ranges = [0,256,0,256,0,256]
+		elif COLOR_SPACE == "YCrCb":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2YCrCb)
+			ranges = [0,256,0,256,0,256]
+		elif COLOR_SPACE == "YUV":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2YUV)
+			ranges = [0,256,0,256,0,256]
 
-		hist = block_histogram(img,total_blocks,bins_channel1,ranges)
+		# Compute the 3D histogram
+		hist = block_histogram(img, NUM_BLOCKS,NUM_BINS,ranges)
 
 		index = int(filename.split('_')[-1].split('.')[0])
 
@@ -40,10 +61,8 @@ def main():
 		histograms[index] = hist
 
 	
-	with open(os.path.join(imgs_path, color_space + '_histograms.pkl'), 'wb') as f:
+	with open(os.path.join(imgs_path, COLOR_SPACE + '_histograms_'+str(NUM_BLOCKS)+'_blocks_'+str(NUM_BINS)+'_bins'+'.pkl'), 'wb') as f:
 		pickle.dump(histograms, f)
-	#compute_descriptors(imgs_path, color_space="Lab")
-	#compute_descriptors(imgs_path, color_space="HSV")
 
 
 if __name__ == "__main__":

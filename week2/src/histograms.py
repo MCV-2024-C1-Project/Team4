@@ -19,13 +19,18 @@ def compute_histogram3d(img, channels, bins, ranges, normalized: bool = True):
 
 def block_histogram(img,total_blocks,bins,ranges):
 
+    # Get the image dimensions (height and width respectively)
     h, w = img.shape[:2]
 
     #Divide the image into blocks of size
-
-    blocks_per_dim = int(total_blocks / 2)
-    block_size_m = w // blocks_per_dim
-    block_size_n = h // blocks_per_dim
+    if total_blocks == 1:
+        blocks_per_dim = 1
+        block_size_m = w 
+        block_size_n = h 
+    else:
+        blocks_per_dim = int(total_blocks / 2)
+        block_size_m = w // blocks_per_dim
+        block_size_n = h // blocks_per_dim
 
     histograms = []
 
@@ -33,10 +38,11 @@ def block_histogram(img,total_blocks,bins,ranges):
         for m in range(blocks_per_dim):
             block = img[n*block_size_n:(n+1)*block_size_n , m*block_size_m:(m+1)*block_size_m]
             hist, hist_vect = compute_histogram3d(block,[0, 1, 2], [bins, bins, bins], ranges, normalized= True)
-            histograms.append(hist_vect)
-            print("1st block 3D Histogram")
-            plot_histogram_3d(hist, bins)
-    return histograms 
+            # Concatenate the 3D histograms computed for each block of the image
+            histograms = np.concatenate([histograms, hist_vect])
+            #print("1st block 3D Histogram")
+            #plot_histogram_3d(hist, bins)
+    return histograms
 
 # Visualizar los histogramas 3D de cada bloque
 def plot_histogram_3d(histogram, bins):
@@ -132,33 +138,34 @@ def exemple():
         print(f"mAP@{k_value} for {color_space}: {mapk(y, res_m, k_value)}")
 
 
+def example2():
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    q_path = os.path.join(base_path, "data","qsd1_w1")
+    color_space = "HSV"
 
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-q_path = os.path.join(base_path, "data","qsd1_w1")
-color_space = "HSV"
 
+    files = [f for f in os.listdir(q_path) if f.endswith('.jpg')]
+    files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
+    total_blocks = 4
+    histograms = []
 
-files = [f for f in os.listdir(q_path) if f.endswith('.jpg')]
-files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
-total_blocks = 4
-histograms = []
+    for filename in files:
 
-for filename in files:
+        # Read image (by default the color space of the loaded image is BGR) 
+        img_bgr = cv.imread(os.path.join(q_path, filename))
 
-    # Read image (by default the color space of the loaded image is BGR) 
-    img_bgr = cv.imread(os.path.join(q_path, filename))
+        img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HSV)
+        bins_channel1 = 8
+        ranges = [0,180,0,256,0,256]
 
-    img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HSV)
-    bins_channel1 = 8
-    ranges = [0,180,0,256,0,256]
+        hist = block_histogram(img,total_blocks,bins_channel1,ranges)
+        dist = compute_similarities(hist, [hist, hist], similarity_measure=Metrics.CANBERRA, k=1)
 
-    hist = block_histogram(img,total_blocks,bins_channel1,ranges)
+        index = int(filename.split('_')[-1].split('.')[0])
 
-    index = int(filename.split('_')[-1].split('.')[0])
-
-    if len(histograms) <= index:
-        histograms.extend([None] * (index + 1 - len(histograms)))
-    histograms[index] = hist
+        if len(histograms) <= index:
+            histograms.extend([None] * (index + 1 - len(histograms)))
+        histograms[index] = hist
 
 
 

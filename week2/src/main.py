@@ -4,7 +4,7 @@ import cv2 as cv
 import argparse
 
 from compute_similarities import compute_similarities
-from compute_descriptors import compute_descriptors
+from histograms import block_histogram
 from average_precision import mapk
 from metrics import Metrics
 
@@ -18,6 +18,8 @@ def main():
 	# Read the color space, similarity measure, k value, query dataset path, and test flag from the command line
 	parser = argparse.ArgumentParser(description="Retrieve results and compute mAP@k")
 	parser.add_argument("color_space", help="Color space (e.g., Lab, HSV)")
+	parser.add_argument("num_blocks", help="Number of blocks")
+	parser.add_argument("num_bins", help="Number of bins (same for all channels) to compute histograms")
 	parser.add_argument("similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)")
 	parser.add_argument("k_value", help="Top k results")
 	parser.add_argument("query_path", help="Path to the query dataset")
@@ -25,6 +27,8 @@ def main():
 
 	args = parser.parse_args()
 	color_space = args.color_space
+	num_blocks = int(args.num_blocks)
+	num_bins = int(args.num_bins)
 	similarity_measure = args.similarity_measure
 	k_value = int(args.k_value)
 	q_path = os.path.join(base_path, args.query_path)
@@ -55,24 +59,64 @@ def main():
 	else:
 		raise ValueError(f"Unknown similarity measure: {similarity_measure}")
 
-	## Task 3: Implement retrieval system (retrieve top K results)
-
 	# If we are not testing, we get the provided GT to evaluate the results 
 	# obatined for the QSD1
 	if not is_test:
 		with open(q_path + "/gt_corresps.pkl", 'rb') as f:
 			y = pickle.load(f) 
 
-	# Compute image descriptors for all images in the query dataset (QST1) 
-	# and save them in a '.pkl' file based on the specified color space
-	compute_descriptors(q_path, color_space)
+	# Get all the images of the QSD that have extension '.jpg'
+	files = [f for f in os.listdir(q_path) if f.endswith('.jpg')]
+	histograms = []
+	for filename in files:
+		# Read image (by default the color space of the loaded image is BGR) 
+		img_bgr = cv.imread(os.path.join(q_path, filename))
+
+		# Change color space (only 2 options are possible)
+		if color_space == "Lab":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2Lab)
+			ranges = [0,256,0,256,0,256]
+		elif color_space == "HSV":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HSV)
+			ranges = [0,180,0,256,0,256]
+		elif color_space == "RGB":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2RGB)
+			ranges = [0,256,0,256,0,256]
+		elif color_space == "HLS":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HLS)
+			ranges = [0,256,0,256,0,256]
+		elif color_space == "Luv":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2Luv)
+			ranges = [0,256,0,256,0,256]
+		elif color_space == "YCrCb":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2YCrCb)
+			ranges = [0,256,0,256,0,256]
+		elif color_space == "YUV":
+			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2YUV)
+			ranges = [0,256,0,256,0,256]
+
+		# Compute the 3D Histogram for the query image
+		hist = block_histogram(img,num_blocks,num_bins,ranges)
+
+		# Extract the index (numerical ID) from the filename and store histogram at the correct position
+		index = int(filename.split('.')[0])
+
+		if len(histograms) <= index:
+			histograms.extend([None] * (index + 1 - len(histograms)))
+		histograms[index] = hist
+
+
+	# Save query histograms to a pickle file
+	with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'wb') as f:
+		pickle.dump(histograms, f)
+
 	
 	# Load the precomputed image descriptors from '.pkl' files
 	# for both the query dataset (QST1) and the museum dataset (BBDD, computed offline)
-	with open(os.path.join(q_path, color_space+'_histograms.pkl'), 'rb') as f:
+	with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 		query_histograms = pickle.load(f)
 
-	with open(os.path.join(bbdd_path, color_space+'_histograms.pkl'), 'rb') as f:
+	with open(os.path.join(bbdd_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 		bbdd_histograms = pickle.load(f)
 
 	# For each image in the query set (QST1), compute its similarity to all museum images (BBDD).
