@@ -30,8 +30,7 @@ def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
 	elif method == Metrics.LORENTZIAN:
 		dist = np.sum(np.log(1+np.abs(hist1-hist2)))
 	elif method == Metrics.CANBERRA:
-		print(hist1[0])
-		dist = np.sum((np.abs(hist1[:,0] - hist2[:,0]) + np.abs(hist1[:,1] - hist2[:,1]) + np.abs(hist1[:,2] - hist2[:,2])) / ((hist1[:,0] + hist2[:,0] + 1e-10) + (hist1[:,1] + hist2[:,1] + 1e-10) + (hist1[:,2] + hist2[:,2] + 1e-10)))
+		dist = np.sum((np.abs(hist1 - hist2) / (hist1 + hist2 + 1e-10)))
 	else:
 		dist = cv.compareHist(hist1, hist2, method)
 	return dist
