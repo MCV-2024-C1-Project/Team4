@@ -65,7 +65,7 @@ def plot_histograms_3d(histograms, blocks_per_dim, bins):
 
     plt.tight_layout()
     plt.show()
-'''
+
 image = cv.imread('../../data/qsd1_w2/qsd1_w1/00001.jpg')
 image = cv.cvtColor(image,cv.COLOR_BGR2HSV)
 color_space = "HSV"
@@ -82,7 +82,7 @@ histograms = block_histogram(image, block_size, bins,ranges)
 similarity_function = Metrics.CANBERRA
 print(compute_similarities(histograms, bbdd_histograms, similarity_function, k_value))
 
-'''
+
 
 
 
