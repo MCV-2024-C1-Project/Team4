@@ -74,7 +74,9 @@ def plot_histogram_3d(histogram, bins):
 #EXEMPLE BINS = 64, DISTANCE = CAMBERRA , ESPAI DE COLOR = HSV
 def exemple():
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     bbdd_path = os.path.join(base_path, "data", "BBDD")
+    q_path = os.path.join(base_path, "data","qsd1_w1")
     q_path = os.path.join(base_path, "data","qsd1_w1")
     color_space = "HSV"
     with open(os.path.join(bbdd_path, color_space+'_histograms.pkl'), 'rb') as f:
