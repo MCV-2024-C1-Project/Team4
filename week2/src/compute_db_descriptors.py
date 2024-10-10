@@ -12,9 +12,9 @@ from histograms import block_histogram
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Modify according to which case we want to evaluate
-COLOR_SPACE = "RGB"
-NUM_BLOCKS = 16
-NUM_BINS = 32
+COLOR_SPACE = "HSV"
+NUM_BLOCKS = 32
+NUM_BINS = 16
 
 def main():
 	# Compute descriptors for the BBDD images (offline)

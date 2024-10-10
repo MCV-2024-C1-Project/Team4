@@ -11,11 +11,9 @@ from average_precision import *
 
 def compute_histogram3d(img, channels, bins, ranges, normalized: bool = True):
     hist = cv.calcHist([img], channels, None, bins, ranges)
-    hist_vect = hist.flatten()
     if normalized:
         cv.normalize(hist, hist)
-    
-    return hist, hist_vect
+    return hist, hist.flatten()
 
 def block_histogram(img,total_blocks,bins,ranges):
 
@@ -75,9 +73,9 @@ def plot_histogram_3d(histogram, bins):
 
 #EXEMPLE BINS = 64, DISTANCE = CAMBERRA , ESPAI DE COLOR = HSV
 def exemple():
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     bbdd_path = os.path.join(base_path, "data", "BBDD")
-    q_path = os.path.join(base_path, "data","qsd1_w2/qsd1_w1")
+    q_path = os.path.join(base_path, "data","qsd1_w1")
     color_space = "HSV"
     with open(os.path.join(bbdd_path, color_space+'_histograms.pkl'), 'rb') as f:
             bbdd_histograms = pickle.load(f)
@@ -149,23 +147,24 @@ def example2():
     total_blocks = 4
     histograms = []
 
-    for filename in files:
+    for filename in files[:2]:
 
         # Read image (by default the color space of the loaded image is BGR) 
         img_bgr = cv.imread(os.path.join(q_path, filename))
 
         img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HSV)
+        plt.imshow(img)
+        img[:,:,2] = cv.equalizeHist(img[:,:,2])
+        plt.imshow(img)
         bins_channel1 = 8
         ranges = [0,180,0,256,0,256]
 
         hist = block_histogram(img,total_blocks,bins_channel1,ranges)
-        dist = compute_similarities(hist, [hist, hist], similarity_measure=Metrics.CANBERRA, k=1)
+        dist = compute_similarities(hist, [hist, hist], similarity_measure=cv.HISTCMP_HELLINGER, k=1)
 
         index = int(filename.split('_')[-1].split('.')[0])
 
         if len(histograms) <= index:
             histograms.extend([None] * (index + 1 - len(histograms)))
         histograms[index] = hist
-
-
 

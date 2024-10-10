@@ -31,8 +31,11 @@ def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
 		dist = np.sum(np.log(1+np.abs(hist1-hist2)))
 	elif method == Metrics.CANBERRA:
 		dist = np.sum((np.abs(hist1 - hist2) / (hist1 + hist2 + 1e-10)))
-	else:
-		dist = cv.compareHist(hist1, hist2, method)
+	elif method == cv.HISTCMP_HELLINGER:
+		dist = np.sum(np.multiply(hist1, hist2))
+	elif method == cv.HISTCMP_CHISQR_ALT:
+		dist = 2*np.sum((pow((hist1-hist2),2))/(hist1+hist2+1e-10))
+		
 	return dist
 
 def precision(gt_mask,pred_mask):
