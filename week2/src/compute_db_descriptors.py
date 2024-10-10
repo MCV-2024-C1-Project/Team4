@@ -81,8 +81,13 @@ def main():
 		histograms[index] = hist
 
 	
-	with open(os.path.join(imgs_path, COLOR_SPACE + '_histograms_'+str(NUM_BLOCKS)+'_blocks_'+str(NUM_BINS)+'_bins'+'.pkl'), 'wb') as f:
-		pickle.dump(histograms, f)
+	if is_pyramid == False:
+		with open(os.path.join(imgs_path, COLOR_SPACE + '_histograms_'+str(NUM_BLOCKS)+'_blocks_'+str(NUM_BINS)+'_bins'+'.pkl'), 'wb') as f:
+			pickle.dump(histograms, f)
+	else:
+		with open(os.path.join(imgs_path, COLOR_SPACE + '_histograms_'+str(NUM_BLOCKS)+'_levels_'+str(NUM_BINS)+'_bins'+'.pkl'), 'wb') as f:
+			pickle.dump(histograms, f)
+
 
 
 if __name__ == "__main__":
