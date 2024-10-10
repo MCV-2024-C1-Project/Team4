@@ -108,28 +108,106 @@ def remove_background(image_path):
 	return img_foreground - background, foreground  # Combine foreground and background
 
 
+def global_f1_score(masks, ground_truths):
+	"""
+    Calculate the global F1 score for a dataset of masks and ground truths.
+
+    Args:
+    - masks (list of np.array): List of mask arrays.
+    - ground_truths (list of np.array): List of corresponding ground truth arrays.
+
+    Returns:
+    - global_f1 (float): The global F1 score for the dataset.
+    """
+	total_tp, total_fp, total_fn = 0, 0, 0
+
+	for pred_mask, gt_mask in zip(masks, ground_truths):
+		# Calculate TP, FP, FN for each mask
+		tp = np.sum((pred_mask == 255) & (gt_mask == 255))
+		fp = np.sum((pred_mask == 255) & (gt_mask == 0))
+		fn = np.sum((pred_mask == 0) & (gt_mask == 255))
+
+		total_tp += tp
+		total_fp += fp
+		total_fn += fn
+
+	# Calculate global precision and recall
+	global_precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 0
+	global_recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0
+
+	# Calculate global F1 score
+	if global_precision + global_recall > 0:
+		global_f1 = 2 * (global_precision * global_recall) / (global_precision + global_recall)
+	else:
+		global_f1 = 0
+
+	return global_f1, global_precision, global_recall
+
+
+def load_masks(imgs_path):
+	ground_truths = {}
+	predicted_masks = {}
+
+	# Load ground truth masks into a dictionary
+	for filename in os.listdir(imgs_path):
+		if filename.endswith(".png") and not filename.endswith("_mask.png"):
+			mask_path = os.path.join(imgs_path, filename)
+			mask = cv.imread(mask_path)  # Load in grayscale if needed
+			key = filename.split(".")[0]  # Get the base name without extension
+			ground_truths[key] = mask
+
+	# Load predicted masks into a dictionary
+	for filename in os.listdir(imgs_path):
+		if filename.endswith("_mask.png"):
+			mask_path = os.path.join(imgs_path, filename)
+			mask = cv.imread(mask_path)
+			key = filename.split("_mask")[0]  # Get the base name without the "_mask" suffix
+			predicted_masks[key] = mask
+
+	# Create aligned lists for ground truth and predicted masks
+	ground_truth_list = []
+	predicted_list = []
+	for key in sorted(ground_truths.keys()):
+		if key in predicted_masks:
+			ground_truth_list.append(ground_truths[key])
+			predicted_list.append(predicted_masks[key])
+		else:
+			print(f"Warning: No predicted mask found for ground truth {key}")
+
+	return ground_truth_list, predicted_list
+
 def main():
 	# Get the image path argument
 	parser = argparse.ArgumentParser(description="Remove background from an images")
 	parser.add_argument("imgs_path", help="Path to the image folder")
+	parser.add_argument("--score", help="Show F1 score, precision and recall", type=bool)
 	args = parser.parse_args()
 
-	# Loop through all files in the directory
-	for filename in tqdm.tqdm(os.listdir(args.imgs_path)):
-		# Check if the file is a .jpg image
-		if filename.endswith(".jpg"):
-			# Get the full image path
-			image_path = os.path.join(args.imgs_path, filename)
-			finalimage, mask = remove_background(image_path)
+	if not args.score:
+		# Loop through all files in the directory
+		for filename in tqdm.tqdm(os.listdir(args.imgs_path)):
+			# Check if the file is a .jpg image
+			if filename.endswith(".jpg"):
+				# Get the full image path
+				image_path = os.path.join(args.imgs_path, filename)
+				finalimage, mask = remove_background(image_path)
 
-			# Get the base filename without extension
-			base_name = os.path.splitext(filename)[0]
-			mask_filename = f"{base_name}_mask.png"
-			mask_path = os.path.join(args.imgs_path, mask_filename)
+				# Get the base filename without extension
+				base_name = os.path.splitext(filename)[0]
+				mask_filename = f"{base_name}_mask.png"
+				mask_path = os.path.join(args.imgs_path, mask_filename)
 
-			# Save the mask
-			cv.imwrite(mask_path, mask * 255)
+				# Save the mask
+				cv.imwrite(mask_path, mask * 255)
+	else:
+		# Load the ground truth and predicted masks
+		ground_truths, predicted_masks = load_masks(args.imgs_path)
 
+		# Calculate the global F1 score
+		global_f1, global_precision, global_recall = global_f1_score(predicted_masks, ground_truths)
+		print(f"Global F1 Score: {global_f1}")
+		print(f"Global Precision: {global_precision}")
+		print(f"Global Recall: {global_recall}")
 
 if __name__ == "__main__":
 	main()

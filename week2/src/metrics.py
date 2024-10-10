@@ -39,9 +39,12 @@ def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
 	return dist
 
 def precision(gt_mask,pred_mask):
-	gt_mask = np.array(gt_mask)
-	pred_mask = np.array(pred_mask)
-
+	"""
+	Calculate the precision
+	:param gt_mask: Ground truth mask
+	:param pred_mask: Predicted mask
+	:return: Precision
+	"""
 	TP = np.sum((pred_mask == 255) & (gt_mask == 255))
 	FP = np.sum((pred_mask == 255) & (gt_mask == 0))
 
@@ -50,9 +53,12 @@ def precision(gt_mask,pred_mask):
 	return precision
 
 def recall(gt_mask,pred_mask):
-	gt_mask = np.array(gt_mask)
-	pred_mask = np.array(pred_mask)
-
+	"""
+	Calculate the recall
+	:param gt_mask: Ground truth mask
+	:param pred_mask: Predicted mask
+	:return: Recall
+	"""
 	TP = np.sum((pred_mask == 255) & (gt_mask == 255))
 	FN = np.sum((pred_mask == 0) & (gt_mask == 255))
 
@@ -62,6 +68,12 @@ def recall(gt_mask,pred_mask):
 
 
 def f1_measure(gt_mask, pred_mask):
+	"""
+	Calculate the F1 measure
+	:param gt_mask: Ground truth mask
+	:param pred_mask: Predicted mask
+	:return: The F1 measure
+	"""
 	p = precision(gt_mask,pred_mask)
 	r = recall(gt_mask,pred_mask)
 	
@@ -71,8 +83,8 @@ def f1_measure(gt_mask, pred_mask):
 
 def example():
 #EXAMPLE
-	gt_mask = cv.imread('C:/Users/34634/Downloads/C1/Team4/week2/data/qsd2_w2/qsd2_w1/00000.png')
-	pred_mask = cv.imread('C:/Users/34634/Downloads/C1/Team4/week2/data/qsd2_w2/qsd2_w1/mask_00000.png')
+	gt_mask = cv.imread('PUT_PATH_TO_GROUND_TRUTH_MASK')
+	pred_mask = cv.imread('PUT_PATH_TO_PREDICTED_MASK')
 
 	print('Precision: ', precision(gt_mask,pred_mask))
 	print('Recall: ', recall(gt_mask,pred_mask))
