@@ -238,8 +238,13 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
 
 - **Index the Database (BBDD):** Generate descriptors offline and saves them in a `.pkl` file.
   ```bash
-  python compute_db_descriptors.py HSV 32 16
-  python compute_db_descriptors.py Lab 32 2
+  # Block 3D histograms
+  python compute_db_descriptors.py HSV 32 16 False
+  python compute_db_descriptors.py Lab 32 2 False
+
+  # Hierarchical 3D histograms
+  python compute_db_descriptors.py HSV 32 16 True
+  python compute_db_descriptors.py Lab 32 2 True
   ```
 - **Compute image descriptors (QSD1):**
   
@@ -258,7 +263,13 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
      ```bash
      #CAMBIAR python .\compute_img_descriptors.py data\qsd1_w1 00001.jpg hist_hsv
      ```
-     
+
+### Task 2: Test query system using query set QSD1-W2 development and evaluate retrieval results
+
+```bash
+#CAMBIAR python main.py Lab 32 2 Lorentzian 1 data\qsd1_w1 False
+```
+
 
 ## Team Members
 
