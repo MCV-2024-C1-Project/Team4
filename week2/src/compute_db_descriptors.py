@@ -20,7 +20,7 @@ def main():
 	# Argument parser
 	parser = argparse.ArgumentParser(description="Compute 3D histograms for each image in the BBDD")
 	parser.add_argument('color_space', type=str, choices=['Lab', 'HSV', 'RGB', 'HLS', 'Luv', 'YCrCb', 'YUV'], help='Color space to use')
-	parser.add_argument('num_blocks', type=int, help='Number of blocks for block histogram')
+	parser.add_argument('num_blocks', type=int, help='Number of blocks or levels for block histogram')
 	parser.add_argument('num_bins', type=int, help='Number of bins for histogram')
 	parser.add_argument("is_pyramid", help="True if we are using the spatial pyramid histogram mode")
 	args = parser.parse_args()
@@ -65,7 +65,7 @@ def main():
 			ranges = [0,256,0,256,0,256]
 
 		# Compute the 3D histogram
-		
+
 		if is_pyramid == False:
 			# Compute the 3D Block Histograms for the query image
 			hist = block_histogram(img,NUM_BLOCKS,NUM_BINS,ranges)

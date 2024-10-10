@@ -126,15 +126,15 @@ def main():
 		with open(os.path.join(bbdd_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 			bbdd_histograms = pickle.load(f)
 	else:
-		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'wb') as f:
+		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
 
 		# Load the precomputed image descriptors from '.pkl' files
 		# for both the query dataset (QST1) and the museum dataset (BBDD, computed offline)
-		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
+		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 			query_histograms = pickle.load(f)
 
-		with open(os.path.join(bbdd_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
+		with open(os.path.join(bbdd_path, color_space + '_histograms_'+str(num_blocks)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 			bbdd_histograms = pickle.load(f)
 
 	# For each image in the query set (QST1), compute its similarity to all museum images (BBDD).
