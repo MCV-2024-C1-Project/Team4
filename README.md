@@ -18,7 +18,7 @@
   - [Prerequisites](#prerequisites)
   - [Setup](#setup)
 - [Project Structure](#project-structure)
-- [Tasks](#tasks)
+- [WEEK 1: Tasks](#week-1-tasks)
   - [Task 1: Museum and query image descriptors (BBDD & QSD1)](#task-1-museum-and-query-image-descriptors-bbdd--qsd1)
   - [Task 2: Selection and implementation of similarity measures to compare images](#task-2-selection-and-implementation-of-similarity-measures-to-compare-images)
   - [Task 3: Implement retrieval system (retrieve top K results)](#task-3-implement-retrieval-system-retrieve-top-k-results)
@@ -103,8 +103,7 @@ Once downloaded and extracted, the project structure will look like this:
     │   ├── plot_results.py
     │   └── print_dict.py
 
-    
-## Tasks
+<h2 align="center">WEEK 1: Tasks</h2>
 
 ### Task 1: Museum and query image descriptors (BBDD & QSD1)
 
@@ -232,6 +231,9 @@ python .\main.py HSV Canberra 10 data\qst1_w1 True
 ```
 
 Since the testing dataset does not have ground truth labels, the Mean Average Precision (mAP@k) cannot be calculated for this task.
+
+<h2 align="center">WEEK 2: Tasks</h2>
+
 
 ## Team Members
 
