@@ -10,7 +10,7 @@ import argparse
 from tqdm import tqdm
 
 from compute_descriptors import compute_descriptors
-from histograms import block_histogram
+from histograms import block_histogram, spatial_pyramid_histogram
 
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -22,11 +22,13 @@ def main():
 	parser.add_argument('color_space', type=str, choices=['Lab', 'HSV', 'RGB', 'HLS', 'Luv', 'YCrCb', 'YUV'], help='Color space to use')
 	parser.add_argument('num_blocks', type=int, help='Number of blocks for block histogram')
 	parser.add_argument('num_bins', type=int, help='Number of bins for histogram')
+	parser.add_argument("is_pyramid", help="True if we are using the spatial pyramid histogram mode")
 	args = parser.parse_args()
 
 	COLOR_SPACE = args.color_space
 	NUM_BLOCKS = args.num_blocks
 	NUM_BINS = args.num_bins
+	is_pyramid = args.is_pyramid == "True"
 
 	# Compute descriptors for the BBDD images (offline)
 	imgs_path = os.path.join(base_path, "data", "BBDD")
@@ -63,7 +65,14 @@ def main():
 			ranges = [0,256,0,256,0,256]
 
 		# Compute the 3D histogram
-		hist = block_histogram(img, NUM_BLOCKS,NUM_BINS,ranges)
+		
+		if is_pyramid == False:
+			# Compute the 3D Block Histograms for the query image
+			hist = block_histogram(img,NUM_BLOCKS,NUM_BINS,ranges)
+		else:
+			# Compute the 3D Hierarchical Histograms for the query image
+			num_levels = NUM_BLOCKS
+			hist = spatial_pyramid_histogram(img, num_levels, NUM_BINS, ranges)
 
 		index = int(filename.split('_')[-1].split('.')[0])
 
