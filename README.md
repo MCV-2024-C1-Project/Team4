@@ -267,7 +267,10 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
 ### Task 2: Test query system using query set QSD1-W2 development and evaluate retrieval results
 
 ```bash
-#CAMBIAR python main.py Lab 32 2 Lorentzian 1 data\qsd1_w1 False
+# Block 3D histograms
+python main.py Lab 32 2 False Lorentzian 1 data\qsd1_w1 False
+# Hierarchical 3D histograms
+python main.py Lab 4 2 True Lorentzian 1 data\qsd1_w1 False
 ```
 
 
