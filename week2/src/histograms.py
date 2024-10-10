@@ -65,6 +65,42 @@ def block_histogram(img,total_blocks,bins,ranges):
             #plot_histogram_3d(hist, bins)
     return histograms
 
+def spatial_pyramid_histogram(img, num_levels, bins, ranges):
+    """
+    Computes the spatial pyramid histogram of an image.
+    
+    :param img: Image for which the spatial pyramid histogram is computed.
+    :param num_levels: Number of levels in the pyramid.
+    :param bins: Number of bins for each channel in the histogram.
+    :param ranges: Range of values for each channel.
+    :return: 1D array containing the concatenated histograms of all levels.
+    """
+    histograms = []
+
+    # Get the image dimensions
+    h, w = img.shape[:2]
+    
+    for level in range(num_levels):
+        # Calculate the number of blocks per dimension at this level
+        blocks_per_dim = 2 ** level   # base ** exponent -> 2^(level)
+        
+        block_size_h = h // blocks_per_dim
+        block_size_w = w // blocks_per_dim
+        
+        for n in range(blocks_per_dim):
+            for m in range(blocks_per_dim):
+                # Define the current block using slicing
+                block = img[n * block_size_h : (n + 1) * block_size_h,
+                             m * block_size_w : (m + 1) * block_size_w]
+                
+                # Compute the 3D histogram for the current block
+                hist, hist_vect = compute_histogram3d(block, [0, 1, 2], [bins, bins, bins], ranges)
+                
+                # Concatenate the histograms
+                histograms = np.concatenate([histograms, hist_vect])
+    
+    return histograms
+
 
 def plot_histogram_3d(histogram, bins):
     """
@@ -105,7 +141,7 @@ def plot_histogram_3d(histogram, bins):
 
 #EXEMPLE BINS = 64, DISTANCE = CAMBERRA , ESPAI DE COLOR = HSV
 def exemple():
-    base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     bbdd_path = os.path.join(base_path, "data", "BBDD")
     q_path = os.path.join(base_path, "data","qsd1_w1")

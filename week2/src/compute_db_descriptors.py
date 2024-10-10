@@ -6,17 +6,28 @@ Histograms are saved in a .pkl file.
 import os
 import cv2 as cv
 import pickle
+import argparse
+from tqdm import tqdm
 
 from compute_descriptors import compute_descriptors
 from histograms import block_histogram
 
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Modify according to which case we want to evaluate
-COLOR_SPACE = "HSV"
-NUM_BLOCKS = 32
-NUM_BINS = 16
+base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 def main():
+	
+	# Argument parser
+	parser = argparse.ArgumentParser(description="Compute 3D histograms for each image in the BBDD")
+	parser.add_argument('color_space', type=str, choices=['Lab', 'HSV', 'RGB', 'HLS', 'Luv', 'YCrCb', 'YUV'], help='Color space to use')
+	parser.add_argument('num_blocks', type=int, help='Number of blocks for block histogram')
+	parser.add_argument('num_bins', type=int, help='Number of bins for histogram')
+	args = parser.parse_args()
+
+	COLOR_SPACE = args.color_space
+	NUM_BLOCKS = args.num_blocks
+	NUM_BINS = args.num_bins
+
 	# Compute descriptors for the BBDD images (offline)
 	imgs_path = os.path.join(base_path, "data", "BBDD")
 	# Get all the images of the BBDD that have extension '.jpg'
@@ -24,7 +35,7 @@ def main():
 	files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
 
 	histograms = []
-	for filename in files:
+	for filename in tqdm(files, desc="Processing images", unit="image"):
 		# Read image (by default the color space of the loaded image is BGR) 
 		img_bgr = cv.imread(os.path.join(imgs_path, filename))
 

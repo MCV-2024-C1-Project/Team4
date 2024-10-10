@@ -2,6 +2,7 @@ import pickle
 import os
 import cv2 as cv
 import argparse
+from tqdm import tqdm
 
 from compute_similarities import compute_similarities
 from histograms import block_histogram
@@ -9,13 +10,13 @@ from average_precision import mapk
 from metrics import Metrics
 
 # Get the path of the folder containing the museum dataset (BBDD)
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 bbdd_path = os.path.join(base_path, "data", "BBDD")
 
 
 def main():
 
-	# Read the color space, similarity measure, k value, query dataset path, and test flag from the command line
+	# Read the arguments from the command line
 	parser = argparse.ArgumentParser(description="Retrieve results and compute mAP@k")
 	parser.add_argument("color_space", help="Color space (e.g., Lab, HSV)")
 	parser.add_argument("num_blocks", help="Number of blocks")
@@ -68,7 +69,7 @@ def main():
 	# Get all the images of the QSD that have extension '.jpg'
 	files = [f for f in os.listdir(q_path) if f.endswith('.jpg')]
 	histograms = []
-	for filename in files:
+	for filename in tqdm(files, desc="Processing images", unit="image"):
 		# Read image (by default the color space of the loaded image is BGR) 
 		img_bgr = cv.imread(os.path.join(q_path, filename))
 
@@ -110,7 +111,6 @@ def main():
 	with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'wb') as f:
 		pickle.dump(histograms, f)
 
-	
 	# Load the precomputed image descriptors from '.pkl' files
 	# for both the query dataset (QST1) and the museum dataset (BBDD, computed offline)
 	with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
