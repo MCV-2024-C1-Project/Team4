@@ -46,7 +46,7 @@ def block_histogram(img,total_blocks,bins,ranges):
         block_size_m = w 
         block_size_n = h 
     else:
-        blocks_per_dim = int(total_blocks / 2)
+        blocks_per_dim = int(np.sqrt(total_blocks))
         block_size_m = w // blocks_per_dim
         block_size_n = h // blocks_per_dim
 
