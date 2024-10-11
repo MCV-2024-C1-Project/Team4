@@ -131,8 +131,6 @@ def remove_background(image_path):
 	left, right = x_indices.min(), x_indices.max()
 
 	cropped_image = image[top:bottom + 1, left:right + 1]
-	cv.imshow("Cropped Image", cropped_image)
-	cv.waitKey(0)
 	return cropped_image, foreground
 
 
