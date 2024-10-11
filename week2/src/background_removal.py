@@ -14,21 +14,18 @@ def fill_surrounded_pixels(foreground):
 	h, w = foreground.shape
 	new_mask = foreground.copy()
 
-	for i in range(h):
-		for j in range(w):
-			if foreground[i, j] == 0:
-				# Check if there is a 1 above
-				has_one_above = np.any(foreground[:i, j] == 1) if i > 0 else False
-				# Check if there is a 1 below
-				has_one_below = np.any(foreground[i + 1:, j] == 1) if i < h - 1 else False
-				# Check if there is a 1 to the left
-				has_one_left = np.any(foreground[i, :j] == 1) if j > 0 else False
-				# Check if there is a 1 to the right
-				has_one_right = np.any(foreground[i, j + 1:] == 1) if j < w - 1 else False
+	# Cumulative sums to check for foreground presence in each direction
+	has_one_above = np.cumsum(foreground, axis=0) > 0
+	has_one_below = np.cumsum(foreground[::-1, :], axis=0)[::-1] > 0
+	has_one_left = np.cumsum(foreground, axis=1) > 0
+	has_one_right = np.cumsum(foreground[:, ::-1], axis=1)[:, ::-1] > 0
 
-				# If there at least a 1 in each direction, change the pixel to 1 (foreground)
-				if has_one_above and has_one_below and has_one_left and has_one_right:
-					new_mask[i, j] = 1
+	# Find all positions that have a 0 but are surrounded by 1s in all directions
+	surrounded = (foreground == 0) & has_one_above & has_one_below & has_one_left & has_one_right
+
+	# Update the new mask with 1 where pixels are surrounded
+	new_mask[surrounded] = 1
+
 	return new_mask
 
 
@@ -64,6 +61,30 @@ def get_s_and_v_masks(hsv_image):
 		V_border_pixels = V_border_pixels[(V_border_pixels >= lower_bound)]
 
 	return np.max(S_border_pixels), np.min(V_border_pixels)
+
+
+def apply_square_mask(mask):
+	# Image dimensions
+	height, width = mask.shape
+
+	# Step 1: Find the first row with more white than black from the top
+	top_row = next(i for i in range(height) if np.sum(mask[i, :] == 1) > width // 2)
+
+	# Step 2: Find the first row with more white than black from the bottom
+	bottom_row = next(i for i in range(height - 1, -1, -1) if np.sum(mask[i, :] == 1) > width // 2)
+
+	# Step 3: Find the first column with more white than black from the left
+	left_col = next(j for j in range(width) if np.sum(mask[:, j] == 1) > height // 2)
+
+	# Step 4: Find the first column with more white than black from the right
+	right_col = next(j for j in range(width - 1, -1, -1) if np.sum(mask[:, j] == 1) > height // 2)
+
+	# Create a new mask to draw the square
+	mask = np.zeros_like(mask, dtype=np.uint8)
+
+	# Fill the area inside the square with white
+	mask[top_row:bottom_row + 1, left_col:right_col + 1] = 1
+	return mask
 
 
 def remove_background(image_path):
@@ -102,15 +123,17 @@ def remove_background(image_path):
 	# Closing -> removes background objects smaller than the kernel
 	kernel = np.ones((50, 50), np.uint8)
 	foreground = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernel)
+	foreground = apply_square_mask(foreground)
 
-	# Show background mask
-	background = np.where(foreground == 0, 255, 0).astype(np.uint8)  # Invert foreground to get background in uint8
-	background = cv.cvtColor(background, cv.COLOR_GRAY2BGR)  # Convert background back into BGR space
+	# Find the bounding box of the non-background region
+	y_indices, x_indices = np.where(foreground == 1)
+	top, bottom = y_indices.min(), y_indices.max()
+	left, right = x_indices.min(), x_indices.max()
 
-	img_foreground = cv.bitwise_and(image, image, mask=foreground)  # Apply our foreground map to original image
-
-	# Show the final image
-	return img_foreground - background, foreground  # Combine foreground and background
+	cropped_image = image[top:bottom + 1, left:right + 1]
+	cv.imshow("Cropped Image", cropped_image)
+	cv.waitKey(0)
+	return cropped_image, foreground
 
 
 def global_f1_score(masks, ground_truths):
