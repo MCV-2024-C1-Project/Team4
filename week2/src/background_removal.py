@@ -96,7 +96,7 @@ def remove_background(image_path):
 
 	kernel = np.ones((5, 5), np.uint8)
 	opening = cv.morphologyEx(foreground, cv.MORPH_OPEN, kernel)
-	kernel = np.ones((25, 25), np.uint8)
+	kernel = np.ones((50, 50), np.uint8)
 	foreground = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernel)
 
 	# Show background mask

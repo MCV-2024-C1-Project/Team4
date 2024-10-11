@@ -324,9 +324,8 @@ PUT EXAMPLES HERE
 
 ### Task 4: Background removal evaluation 
 The algorithm evaluates the accuracy of background removal using the **global F1 score, precision, and recall metrics**. This process compares the algorithm-generated masks with the provided ground truth masks to assess how accurately the background was removed.
-Here's the explanation for the evaluation process in a README format for Task 4:
 
-#### Evaluation Process
+#### Evaluation process
 
 1. **Loading Ground Truth and Predicted Masks**  
    - The `load_masks` function reads all image masks from a specified folder. It distinguishes between the original ground truth masks (saved as `.png` files) and the predicted masks (saved as `_mask.png` files).
