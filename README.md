@@ -234,8 +234,13 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
 
 <h2 align="center">WEEK 2: Tasks</h2>
 
-### Task 1: Museum and query image descriptors (BBDD & QSD1) with block and hierarchical 3D histograms
+### Task 1: Implement 3D/2D block and hierarchical histograms
 
+
+  
+  
+
+### Task 2: Test query system using query set QSD1-W2 development and evaluate retrieval results
 - **Index the Database (BBDD):** Generate descriptors offline and saves them in a `.pkl` file.
   ```bash
   # Block 3D histograms
@@ -246,26 +251,6 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
   python compute_db_descriptors.py HSV 32 16 True
   python compute_db_descriptors.py Lab 32 2 True
   ```
-- **Compute image descriptors (QSD1):**
-  
-  Methods:
-   - **Color space CieLab:** Histograms for the L, a, and b channels.
-     
-     Example command:
-     ```bash
-     #CAMBIAR python .\compute_img_descriptors.py data\qsd1_w1 00001.jpg hist_lab 
-     ```
-    
-
-   - **Color space HSV:** Histograms for the Hue, Saturation, and Value channels.
-     
-     Example command:
-     ```bash
-     #CAMBIAR python .\compute_img_descriptors.py data\qsd1_w1 00001.jpg hist_hsv
-     ```
-
-### Task 2: Test query system using query set QSD1-W2 development and evaluate retrieval results
-
 ```bash
 # Block 3D histograms
 python main.py Lab 32 2 False Lorentzian 1 data\qsd1_w1 False
