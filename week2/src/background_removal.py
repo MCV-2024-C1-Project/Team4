@@ -65,6 +65,7 @@ def get_s_and_v_masks(hsv_image):
 
 	return np.max(S_border_pixels), np.min(V_border_pixels)
 
+
 def remove_background(image_path):
 	"""
 	Remove the background from an image
@@ -110,15 +111,15 @@ def remove_background(image_path):
 
 def global_f1_score(masks, ground_truths):
 	"""
-    Calculate the global F1 score for a dataset of masks and ground truths.
+	Calculate the global F1 score for a dataset of masks and ground truths.
 
-    Args:
-    - masks (list of np.array): List of mask arrays.
-    - ground_truths (list of np.array): List of corresponding ground truth arrays.
+	Args:
+	- masks (list of np.array): List of mask arrays.
+	- ground_truths (list of np.array): List of corresponding ground truth arrays.
 
-    Returns:
-    - global_f1 (float): The global F1 score for the dataset.
-    """
+	Returns:
+	- global_f1 (float): The global F1 score for the dataset.
+	"""
 	total_tp, total_fp, total_fn = 0, 0, 0
 
 	for pred_mask, gt_mask in zip(masks, ground_truths):
@@ -176,6 +177,7 @@ def load_masks(imgs_path):
 
 	return ground_truth_list, predicted_list
 
+
 def main():
 	# Get the image path argument
 	parser = argparse.ArgumentParser(description="Remove background from an images")
@@ -199,7 +201,8 @@ def main():
 
 				# Save the mask
 				cv.imwrite(mask_path, mask * 255)
-	else:
+
+	if args.score:
 		# Load the ground truth and predicted masks
 		ground_truths, predicted_masks = load_masks(args.imgs_path)
 
@@ -208,6 +211,7 @@ def main():
 		print(f"Global F1 Score: {global_f1}")
 		print(f"Global Precision: {global_precision}")
 		print(f"Global Recall: {global_recall}")
+
 
 if __name__ == "__main__":
 	main()
