@@ -26,7 +26,7 @@ def fill_surrounded_pixels(foreground):
 				# Check if there is a 1 to the right
 				has_one_right = np.any(foreground[i, j + 1:] == 1) if j < w - 1 else False
 
-				# If there is at least a 1 in each direction, change the pixel to 1
+				# If there at least a 1 in each direction, change the pixel to 1 (foreground)
 				if has_one_above and has_one_below and has_one_left and has_one_right:
 					new_mask[i, j] = 1
 	return new_mask
@@ -77,11 +77,13 @@ def remove_background(image_path):
 	myimage_hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
 	threshold_s, threshold_v = get_s_and_v_masks(myimage_hsv)
 
-	# Take S and remove any value that is less than half
+	# Take S channel and create a mask so that each pixel with a saturation level below or equal
+	# to the threshold is set to 0 (background) and S_levels > th are set to 1 (painting)
 	s = myimage_hsv[:, :, 1]
-	s = np.where(s < threshold_s + 1, 0, 1)  # Any value below 127 will be excluded
+	s = np.where(s < threshold_s + 1, 0, 1)
 
-	# We increase the brightness of the image and then mod by 255
+	# Take V channel and create a mask so that each pixel with a Value level above or equal
+	# to the threshold is set to 0 (background) and V_levels < th are set to 1 (painting)
 	v = myimage_hsv[:, :, 2]
 	v = np.where(v > threshold_v - 1, 0, 1)  # Any value above 255 will be part of our mask
 
@@ -93,8 +95,10 @@ def remove_background(image_path):
 	foreground[:, -10:] = 0
 	foreground = fill_surrounded_pixels(foreground)
 
+	# Opening -> removes foreground objects smaller than the kernel
 	kernel = np.ones((5, 5), np.uint8)
 	opening = cv.morphologyEx(foreground, cv.MORPH_OPEN, kernel)
+	# Closing -> removes background objects smaller than the kernel
 	kernel = np.ones((50, 50), np.uint8)
 	foreground = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernel)
 
