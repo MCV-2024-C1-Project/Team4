@@ -235,7 +235,7 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
 <h2 align="center">WEEK 2: Tasks</h2>
 
 ### Task 1: Implement 3D/2D block and hierarchical histograms
-
+Explicar com s'implementen els histogrames i un exemple d'algun plot.
 
   
   
@@ -337,6 +337,10 @@ Global Recall: 0.98
 ```
 
 This output reflects the algorithm's overall accuracy in foreground-background separation across the entire dataset. To evaluate the algorithm use the commands from Task 3 with the `--score=True` flag.
+
+### Task 5: Background removal evaluation (QSD2-W2)  
+
+### Task 6:Processing the QST1 and QST2 Testing Dataset
 
 #### Our results
 
