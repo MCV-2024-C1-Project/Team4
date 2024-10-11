@@ -51,6 +51,7 @@ def block_histogram(img,total_blocks,bins,ranges):
         block_size_n = h // blocks_per_dim
 
     histograms = []
+    block_count = 1
     # Iterate over each block to compute its histogram
     for n in range(blocks_per_dim):
         for m in range(blocks_per_dim):
@@ -62,7 +63,8 @@ def block_histogram(img,total_blocks,bins,ranges):
             histograms = np.concatenate([histograms, hist_vect])
             # Uncomment below to visualize the 3D histogram for each block
             #print("1st block 3D Histogram")
-            #plot_histogram_3d(hist, bins)
+            plot_histogram_3d(hist, bins,block_name=f"Block_{block_count}")
+            block_count += 1  # Increment block number
     return histograms
 
 def spatial_pyramid_histogram(img, num_levels, bins, ranges):
@@ -102,7 +104,7 @@ def spatial_pyramid_histogram(img, num_levels, bins, ranges):
     return histograms
 
 
-def plot_histogram_3d(histogram, bins):
+def plot_histogram_3d(histogram, bins, block_name):
     """
     Plots a 3D histogram.
 
@@ -131,80 +133,31 @@ def plot_histogram_3d(histogram, bins):
     colorbar = fig.colorbar(scatter, ax=ax, shrink=0.5, aspect=10) # Add a color bar to indicate probability
     colorbar.set_label('Probability')
 
+    #Set the title with the block name
+    ax.set_title(f'3D Histogram for {block_name}')
+
     # Set axis labels    
     ax.set_xlabel('H')
     ax.set_ylabel('s')
     ax.set_zlabel('V')
     plt.tight_layout()
+    plt.savefig(f"{block_name}_histogram_3d.png")
     plt.show()
 
 
 #EXEMPLE BINS = 64, DISTANCE = CAMBERRA , ESPAI DE COLOR = HSV
 def exemple():
 
-    base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    bbdd_path = os.path.join(base_path, "data", "BBDD")
-    q_path = os.path.join(base_path, "data","qsd1_w1")
-    q_path = os.path.join(base_path, "data","qsd1_w1")
-    color_space = "HSV"
-    with open(os.path.join(bbdd_path, color_space+'_histograms.pkl'), 'rb') as f:
-            bbdd_histograms = pickle.load(f)
-    with open(q_path + "/gt_corresps.pkl", 'rb') as f:
-                y = pickle.load(f)
-
-    files = [f for f in os.listdir(q_path) if f.endswith('.jpg')]
-    files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
+    img = cv.imread('C:/Users/34634/Downloads/C1/Team4/week2/data/qsd1_w2/qsd1_w1/00003.jpg')
     total_blocks = 4
-    histograms = []
-    for filename in files:
+    img = cv.cvtColor(img,cv.COLOR_BGR2HSV)
+    bins_channel1 = 4
+    ranges = [0,180,0,256,0,256]
+    
+    block_histogram(img,total_blocks,bins_channel1,ranges)
+    
 
-            # Read image (by default the color space of the loaded image is BGR) 
-        img_bgr = cv.imread(os.path.join(q_path, filename))
-
-            # Change color space (only 2 options are possible)
-        if color_space == "Lab":
-            img = cv.cvtColor(img_bgr, cv.COLOR_BGR2Lab)
-            bins_channel1 = 64
-            ranges = [0,256,0,256,0,256]
-        elif color_space == "HSV":
-            img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HSV)
-            bins_channel1 = 64
-            ranges = [0,180,0,256,0,256]
-
-        hist = block_histogram(img,total_blocks,bins_channel1,ranges)
-
-        index = int(filename.split('_')[-1].split('.')[0])
-
-        if len(histograms) <= index:
-            histograms.extend([None] * (index + 1 - len(histograms)))
-        histograms[index] = hist
-
-        
-    with open(os.path.join(q_path, color_space + '_histograms.pkl'), 'wb') as f:
-        pickle.dump(histograms, f)
-
-
-    with open(os.path.join(q_path, color_space+'_histograms.pkl'), 'rb') as f:
-            query_histograms = pickle.load(f)
-
-    k_value = 5
-    similarity_measure = "Canberra"
-    similarity_function = Metrics.CANBERRA
-
-    res_m = []
-        
-    for query_img_h in query_histograms:
-        res_m.append(compute_similarities(query_img_h, bbdd_histograms, similarity_function, k_value)[1])
-        
-        # If we are not in testing mode
-
-            # Save the top K indices of the museum images with the best similarity for each query image to a pickle file
-        with open(os.path.join(q_path, color_space +'_'+ similarity_measure + '_' + str(k_value) + '_results.pkl'), 'wb') as f:
-            pickle.dump(res_m, f)
-
-            # Evaluate the results using mAP@K if we are not in testing mode	
-        print(f"mAP@{k_value} for {color_space}: {mapk(y, res_m, k_value)}")
-
+    
 
 def example2():
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -238,3 +191,4 @@ def example2():
             histograms.extend([None] * (index + 1 - len(histograms)))
         histograms[index] = hist
 
+exemple()
