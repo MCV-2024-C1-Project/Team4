@@ -327,27 +327,21 @@ The algorithm evaluates the accuracy of background removal using the **global F1
 
 #### Evaluation process
 
-1. **Loading Ground Truth and Predicted Masks**  
-   - The `load_masks` function reads all image masks from a specified folder. It distinguishes between the original ground truth masks (saved as `.png` files) and the predicted masks (saved as `_mask.png` files).
+1. **Loading ground truth and predicted masks**  
+   - The `load_masks()` function reads all image masks from a specified folder. It distinguishes between the original ground truth masks (saved as `.png` files) and the predicted masks (saved as `_mask.png` files).
    - These masks are aligned by filename, ensuring each predicted mask matches its corresponding ground truth mask.
 
-2. **Calculating F1 Score**  
-   The `global_f1_score` function iterates through each pair of predicted and ground truth masks and calculates the number of:
+2. **Calculating F1 score**  
+   The `global_f1_score()` function iterates through each pair of predicted and ground truth masks and calculates the number of:
    - **True Positives (TP):** Pixels correctly identified as foreground (both predicted and ground truth are 255).
    - **False Positives (FP):** Pixels incorrectly identified as foreground (predicted as 255, but ground truth is 0).
    - **False Negatives (FN):** Pixels incorrectly identified as background (predicted as 0, but ground truth is 255).
 
-3. **Global Precision and Recall Calculation**  
+3. **Global precision and recall calculation**  
    - **Precision:** The ratio of true positives to all predicted positives (`TP / (TP + FP)`). Precision shows the accuracy of detected foreground pixels.
    - **Recall:** The ratio of true positives to all actual positives (`TP / (TP + FN)`). Recall measures the algorithm's ability to capture all relevant foreground pixels.
 
-4. **Global F1 Score Calculation**  
-   The F1 score is the harmonic mean of precision and recall, representing the balance between these two metrics. It’s computed as:
-
-   If both precision and recall are zero, the F1 score is set to zero to avoid division errors.
-
-5. **Output of Evaluation Metrics**  
-   When the `--score` flag is specified, the script displays the global F1 score, precision, and recall for the dataset, providing a clear assessment of the algorithm’s performance on the QSD2-W2 dataset.
+4. **Global F1 score calculation:** The F1 score is the harmonic mean of precision and recall, representing the balance between these two metrics.
 
 #### Example Output
 
@@ -357,7 +351,15 @@ Global Precision: 0.94
 Global Recall: 0.98
 ```
 
-This output reflects the algorithm's overall accuracy in foreground-background separation across the entire dataset.
+This output reflects the algorithm's overall accuracy in foreground-background separation across the entire dataset. To evaluate the algorithm use the commands from Task 3 with the `--score=True` flag.
+
+#### Our results
+
+| Metric        | Value |
+|---------------|-------|
+| Global F1 Score | 0.97  |
+| Global Precision | 0.95  |
+| Global Recall    | 0.98  |
 
 ## Team Members
 
