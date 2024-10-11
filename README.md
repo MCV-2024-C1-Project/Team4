@@ -273,6 +273,92 @@ python main.py Lab 32 2 False Lorentzian 1 data\qsd1_w1 False
 python main.py Lab 4 2 True Lorentzian 1 data\qsd1_w1 False
 ```
 
+### Task 3: Remove background using the background color for the QSD2-W2 dataset
+
+This algorithm removes the background from images by leveraging the S (saturation) and V (value) channels in the HSV color space. By isolating the foreground based on these channels, we achieve a clear separation of the main subject from the background.
+
+#### Algorithm Breakdown:
+
+1. **Convert image to HSV color space:**
+   1. This is because the S and V channels are useful in isolating color and brightness, making it easier to separate the foreground from the background.
+
+2. **Extract border pixels for S and V channels:** Border pixels (*10 pixels*) in the S and V channels are extracted from the top, bottom, left, and right edges of the image. These are used to determine the predominant background colors:
+   1. **S Border Pixels**: The maximum value among these pixels is used to define the S threshold for background separation.
+   2. **V Border Pixels**: The minimum value among these pixels is used to define the V threshold.
+
+3. **Threshold adjustment:** Based on the extracted border pixels, thresholds are adjusted:
+   1. If the maximum S border value exceeds 70% of *max(S)=255*, it uses the 97th percentile of the S border pixels.
+   2. If the minimum V border value is below 30% of *max(V)=255*, it uses the 3rd percentile of the V border pixels.
+
+4. **Apply thresholds to create foreground mask:** The adjusted thresholds are applied to the S and V channels of the entire image:
+   1. Pixels with values lower than the S threshold and higher than the V threshold are set to 0, marking the background.
+   2. Pixels meeting the criteria remain as foreground pixels, marked with a value of 1.
+
+5. **Refine mask using border pixels:** The mask’s outer edges are cleared (*set to 0*) to remove any artifacts near the image borders.
+
+6. **Fill surrounded pixels:** The function ```fill_surrounded_pixels()``` is used to fill in any isolated pixels completely surrounded by foreground pixels, refining the mask.
+
+7. **Morphological operations:** A morphological open operation removes noise using a small *5x5* kernel. Then, a morphological close operation smooths the mask and merges any remaining small holes using a larger *50x50* kernel. The kernel sizes is a hyperparameter to be adjusted based on the image size.
+
+8. **Combine foreground and background:**
+   1. The foreground is isolated by applying the mask to the original image.
+   2. The background mask is inverted and subtracted from the original image to create a clean final output with only the foreground.
+
+> **Note:**  
+> The **threshold adjustment** in 3rd point is designed to prevent issues with objects that are positioned near the borders of the image. By using the 97th percentile for the S channel and the 3rd percentile for the V channel, we ensure that border-adjacent foreground elements are not mistakenly classified as background, maintaining accuracy even when objects are close to the edges.
+
+#### Usage:
+```bash
+# Without score computation
+python background_removal.py data/qsd2_w1
+# With score computation
+python background_removal.py data/qsd2_w1 --score=True
+
+## If using python3 and the script is not executable, use:
+python3 background_removal.py data/qsd2_w1
+python3 background_removal.py data/qsd2_w1 --score=True
+```
+
+#### Examples:
+PUT EXAMPLES HERE
+
+### Task 4: Background removal evaluation 
+The algorithm evaluates the accuracy of background removal using the **global F1 score, precision, and recall metrics**. This process compares the algorithm-generated masks with the provided ground truth masks to assess how accurately the background was removed.
+Here's the explanation for the evaluation process in a README format for Task 4:
+
+#### Evaluation Process
+
+1. **Loading Ground Truth and Predicted Masks**  
+   - The `load_masks` function reads all image masks from a specified folder. It distinguishes between the original ground truth masks (saved as `.png` files) and the predicted masks (saved as `_mask.png` files).
+   - These masks are aligned by filename, ensuring each predicted mask matches its corresponding ground truth mask.
+
+2. **Calculating F1 Score**  
+   The `global_f1_score` function iterates through each pair of predicted and ground truth masks and calculates the number of:
+   - **True Positives (TP):** Pixels correctly identified as foreground (both predicted and ground truth are 255).
+   - **False Positives (FP):** Pixels incorrectly identified as foreground (predicted as 255, but ground truth is 0).
+   - **False Negatives (FN):** Pixels incorrectly identified as background (predicted as 0, but ground truth is 255).
+
+3. **Global Precision and Recall Calculation**  
+   - **Precision:** The ratio of true positives to all predicted positives (`TP / (TP + FP)`). Precision shows the accuracy of detected foreground pixels.
+   - **Recall:** The ratio of true positives to all actual positives (`TP / (TP + FN)`). Recall measures the algorithm's ability to capture all relevant foreground pixels.
+
+4. **Global F1 Score Calculation**  
+   The F1 score is the harmonic mean of precision and recall, representing the balance between these two metrics. It’s computed as:
+
+   If both precision and recall are zero, the F1 score is set to zero to avoid division errors.
+
+5. **Output of Evaluation Metrics**  
+   When the `--score` flag is specified, the script displays the global F1 score, precision, and recall for the dataset, providing a clear assessment of the algorithm’s performance on the QSD2-W2 dataset.
+
+#### Example Output
+
+```plaintext
+Global F1 Score: 0.96
+Global Precision: 0.94
+Global Recall: 0.98
+```
+
+This output reflects the algorithm's overall accuracy in foreground-background separation across the entire dataset.
 
 ## Team Members
 
