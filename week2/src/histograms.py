@@ -63,7 +63,7 @@ def block_histogram(img,total_blocks,bins,ranges):
             histograms = np.concatenate([histograms, hist_vect])
             # Uncomment below to visualize the 3D histogram for each block
             #print("1st block 3D Histogram")
-            plot_histogram_3d(hist, bins,block_name=f"Block_{block_count}")
+            #plot_histogram_3d(hist, bins,block_name=f"Block_{block_count}")
             block_count += 1  # Increment block number
     return histograms
 
@@ -191,4 +191,4 @@ def example2():
             histograms.extend([None] * (index + 1 - len(histograms)))
         histograms[index] = hist
 
-exemple()
+# exemple()

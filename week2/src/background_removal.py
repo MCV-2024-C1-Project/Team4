@@ -217,7 +217,7 @@ def main():
 			if filename.endswith(".jpg"):
 				# Get the full image path
 				image_path = os.path.join(args.imgs_path, filename)
-				finalimage, mask = remove_background(image_path)
+				final_image, mask = remove_background(image_path)
 
 				# Get the base filename without extension
 				base_name = os.path.splitext(filename)[0]
@@ -226,6 +226,13 @@ def main():
 
 				# Save the mask
 				cv.imwrite(mask_path, mask * 255)
+
+				# Save the final image in a masked folder
+				if not os.path.exists(os.path.join(args.imgs_path, "masked")):
+					os.makedirs(os.path.join(args.imgs_path, "masked"))
+				final_image_filename = f"masked/{base_name}.jpg"
+				final_image_path = os.path.join(args.imgs_path, final_image_filename)
+				cv.imwrite(final_image_path, final_image)
 
 	if args.score:
 		# Load the ground truth and predicted masks
