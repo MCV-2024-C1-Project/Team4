@@ -210,33 +210,36 @@ def main():
 	parser.add_argument("--score", help="Show F1 score, precision and recall", type=bool)
 	args = parser.parse_args()
 
+	base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+	imgs_path = os.path.join(base_path, args.imgs_path)
+
 	if not args.score:
 		# Loop through all files in the directory
-		for filename in tqdm.tqdm(os.listdir(args.imgs_path)):
+		for filename in tqdm.tqdm(os.listdir(imgs_path)):
 			# Check if the file is a .jpg image
 			if filename.endswith(".jpg"):
 				# Get the full image path
-				image_path = os.path.join(args.imgs_path, filename)
+				image_path = os.path.join(imgs_path, filename)
 				final_image, mask = remove_background(image_path)
 
 				# Get the base filename without extension
 				base_name = os.path.splitext(filename)[0]
 				mask_filename = f"{base_name}_mask.png"
-				mask_path = os.path.join(args.imgs_path, mask_filename)
+				mask_path = os.path.join(imgs_path, mask_filename)
 
 				# Save the mask
 				cv.imwrite(mask_path, mask * 255)
 
 				# Save the final image in a masked folder
-				if not os.path.exists(os.path.join(args.imgs_path, "masked")):
-					os.makedirs(os.path.join(args.imgs_path, "masked"))
+				if not os.path.exists(os.path.join(imgs_path, "masked")):
+					os.makedirs(os.path.join(imgs_path, "masked"))
 				final_image_filename = f"masked/{base_name}.jpg"
-				final_image_path = os.path.join(args.imgs_path, final_image_filename)
+				final_image_path = os.path.join(imgs_path, final_image_filename)
 				cv.imwrite(final_image_path, final_image)
 
 	if args.score:
 		# Load the ground truth and predicted masks
-		ground_truths, predicted_masks = load_masks(args.imgs_path)
+		ground_truths, predicted_masks = load_masks(imgs_path)
 
 		# Calculate the global F1 score
 		global_f1, global_precision, global_recall = global_f1_score(predicted_masks, ground_truths)
