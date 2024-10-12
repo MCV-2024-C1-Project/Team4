@@ -397,7 +397,7 @@ To apply the algorithm to the QST1 testing dataset, you need to set the `is_test
 
 The best results for the QSD1 were obtained by using the following parameters (therefore, we are using the same parameters for the QST1 dataset):
 ```bash
-python main.py ./data/qst1_w2 --color_space=HSV --num_blocks=256 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=10 --is_test=True
+python main.py ./data/qst1_w2 --color_space=HSV --num_levels=5 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=10 --is_test=True --is_pyramid=True
 ```
 
 #### QST-2 dataset
@@ -410,7 +410,7 @@ For the QST-2 dataset we follow the steps below to run the background removal, a
 python background_removal.py data/qst2_w1
 
 # Retrieve similarities from BBDD
-python main.py ./data/qst2_w1/masked --color_space=HSV --num_blocks=256 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=10 --is_test=True
+python main.py ./data/qst2_w1/masked --color_space=HSV --num_levels=5 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=10 --is_test=True --is_pyramid=True
 ```
 
 ## Team Members
