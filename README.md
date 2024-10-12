@@ -304,9 +304,6 @@ python3 background_removal.py data/qsd2_w1
 python3 background_removal.py data/qsd2_w1 --score=True
 ```
 
-#### Examples:
-PUT EXAMPLES HERE
-
 ### Task 4: Background removal evaluation 
 The algorithm evaluates the accuracy of background removal using the **global F1 score, precision, and recall metrics**. This process compares the algorithm-generated masks with the provided ground truth masks to assess how accurately the background was removed.
 
@@ -368,6 +365,27 @@ The final task combines the background removal algorithm with the retrieval syst
 
 
 ### Task 6: Processing the QST1 and QST2 Testing Dataset
+
+#### QST-1 dataset
+To apply the algorithm to the QST1 testing dataset, you need to set the `is_test` flag to `True` in the program's configuration. When `is_test` is enabled, the program will perform image comparisons based on your chosen parameters and save the retrieval results in a pickle file. 
+
+The best results for the QSD1 were obtained by using the following parameters (therefore, we are using the same parameters for the QST1 dataset):
+```bash
+python main.py ./data/qst1_w2 --color_space=HSV --num_blocks=256 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=10 --is_test=True
+```
+
+#### QST-2 dataset
+> **Note:**  
+> We use the same parameters from QST1 dataset to retrieve similarities in QST2.
+
+For the QST-2 dataset we follow the steps below to run the background removal, as well as the retrieval system:
+```bash
+# Remove background
+python background_removal.py data/qst2_w1
+
+# Retrieve similarities from BBDD
+python main.py ./data/qst2_w1/masked --color_space=HSV --num_blocks=256 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=10 --is_test=True
+```
 
 ## Team Members
 
