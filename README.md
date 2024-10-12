@@ -244,19 +244,27 @@ Explicar com s'implementen els histogrames i un exemple d'algun plot.
 - **Index the Database (BBDD):** Generate descriptors offline and saves them in a `.pkl` file.
   ```bash
   # Block 3D histograms
-  python compute_db_descriptors.py --color_space=HSV --num_blocks=32 --num_bins=16 
-  python compute_db_descriptors.py --color_space=Lab --num_blocks=32 --num_bins=2 
+  python compute_db_descriptors.py --color_space=HSV --num_blocks=256 --num_bins=4 
 
   # Hierarchical 3D histograms
-  python compute_db_descriptors.py --color_space=HSV --num_blocks=32 --num_bins=16 --is_pyramid=True  
-  python compute_db_descriptors.py --color_space=Lab --num_blocks=32 --num_bins=2 --is_pyramid=True  
+  python compute_db_descriptors.py --color_space=HSV --num_levels=5 --num_bins=4 --is_pyramid=True   
   ```
+  
+- **Compute image descriptors (QSD1) and evaluate retrieval results:**
   ```bash
   # Block 3D histograms
-  python main.py ./data/qsd1_w1 --color_space=Lab --num_blocks=32 --num_bins=2 --similarity_measure=Lorentzian --k_value=1
+  python main.py ./data/qsd1_w1 --color_space=HSV --num_blocks=256 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1
+  
   # Hierarchical 3D histograms
-  python main.py ./data/qsd1_w1 --color_space=Lab --num_blocks=4 --num_bins=2 --similarity_measure=Lorentzian --k_value=1 --is_pyramid=True
+  python main.py ./data/qsd1_w1 --color_space=HSV --num_levels=5 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1 --is_pyramid=True
   ```
+
+#### Results
+
+| Method                          | mAP@1          | 
+|---------------------------------|----------------|
+| **Block 3D histograms**         | 0.8            |
+| **Hierarchical 3D histograms**  | 0.8            |
 
 ### Task 3: Remove background using the background color for the QSD2-W2 dataset
 
