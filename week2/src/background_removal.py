@@ -68,16 +68,28 @@ def apply_square_mask(mask):
 	height, width = mask.shape
 
 	# Step 1: Find the first row with more white than black from the top
-	top_row = next(i for i in range(height) if np.sum(mask[i, :] == 1) > width // 2)
+	try:
+		top_row = next(i for i in range(height) if np.sum(mask[i, :] == 1) > width // 2)
+	except StopIteration:
+		top_row = next(i for i in range(height) if np.sum(mask[i, :] == 1) > 0)
 
 	# Step 2: Find the first row with more white than black from the bottom
-	bottom_row = next(i for i in range(height - 1, -1, -1) if np.sum(mask[i, :] == 1) > width // 2)
+	try:
+		bottom_row = next(i for i in range(height - 1, -1, -1) if np.sum(mask[i, :] == 1) > width // 2)
+	except StopIteration:
+		bottom_row = next(i for i in range(height - 1, -1, -1) if np.sum(mask[i, :] == 1) > 0)
 
 	# Step 3: Find the first column with more white than black from the left
-	left_col = next(j for j in range(width) if np.sum(mask[:, j] == 1) > height // 2)
+	try:
+		left_col = next(j for j in range(width) if np.sum(mask[:, j] == 1) > height // 2)
+	except StopIteration:
+		left_col = next(j for j in range(width) if np.sum(mask[:, j] == 1) > 0)
 
 	# Step 4: Find the first column with more white than black from the right
-	right_col = next(j for j in range(width - 1, -1, -1) if np.sum(mask[:, j] == 1) > height // 2)
+	try:
+		right_col = next(j for j in range(width - 1, -1, -1) if np.sum(mask[:, j] == 1) > height // 2)
+	except StopIteration:
+		right_col = next(j for j in range(width - 1, -1, -1) if np.sum(mask[:, j] == 1) > 0)
 
 	# Create a new mask to draw the square
 	mask = np.zeros_like(mask, dtype=np.uint8)
