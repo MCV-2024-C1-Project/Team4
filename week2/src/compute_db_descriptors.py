@@ -1,34 +1,33 @@
-'''
-Compute the 3D Histograms for each image in the BBDD. Each 3D histogram is saved 
+"""
+Compute the 3D Histograms for each image in the BBDD. Each 3D histogram is saved
 as a list of length n_bins³ (assuming n_bins is the same for the three channels).
 Histograms are saved in a .pkl file.
-'''
+"""
 import os
 import cv2 as cv
 import pickle
 import argparse
 from tqdm import tqdm
 
-from compute_descriptors import compute_descriptors
 from histograms import block_histogram, spatial_pyramid_histogram
 
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def main():
-	
+
 	# Argument parser
 	parser = argparse.ArgumentParser(description="Compute 3D histograms for each image in the BBDD")
-	parser.add_argument('color_space', type=str, choices=['Lab', 'HSV', 'RGB', 'HLS', 'Luv', 'YCrCb', 'YUV'], help='Color space to use')
-	parser.add_argument('num_blocks', type=int, help='Number of blocks or levels for block histogram')
-	parser.add_argument('num_bins', type=int, help='Number of bins for histogram')
-	parser.add_argument("is_pyramid", help="True if we are using the spatial pyramid histogram mode")
+	parser.add_argument('--color_space', type=str, choices=['Lab', 'HSV', 'RGB', 'HLS', 'Luv', 'YCrCb', 'YUV'], help='Color space to use')
+	parser.add_argument('--num_blocks', type=int, help='Number of blocks or levels for block histogram')
+	parser.add_argument('--num_bins', type=int, help='Number of bins for histogram')
+	parser.add_argument("--is_pyramid", help="True if we are using the spatial pyramid histogram mode", default=False, type=bool)
 	args = parser.parse_args()
 
 	COLOR_SPACE = args.color_space
 	NUM_BLOCKS = args.num_blocks
 	NUM_BINS = args.num_bins
-	is_pyramid = args.is_pyramid == "True"
+	is_pyramid = args.is_pyramid
 
 	# Compute descriptors for the BBDD images (offline)
 	imgs_path = os.path.join(base_path, "data", "BBDD")
@@ -66,7 +65,7 @@ def main():
 
 		# Compute the 3D histogram
 
-		if is_pyramid == False:
+		if not is_pyramid:
 			# Compute the 3D Block Histograms for the query image
 			hist = block_histogram(img,NUM_BLOCKS,NUM_BINS,ranges)
 		else:
@@ -80,14 +79,12 @@ def main():
 			histograms.extend([None] * (index + 1 - len(histograms)))
 		histograms[index] = hist
 
-	
-	if is_pyramid == False:
+	if not is_pyramid:
 		with open(os.path.join(imgs_path, COLOR_SPACE + '_histograms_'+str(NUM_BLOCKS)+'_blocks_'+str(NUM_BINS)+'_bins'+'.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
 	else:
 		with open(os.path.join(imgs_path, COLOR_SPACE + '_histograms_'+str(NUM_BLOCKS)+'_levels_'+str(NUM_BINS)+'_bins'+'.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
-
 
 
 if __name__ == "__main__":

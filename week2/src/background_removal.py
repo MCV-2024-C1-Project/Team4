@@ -14,21 +14,18 @@ def fill_surrounded_pixels(foreground):
 	h, w = foreground.shape
 	new_mask = foreground.copy()
 
-	for i in range(h):
-		for j in range(w):
-			if foreground[i, j] == 0:
-				# Check if there is a 1 above
-				has_one_above = np.any(foreground[:i, j] == 1) if i > 0 else False
-				# Check if there is a 1 below
-				has_one_below = np.any(foreground[i + 1:, j] == 1) if i < h - 1 else False
-				# Check if there is a 1 to the left
-				has_one_left = np.any(foreground[i, :j] == 1) if j > 0 else False
-				# Check if there is a 1 to the right
-				has_one_right = np.any(foreground[i, j + 1:] == 1) if j < w - 1 else False
+	# Cumulative sums to check for foreground presence in each direction
+	has_one_above = np.cumsum(foreground, axis=0) > 0
+	has_one_below = np.cumsum(foreground[::-1, :], axis=0)[::-1] > 0
+	has_one_left = np.cumsum(foreground, axis=1) > 0
+	has_one_right = np.cumsum(foreground[:, ::-1], axis=1)[:, ::-1] > 0
 
-				# If there is at least a 1 in each direction, change the pixel to 1
-				if has_one_above and has_one_below and has_one_left and has_one_right:
-					new_mask[i, j] = 1
+	# Find all positions that have a 0 but are surrounded by 1s in all directions
+	surrounded = (foreground == 0) & has_one_above & has_one_below & has_one_left & has_one_right
+
+	# Update the new mask with 1 where pixels are surrounded
+	new_mask[surrounded] = 1
+
 	return new_mask
 
 
@@ -65,6 +62,31 @@ def get_s_and_v_masks(hsv_image):
 
 	return np.max(S_border_pixels), np.min(V_border_pixels)
 
+
+def apply_square_mask(mask):
+	# Image dimensions
+	height, width = mask.shape
+
+	# Step 1: Find the first row with more white than black from the top
+	top_row = next(i for i in range(height) if np.sum(mask[i, :] == 1) > width // 2)
+
+	# Step 2: Find the first row with more white than black from the bottom
+	bottom_row = next(i for i in range(height - 1, -1, -1) if np.sum(mask[i, :] == 1) > width // 2)
+
+	# Step 3: Find the first column with more white than black from the left
+	left_col = next(j for j in range(width) if np.sum(mask[:, j] == 1) > height // 2)
+
+	# Step 4: Find the first column with more white than black from the right
+	right_col = next(j for j in range(width - 1, -1, -1) if np.sum(mask[:, j] == 1) > height // 2)
+
+	# Create a new mask to draw the square
+	mask = np.zeros_like(mask, dtype=np.uint8)
+
+	# Fill the area inside the square with white
+	mask[top_row:bottom_row + 1, left_col:right_col + 1] = 1
+	return mask
+
+
 def remove_background(image_path):
 	"""
 	Remove the background from an image
@@ -77,11 +99,13 @@ def remove_background(image_path):
 	myimage_hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
 	threshold_s, threshold_v = get_s_and_v_masks(myimage_hsv)
 
-	# Take S and remove any value that is less than half
+	# Take S channel and create a mask so that each pixel with a saturation level below or equal
+	# to the threshold is set to 0 (background) and S_levels > th are set to 1 (painting)
 	s = myimage_hsv[:, :, 1]
-	s = np.where(s < threshold_s + 1, 0, 1)  # Any value below 127 will be excluded
+	s = np.where(s < threshold_s + 1, 0, 1)
 
-	# We increase the brightness of the image and then mod by 255
+	# Take V channel and create a mask so that each pixel with a Value level above or equal
+	# to the threshold is set to 0 (background) and V_levels < th are set to 1 (painting)
 	v = myimage_hsv[:, :, 2]
 	v = np.where(v > threshold_v - 1, 0, 1)  # Any value above 255 will be part of our mask
 
@@ -93,32 +117,34 @@ def remove_background(image_path):
 	foreground[:, -10:] = 0
 	foreground = fill_surrounded_pixels(foreground)
 
+	# Opening -> removes foreground objects smaller than the kernel
 	kernel = np.ones((5, 5), np.uint8)
 	opening = cv.morphologyEx(foreground, cv.MORPH_OPEN, kernel)
+	# Closing -> removes background objects smaller than the kernel
 	kernel = np.ones((50, 50), np.uint8)
 	foreground = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernel)
+	foreground = apply_square_mask(foreground)
 
-	# Show background mask
-	background = np.where(foreground == 0, 255, 0).astype(np.uint8)  # Invert foreground to get background in uint8
-	background = cv.cvtColor(background, cv.COLOR_GRAY2BGR)  # Convert background back into BGR space
+	# Find the bounding box of the non-background region
+	y_indices, x_indices = np.where(foreground == 1)
+	top, bottom = y_indices.min(), y_indices.max()
+	left, right = x_indices.min(), x_indices.max()
 
-	img_foreground = cv.bitwise_and(image, image, mask=foreground)  # Apply our foreground map to original image
-
-	# Show the final image
-	return img_foreground - background, foreground  # Combine foreground and background
+	cropped_image = image[top:bottom + 1, left:right + 1]
+	return cropped_image, foreground
 
 
 def global_f1_score(masks, ground_truths):
 	"""
-    Calculate the global F1 score for a dataset of masks and ground truths.
+	Calculate the global F1 score for a dataset of masks and ground truths.
 
-    Args:
-    - masks (list of np.array): List of mask arrays.
-    - ground_truths (list of np.array): List of corresponding ground truth arrays.
+	Args:
+	- masks (list of np.array): List of mask arrays.
+	- ground_truths (list of np.array): List of corresponding ground truth arrays.
 
-    Returns:
-    - global_f1 (float): The global F1 score for the dataset.
-    """
+	Returns:
+	- global_f1 (float): The global F1 score for the dataset.
+	"""
 	total_tp, total_fp, total_fn = 0, 0, 0
 
 	for pred_mask, gt_mask in zip(masks, ground_truths):
@@ -176,6 +202,7 @@ def load_masks(imgs_path):
 
 	return ground_truth_list, predicted_list
 
+
 def main():
 	# Get the image path argument
 	parser = argparse.ArgumentParser(description="Remove background from an images")
@@ -190,7 +217,7 @@ def main():
 			if filename.endswith(".jpg"):
 				# Get the full image path
 				image_path = os.path.join(args.imgs_path, filename)
-				finalimage, mask = remove_background(image_path)
+				final_image, mask = remove_background(image_path)
 
 				# Get the base filename without extension
 				base_name = os.path.splitext(filename)[0]
@@ -199,7 +226,15 @@ def main():
 
 				# Save the mask
 				cv.imwrite(mask_path, mask * 255)
-	else:
+
+				# Save the final image in a masked folder
+				if not os.path.exists(os.path.join(args.imgs_path, "masked")):
+					os.makedirs(os.path.join(args.imgs_path, "masked"))
+				final_image_filename = f"masked/{base_name}.jpg"
+				final_image_path = os.path.join(args.imgs_path, final_image_filename)
+				cv.imwrite(final_image_path, final_image)
+
+	if args.score:
 		# Load the ground truth and predicted masks
 		ground_truths, predicted_masks = load_masks(args.imgs_path)
 
@@ -208,6 +243,7 @@ def main():
 		print(f"Global F1 Score: {global_f1}")
 		print(f"Global Precision: {global_precision}")
 		print(f"Global Recall: {global_recall}")
+
 
 if __name__ == "__main__":
 	main()

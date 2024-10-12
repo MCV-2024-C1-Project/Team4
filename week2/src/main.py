@@ -18,24 +18,24 @@ def main():
 
 	# Read the arguments from the command line
 	parser = argparse.ArgumentParser(description="Retrieve results and compute mAP@k")
-	parser.add_argument("color_space", help="Color space (e.g., Lab, HSV)")
-	parser.add_argument("num_blocks", help="Number of blocks or levels")
-	parser.add_argument("num_bins", help="Number of bins (same for all channels) to compute histograms")
-	parser.add_argument("is_pyramid", help="True if we are using the spatial pyramid histogram mode")
-	parser.add_argument("similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)")
-	parser.add_argument("k_value", help="Top k results")
 	parser.add_argument("query_path", help="Path to the query dataset")
-	parser.add_argument("is_test", help="True if we are testing the model (without ground truth)")
+	parser.add_argument("--color_space", help="Color space (e.g., Lab, HSV)", default="Lab")
+	parser.add_argument("--num_blocks", help="Number of blocks or levels", default=1)
+	parser.add_argument("--num_bins", help="Number of bins (same for all channels) to compute histograms", default=1)
+	parser.add_argument("--similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)", default="HISTCMP_HELLINGER")
+	parser.add_argument("--k_value", help="Top k results", default=1)
+	parser.add_argument("--is_pyramid", help="True if we are using the spatial pyramid histogram mode", default=False, type=bool)
+	parser.add_argument("--is_test", help="True if we are testing the model (without ground truth)", default=False, type=bool)
 
 	args = parser.parse_args()
 	color_space = args.color_space
 	num_blocks = int(args.num_blocks)
 	num_bins = int(args.num_bins)
-	is_pyramid = args.is_pyramid == "True"
+	is_pyramid = args.is_pyramid
 	similarity_measure = args.similarity_measure
 	k_value = int(args.k_value)
 	q_path = os.path.join(base_path, args.query_path)
-	is_test = args.is_test == "True"
+	is_test = args.is_test
 
 	# Select the appropriate similarity measure based on the command line argument. 
 	# For those distances that we have defined manually, we have assigned them a numerical ID.
@@ -98,7 +98,7 @@ def main():
 			img = cv.cvtColor(img_bgr, cv.COLOR_BGR2YUV)
 			ranges = [0,256,0,256,0,256]
 
-		if is_pyramid == False:
+		if not is_pyramid:
 			# Compute the 3D Block Histograms for the query image
 			hist = block_histogram(img,num_blocks,num_bins,ranges)
 		else:
@@ -113,7 +113,7 @@ def main():
 			histograms.extend([None] * (index + 1 - len(histograms)))
 		histograms[index] = hist
 
-	if is_pyramid == False:
+	if not is_pyramid:
 		# Save query histograms to a pickle file
 		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
