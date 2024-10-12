@@ -381,10 +381,10 @@ The final task combines the background removal algorithm with the retrieval syst
    
    The following example uses HSV color space, 256 blocks, 2 bins, Canberra distance, and retrieves the top k=1 result:
    ```bash
-   python ./week2/src/main.py ./data/qsd2_w1/masked/ --color_space=HSV --num_blocks=256 --num_bins=2 --similarity_measure=Canberra --k_value=1
+   python main.py ./data/qsd2_w1/masked --color_space=HSV --num_levels=5 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1 --is_pyramid=True
    
    # Use python3 if necessary
-   python3 ./week2/src/main.py ./data/qsd2_w1/masked/ --color_space=HSV --num_blocks=256 --num_bins=2 --similarity_measure=Canberra --k_value=1
+   python3 main.py ./data/qsd2_w1/masked --color_space=HSV --num_levels=5 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1 --is_pyramid=True
    ```
 4. **Evaluate the retrieval results:**  
     The system will generate retrieval results for the processed images as well as evaluate the system using the ground truth correspondences. The evaluation metrics include mAP@k.
