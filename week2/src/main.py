@@ -143,7 +143,7 @@ def main():
 	#	- Method 2 (HSV): Alternative Chi Square (distance)
 	res_m = []
 	
-	for query_img_h in query_histograms:
+	for query_img_h in tqdm(query_histograms, desc="Processing images", unit="image"):
 		res_m.append(compute_similarities(query_img_h, bbdd_histograms, similarity_function, k_value)[1])
 	
 	# If we are not in testing mode

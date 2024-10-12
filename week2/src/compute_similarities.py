@@ -22,7 +22,7 @@ def compute_similarities(query_hist: Any, bbdd_histograms: Any, similarity_measu
     measure_type = MeasureType.DISTANCE
 
     # Check if the measure is a similarity measure
-    if similarity_measure == cv.HISTCMP_CORREL or similarity_measure == cv.HISTCMP_INTERSECT:
+    if similarity_measure == cv.HISTCMP_CORREL or similarity_measure == cv.HISTCMP_INTERSECT or similarity_measure == cv.HISTCMP_HELLINGER:
         measure_type = MeasureType.SIMILARITY
 
     results = []
