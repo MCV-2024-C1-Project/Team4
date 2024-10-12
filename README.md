@@ -244,19 +244,19 @@ Explicar com s'implementen els histogrames i un exemple d'algun plot.
 - **Index the Database (BBDD):** Generate descriptors offline and saves them in a `.pkl` file.
   ```bash
   # Block 3D histograms
-  python compute_db_descriptors.py HSV 32 16 False
-  python compute_db_descriptors.py Lab 32 2 False
+  python compute_db_descriptors.py --color_space=HSV --num_blocks=32 --num_bins=16 
+  python compute_db_descriptors.py --color_space=Lab --num_blocks=32 --num_bins=2 
 
   # Hierarchical 3D histograms
-  python compute_db_descriptors.py HSV 32 16 True
-  python compute_db_descriptors.py Lab 32 2 True
+  python compute_db_descriptors.py --color_space=HSV --num_blocks=32 --num_bins=16 --is_pyramid=True  
+  python compute_db_descriptors.py --color_space=Lab --num_blocks=32 --num_bins=2 --is_pyramid=True  
   ```
-```bash
-# Block 3D histograms
-python main.py Lab 32 2 False Lorentzian 1 data\qsd1_w1 False
-# Hierarchical 3D histograms
-python main.py Lab 4 2 True Lorentzian 1 data\qsd1_w1 False
-```
+  ```bash
+  # Block 3D histograms
+  python main.py ./data/qsd1_w1 --color_space=Lab --num_blocks=32 --num_bins=2 --similarity_measure=Lorentzian --k_value=1
+  # Hierarchical 3D histograms
+  python main.py ./data/qsd1_w1 --color_space=Lab --num_blocks=4 --num_bins=2 --similarity_measure=Lorentzian --k_value=1 --is_pyramid=True
+  ```
 
 ### Task 3: Remove background using the background color for the QSD2-W2 dataset
 
@@ -328,19 +328,7 @@ The algorithm evaluates the accuracy of background removal using the **global F1
 
 4. **Global F1 score calculation:** The F1 score is the harmonic mean of precision and recall, representing the balance between these two metrics.
 
-#### Example Output
-
-```plaintext
-Global F1 Score: 0.96
-Global Precision: 0.94
-Global Recall: 0.98
-```
-
 This output reflects the algorithm's overall accuracy in foreground-background separation across the entire dataset. To evaluate the algorithm use the commands from Task 3 with the `--score=True` flag.
-
-### Task 5: Background removal evaluation (QSD2-W2)  
-
-### Task 6:Processing the QST1 and QST2 Testing Dataset
 
 #### Our results
 
@@ -349,6 +337,37 @@ This output reflects the algorithm's overall accuracy in foreground-background s
 | Global F1 Score | 0.97  |
 | Global Precision | 0.95  |
 | Global Recall    | 0.98  |
+
+### Task 5: Remove background + Retrieval system (QSD2-W2)
+The final task combines the background removal algorithm with the retrieval system to enhance the accuracy of image retrieval. By removing the background from query images, the system can focus on the main subject, improving the quality of image comparisons and retrieval results.
+
+#### Follow the steps below to run the combined system:
+1. **Run the background removal algorithm:**  
+   Execute the background removal script with the specified dataset path. This will generate the processed images with the background removed in the folder ```/masked``` inside the dataset directory.
+   ```bash
+   python background_removal.py data/qsd2_w1
+   
+   # Use python3 if necessary
+   python3 background_removal.py data/qsd2_w1
+   ```
+2. **Move Ground Truth file:**  
+   Move the `gt_corresps.pkl` file from the QSD2-W2 dataset to the `/masked` folder. This file contains the ground truth correspondences for the query images.
+
+3. **Run the retrieval system:**  
+   Execute the retrieval system script with the specified dataset path. This will perform image comparisons using the processed images and generate the retrieval results.
+   
+   The following example uses HSV color space, 256 blocks, 2 bins, Canberra distance, and retrieves the top k=1 result:
+   ```bash
+   python ./week2/src/main.py ./data/qsd2_w1/masked/ --color_space=HSV --num_blocks=256 --num_bins=2 --similarity_measure=Canberra --k_value=1
+   
+   # Use python3 if necessary
+   python3 ./week2/src/main.py ./data/qsd2_w1/masked/ --color_space=HSV --num_blocks=256 --num_bins=2 --similarity_measure=Canberra --k_value=1
+   ```
+4. **Evaluate the retrieval results:**  
+    The system will generate retrieval results for the processed images as well as evaluate the system using the ground truth correspondences. The evaluation metrics include mAP@k.
+
+
+### Task 6: Processing the QST1 and QST2 Testing Dataset
 
 ## Team Members
 
