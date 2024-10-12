@@ -20,7 +20,8 @@ def main():
 	parser = argparse.ArgumentParser(description="Retrieve results and compute mAP@k")
 	parser.add_argument("query_path", help="Path to the query dataset")
 	parser.add_argument("--color_space", help="Color space (e.g., Lab, HSV)", default="Lab")
-	parser.add_argument("--num_blocks", help="Number of blocks or levels", default=1)
+	parser.add_argument("--num_blocks", help="Number of blocks fot the block histogram", default=1)
+	parser.add_argument("--num_levels", help="Number of levels for the spatial pyramid histogram", default=1)
 	parser.add_argument("--num_bins", help="Number of bins (same for all channels) to compute histograms", default=1)
 	parser.add_argument("--similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)", default="HISTCMP_HELLINGER")
 	parser.add_argument("--k_value", help="Top k results", default=1)
@@ -30,6 +31,7 @@ def main():
 	args = parser.parse_args()
 	color_space = args.color_space
 	num_blocks = int(args.num_blocks)
+	num_levels = int(args.num_levels)
 	num_bins = int(args.num_bins)
 	is_pyramid = args.is_pyramid
 	similarity_measure = args.similarity_measure
@@ -103,7 +105,6 @@ def main():
 			hist = block_histogram(img,num_blocks,num_bins,ranges)
 		else:
 			# Compute the 3D Hierarchical Histograms for the query image
-			num_levels = num_blocks
 			hist = spatial_pyramid_histogram(img, num_levels, num_bins, ranges)
 
 		# Extract the index (numerical ID) from the filename and store histogram at the correct position
@@ -126,15 +127,15 @@ def main():
 		with open(os.path.join(bbdd_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 			bbdd_histograms = pickle.load(f)
 	else:
-		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'wb') as f:
+		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_levels)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
 
 		# Load the precomputed image descriptors from '.pkl' files
 		# for both the query dataset (QST1) and the museum dataset (BBDD, computed offline)
-		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
+		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_levels)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 			query_histograms = pickle.load(f)
 
-		with open(os.path.join(bbdd_path, color_space + '_histograms_'+str(num_blocks)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
+		with open(os.path.join(bbdd_path, color_space + '_histograms_'+str(num_levels)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 			bbdd_histograms = pickle.load(f)
 
 	# For each image in the query set (QST1), compute its similarity to all museum images (BBDD).

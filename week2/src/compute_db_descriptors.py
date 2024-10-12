@@ -19,13 +19,15 @@ def main():
 	# Argument parser
 	parser = argparse.ArgumentParser(description="Compute 3D histograms for each image in the BBDD")
 	parser.add_argument('--color_space', type=str, choices=['Lab', 'HSV', 'RGB', 'HLS', 'Luv', 'YCrCb', 'YUV'], help='Color space to use')
-	parser.add_argument('--num_blocks', type=int, help='Number of blocks or levels for block histogram')
+	parser.add_argument('--num_blocks', type=int, help='Number of blocks for block histogram')
+	parser.add_argument('--num_levels', type=int, help='Number of levels for block histogram')
 	parser.add_argument('--num_bins', type=int, help='Number of bins for histogram')
 	parser.add_argument("--is_pyramid", help="True if we are using the spatial pyramid histogram mode", default=False, type=bool)
 	args = parser.parse_args()
 
 	COLOR_SPACE = args.color_space
 	NUM_BLOCKS = args.num_blocks
+	NUM_LEVELS = args.num_levels
 	NUM_BINS = args.num_bins
 	is_pyramid = args.is_pyramid
 
@@ -70,8 +72,7 @@ def main():
 			hist = block_histogram(img,NUM_BLOCKS,NUM_BINS,ranges)
 		else:
 			# Compute the 3D Hierarchical Histograms for the query image
-			num_levels = NUM_BLOCKS
-			hist = spatial_pyramid_histogram(img, num_levels, NUM_BINS, ranges)
+			hist = spatial_pyramid_histogram(img, NUM_LEVELS, NUM_BINS, ranges)
 
 		index = int(filename.split('_')[-1].split('.')[0])
 
@@ -83,7 +84,7 @@ def main():
 		with open(os.path.join(imgs_path, COLOR_SPACE + '_histograms_'+str(NUM_BLOCKS)+'_blocks_'+str(NUM_BINS)+'_bins'+'.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
 	else:
-		with open(os.path.join(imgs_path, COLOR_SPACE + '_histograms_'+str(NUM_BLOCKS)+'_levels_'+str(NUM_BINS)+'_bins'+'.pkl'), 'wb') as f:
+		with open(os.path.join(imgs_path, COLOR_SPACE + '_histograms_'+str(NUM_LEVELS)+'_levels_'+str(NUM_BINS)+'_bins'+'.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
 
 
