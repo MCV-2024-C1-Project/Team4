@@ -304,6 +304,24 @@ python3 background_removal.py data/qsd2_w1
 python3 background_removal.py data/qsd2_w1 --score=True
 ```
 
+<table>
+  <tr>
+    <td style="text-align: center;">
+      <img src="https://github.com/user-attachments/assets/735b5fd6-9301-463f-a07d-7366ac0aced3" alt="Imagen 1" width="200"/>
+      <p>Example Image</p>
+    </td>
+    <td style="text-align: center;">
+      <img src="https://github.com/user-attachments/assets/6e11dc2a-6a6c-4eaf-9fd3-8ccc8bad5cdc" alt="Imagen 2" width="200"/>
+      <p>Predicted Mask</p>
+    </td>
+    <td style="text-align: center;">
+      <img src="https://github.com/user-attachments/assets/40aec7ee-cd25-4dd2-b498-cc121b52e298" alt="Imagen 3" width="215"/>
+      <p>Cropped Image</p>
+    </td>
+  </tr>
+</table>
+
+
 ### Task 4: Background removal evaluation 
 The algorithm evaluates the accuracy of background removal using the **global F1 score, precision, and recall metrics**. This process compares the algorithm-generated masks with the provided ground truth masks to assess how accurately the background was removed.
 
