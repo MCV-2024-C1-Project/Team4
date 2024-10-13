@@ -273,13 +273,10 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
     │   ├── average_precision.py
     │   ├── background_removal.py
     │   ├── compute_db_descriptors.py
-    │   ├── compute_descriptors.py
-    │   ├── compute_img_descriptors.py
     │   ├── compute_similarities.py
     │   ├── histograms.py
     │   ├── main.py
-    │   ├── metrics.py
-    │   └── utils.py
+    │   └── metrics.py
     ├── utils/
     │   ├── plot_results.py
     │   └── print_dict.py
