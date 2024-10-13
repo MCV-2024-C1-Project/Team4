@@ -115,7 +115,7 @@ Once downloaded and extracted, the project structure will look like this:
 
 <h2 align="center">WEEK 1: Tasks</h2>
 
-## Project Structure
+### Project Structure
 
     week1/
     ├── evaluation/
@@ -263,7 +263,7 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
 
 <h2 align="center">WEEK 2: Tasks</h2>
 
-## Project Structure
+### Project Structure
 
     week2/
     ├── evaluation/
