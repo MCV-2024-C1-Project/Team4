@@ -282,7 +282,8 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
     │   └── print_dict.py
 
 ### Task 1: Implement 3D/2D block and hierarchical histograms
-Explicar com s'implementen els histogrames i un exemple d'algun plot.
+![image](https://github.com/user-attachments/assets/8b992878-43a0-4bc3-a7e1-6a00ac8cb558)
+
 
   
   
