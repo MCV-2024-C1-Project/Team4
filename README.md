@@ -58,13 +58,20 @@ The following prerequisites must be followed:
    ```bash
    git clone https://github.com/MCV-2024-C1-Project/Team4.git
    ```
+
+2. **Navigate to the corresponding week's folder:**
    
-2. **Create a virtual environment:**
+   For example, to enter the folder for week 1:
+   ```bash
+   cd week1
+   ```
+   
+4. **Create a virtual environment:**
    ```bash
    python -m venv env
    ```
 
-3. **Activate the virtual environment:**
+5. **Activate the virtual environment:**
     - On Windows:
       ```bash
       .\env\Scripts\activate
@@ -74,7 +81,7 @@ The following prerequisites must be followed:
       source env/bin/activate
       ```
 
-4. **Install the dependencies:**
+6. **Install the dependencies:**
   ```bash
   pip install -r requirements.txt
   ```
@@ -86,7 +93,10 @@ Within the downloaded repository, you'll find the following directories and file
 
 - **BBDD:** [Download here](https://e-aules.uab.cat/2024-25/pluginfile.php/398404/mod_page/content/186/BBDD.zip)
 - **qsd1_w1:** [Download here](https://e-aules.uab.cat/2024-25/pluginfile.php/398404/mod_page/content/186/qsd1_w1.zip?time=1602013828018)
-- **qst1_w1:** [Download here](https://e-aules.uab.cat/2024-25/mod/resource/view.php?id=176342)
+- **qsd2_w1:** [Download here](https://e-aules.uab.cat/2024-25/pluginfile.php/398404/mod_page/content/188/qsd2_w2.zip?time=1728249194853)
+- **qst1_w1:** [Download here](https://drive.google.com/file/d/1GbI0ik3IeUNN51dJBewpeWL_Dm_uNhNT/view?usp=drive_link)
+- **qst1_w2:** [Download here](https://drive.google.com/file/d/1TLCfm4uYXf40PKUxRW4r_8vqn4yEKatl/view?usp=drive_link)
+- **qst2_w2:** [Download here](https://drive.google.com/file/d/1t_9DZVH7uxykdDF6c9M3Cim6RpMlFubw/view?usp=drive_link)
 
 Once downloaded and extracted, the project structure will look like this:
 
@@ -94,7 +104,20 @@ Once downloaded and extracted, the project structure will look like this:
     ├── data/
     │   ├── BBDD/
     │   ├── qsd1_w1/
-    │   └── qst1_w1/
+    │   ├── qsd2_w1/
+    │   ├── qst1_w1/
+    │   ├── qst1_w2/
+    │   └── qst2_w2/
+    ├── week1/
+    │   └── ...
+    ├── week2/
+    │   └── ...
+
+<h2 align="center">WEEK 1: Tasks</h2>
+
+## Project Structure
+
+    week1/
     ├── evaluation/
     │   ├── bbox_iou.py
     │   └── evaluation_funcs.py
@@ -110,9 +133,7 @@ Once downloaded and extracted, the project structure will look like this:
     ├── utils/
     │   ├── plot_results.py
     │   └── print_dict.py
-
-<h2 align="center">WEEK 1: Tasks</h2>
-
+    
 ### Task 1: Museum and query image descriptors (BBDD & QSD1)
 
 - **Index the Database (BBDD):** Generate descriptors offline and saves them in a `.pkl` file.
@@ -241,6 +262,27 @@ python .\main.py HSV Canberra 10 data\qst1_w1 True
 Since the testing dataset does not have ground truth labels, the Mean Average Precision (mAP@k) cannot be calculated for this task.
 
 <h2 align="center">WEEK 2: Tasks</h2>
+
+## Project Structure
+
+    week2/
+    ├── evaluation/
+    │   ├── bbox_iou.py
+    │   └── evaluation_funcs.py
+    ├── src/
+    │   ├── average_precision.py
+    │   ├── background_removal.py
+    │   ├── compute_db_descriptors.py
+    │   ├── compute_descriptors.py
+    │   ├── compute_img_descriptors.py
+    │   ├── compute_similarities.py
+    │   ├── histograms.py
+    │   ├── main.py
+    │   ├── metrics.py
+    │   └── utils.py
+    ├── utils/
+    │   ├── plot_results.py
+    │   └── print_dict.py
 
 ### Task 1: Implement 3D/2D block and hierarchical histograms
 Explicar com s'implementen els histogrames i un exemple d'algun plot.
