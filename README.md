@@ -284,6 +284,7 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
 ### Task 1: Implement 3D/2D block and hierarchical histograms
 - **Block 3D histograms scheme:**
   ![image](https://github.com/user-attachments/assets/8b992878-43a0-4bc3-a7e1-6a00ac8cb558)
+
   Before using the flatten() function, we get a 3D histogram. The computed histogram for image 00001.jpg in the HSV color space when it is not divided into blocks is shown below:
   ![image](https://github.com/user-attachments/assets/71417b4a-8a82-4b2a-a19b-ffce44a32c0f)
   Since only 2 bins/channel are used, the range of values for each channel is divided into 2 levels. Therefore, pixels values can fall into 8 possible colors. Size and color are used in this scatter to represent the amount of pixels of each color that are present in the image. By using the flatten() function a 8-element vector is obtained conatining the number of pixels for each color (the flattened histogram is shown in the algorithm scheme).
@@ -295,7 +296,7 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
 
 
 ### Task 2: Test query system using query set QSD1-W2 development and evaluate retrieval results
-- **Index the Database (BBDD):** Generate descriptors offline and saves them in a `.pkl` file.
+- **Index the Database (BBDD):** Generate descriptors offline and save them in a `.pkl` file.
   ```bash
   # Block 3D histograms
   python compute_db_descriptors.py --color_space=HSV --num_blocks=256 --num_bins=4 
