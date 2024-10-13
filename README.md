@@ -282,13 +282,11 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
     │   └── print_dict.py
 
 ### Task 1: Implement 3D/2D block and hierarchical histograms
-![image](https://github.com/user-attachments/assets/8b992878-43a0-4bc3-a7e1-6a00ac8cb558)
-![image](https://github.com/user-attachments/assets/aa46657a-b0f3-44df-afba-eaef800354de)
+- **Block 3D histograms scheme:**
+  ![image](https://github.com/user-attachments/assets/8b992878-43a0-4bc3-a7e1-6a00ac8cb558)
+- **Hierarchical 3D histograms:**
+  ![image](https://github.com/user-attachments/assets/cdc3d024-7d63-481d-8ea4-0b8ead6d2649)
 
-
-
-  
-  
 
 ### Task 2: Test query system using query set QSD1-W2 development and evaluate retrieval results
 - **Index the Database (BBDD):** Generate descriptors offline and saves them in a `.pkl` file.
