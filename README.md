@@ -26,6 +26,7 @@
     - [Process Description](#process-description)
     - [Best Result Methods](#best-result-methods)
   - [Task 4: Processing the QST1 Testing Dataset](#task-4-processing-the-qst1-testing-dataset)
+- [WEEK 2: Tasks](#week-2-tasks)
 - [Team Members](#team-members)
 - [License](#license)
 
