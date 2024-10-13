@@ -120,7 +120,7 @@ def main():
 			pickle.dump(histograms, f)
 
 		# Load the precomputed image descriptors from '.pkl' files
-		# for both the query dataset (QST1) and the museum dataset (BBDD, computed offline)
+		# for both the query dataset  and the museum dataset (BBDD, computed offline)
 		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_blocks)+'_blocks_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 			query_histograms = pickle.load(f)
 
@@ -131,17 +131,14 @@ def main():
 			pickle.dump(histograms, f)
 
 		# Load the precomputed image descriptors from '.pkl' files
-		# for both the query dataset (QST1) and the museum dataset (BBDD, computed offline)
+		# for both the query dataset and the museum dataset (BBDD, computed offline)
 		with open(os.path.join(q_path, color_space + '_histograms_'+str(num_levels)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 			query_histograms = pickle.load(f)
 
 		with open(os.path.join(bbdd_path, color_space + '_histograms_'+str(num_levels)+'_levels_'+str(num_bins)+'_bins'+'.pkl'), 'rb') as f:
 			bbdd_histograms = pickle.load(f)
 
-	# For each image in the query set (QST1), compute its similarity to all museum images (BBDD).
-	# The best results are obtained using the following similarity measures:	  
-	#	- Method 1 (Lab): Hellinger (distance)
-	#	- Method 2 (HSV): Alternative Chi Square (distance)
+	# For each image in the query set, compute its similarity to all museum images (BBDD).
 	res_m = []
 	
 	for query_img_h in tqdm(query_histograms, desc="Processing images", unit="image"):
@@ -156,7 +153,6 @@ def main():
 		# Evaluate the results using mAP@K if we are not in testing mode	
 		print(f"mAP@{k_value} for {color_space}: {mapk(y, res_m, k_value)}")
 
-	## Task 4: Create predictions for blind challenge (QST1)
 
 	# Save the 'blind' results for the test query set 
 	if is_test:
