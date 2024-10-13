@@ -283,6 +283,8 @@ Since the testing dataset does not have ground truth labels, the Mean Average Pr
 
 ### Task 1: Implement 3D/2D block and hierarchical histograms
 ![image](https://github.com/user-attachments/assets/8b992878-43a0-4bc3-a7e1-6a00ac8cb558)
+![image](https://github.com/user-attachments/assets/aa46657a-b0f3-44df-afba-eaef800354de)
+
 
 
   
