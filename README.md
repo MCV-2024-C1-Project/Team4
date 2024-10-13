@@ -27,6 +27,10 @@
     - [Best Result Methods](#best-result-methods)
   - [Task 4: Processing the QST1 Testing Dataset](#task-4-processing-the-qst1-testing-dataset)
 - [WEEK 2: Tasks](#week-2-tasks)
+  - [Task 1: Implement 3D/2D block and hierarchical histograms)](#task-1-implement-3d/2d-block-and-hierarchical-histograms)
+  - [Task 2: Selection and implementation of similarity measures to compare images](#task-2-selection-and-implementation-of-similarity-measures-to-compare-images)
+  - [Task 3: Implement retrieval system (retrieve top K results)](#task-3-implement-retrieval-system-retrieve-top-k-results)
+
 - [Team Members](#team-members)
 - [License](#license)
 
