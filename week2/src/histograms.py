@@ -61,10 +61,11 @@ def block_histogram(img,total_blocks,bins,ranges):
             hist, hist_vect = compute_histogram3d(block,[0, 1, 2], [bins, bins, bins], ranges, normalized= True)
             # Concatenate the 3D histograms computed for each block of the image
             histograms = np.concatenate([histograms, hist_vect])
+            
             # Uncomment below to visualize the 3D histogram for each block
             #print("1st block 3D Histogram")
             #plot_histogram_3d(hist, bins,block_name=f"Block_{block_count}")
-            block_count += 1  # Increment block number
+            #block_count += 1  # Increment block number
     return histograms
 
 def spatial_pyramid_histogram(img, num_levels, bins, ranges):
@@ -145,50 +146,15 @@ def plot_histogram_3d(histogram, bins, block_name):
     plt.show()
 
 
-#EXEMPLE BINS = 64, DISTANCE = CAMBERRA , ESPAI DE COLOR = HSV
+# Example of 3D Block-based histogram
 def exemple():
 
     img = cv.imread('C:/Users/34634/Downloads/C1/Team4/week2/data/qsd1_w2/qsd1_w1/00003.jpg')
     total_blocks = 4
     img = cv.cvtColor(img,cv.COLOR_BGR2HSV)
-    bins_channel1 = 4
+    bins = 4
     ranges = [0,180,0,256,0,256]
     
-    block_histogram(img,total_blocks,bins_channel1,ranges)
+    block_histogram(img,total_blocks,bins,ranges)
     
-
-    
-
-def example2():
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    q_path = os.path.join(base_path, "data","qsd1_w1")
-    color_space = "HSV"
-
-
-    files = [f for f in os.listdir(q_path) if f.endswith('.jpg')]
-    files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
-    total_blocks = 4
-    histograms = []
-
-    for filename in files[:2]:
-
-        # Read image (by default the color space of the loaded image is BGR) 
-        img_bgr = cv.imread(os.path.join(q_path, filename))
-
-        img = cv.cvtColor(img_bgr, cv.COLOR_BGR2HSV)
-        plt.imshow(img)
-        img[:,:,2] = cv.equalizeHist(img[:,:,2])
-        plt.imshow(img)
-        bins_channel1 = 8
-        ranges = [0,180,0,256,0,256]
-
-        hist = block_histogram(img,total_blocks,bins_channel1,ranges)
-        dist = compute_similarities(hist, [hist, hist], similarity_measure=cv.HISTCMP_HELLINGER, k=1)
-
-        index = int(filename.split('_')[-1].split('.')[0])
-
-        if len(histograms) <= index:
-            histograms.extend([None] * (index + 1 - len(histograms)))
-        histograms[index] = hist
-
 # exemple()
