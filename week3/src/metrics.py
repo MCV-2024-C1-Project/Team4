@@ -38,6 +38,7 @@ def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
 		
 	return dist
 
+
 def precision(gt_mask,pred_mask):
 	"""
 	Calculate the precision
@@ -51,6 +52,7 @@ def precision(gt_mask,pred_mask):
 	precision = TP/ (TP+FP) if (TP + FP) != 0 else 0
 
 	return precision
+
 
 def recall(gt_mask,pred_mask):
 	"""
@@ -80,6 +82,43 @@ def f1_measure(gt_mask, pred_mask):
 	f1_measure = (2*p*r)/(p + r) if (p+r) !=0 else 0
 
 	return f1_measure
+
+
+def global_f1_score(masks, ground_truths):
+	"""
+	Calculate the global F1 score for a dataset of masks and ground truths.
+
+	Args:
+	- masks (list of np.array): List of mask arrays.
+	- ground_truths (list of np.array): List of corresponding ground truth arrays.
+
+	Returns:
+	- global_f1 (float): The global F1 score for the dataset.
+	"""
+	total_tp, total_fp, total_fn = 0, 0, 0
+
+	for pred_mask, gt_mask in zip(masks, ground_truths):
+		# Calculate TP, FP, FN for each mask
+		tp = np.sum((pred_mask == 255) & (gt_mask == 255))
+		fp = np.sum((pred_mask == 255) & (gt_mask == 0))
+		fn = np.sum((pred_mask == 0) & (gt_mask == 255))
+
+		total_tp += tp
+		total_fp += fp
+		total_fn += fn
+
+	# Calculate global precision and recall
+	global_precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 0
+	global_recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0
+
+	# Calculate global F1 score
+	if global_precision + global_recall > 0:
+		global_f1 = 2 * (global_precision * global_recall) / (global_precision + global_recall)
+	else:
+		global_f1 = 0
+
+	return global_f1, global_precision, global_recall
+
 
 def example():
 #EXAMPLE
