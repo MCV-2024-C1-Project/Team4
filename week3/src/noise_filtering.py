@@ -12,7 +12,7 @@ from skimage.metrics import peak_signal_noise_ratio
 
 # Path to the folder containing the images
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-folder_path = os.path.join(base_path, "./data/qsd2_w3")
+folder_path = os.path.join(base_path, "./data/qsd1_w3")
 
 # Get all images with .jpg extension
 image_paths = glob.glob(os.path.join(folder_path, "*.jpg"))
