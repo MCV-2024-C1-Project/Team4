@@ -4,3 +4,4 @@ pandas
 pypickle
 matplotlib
 tqdm
+scikit-image
