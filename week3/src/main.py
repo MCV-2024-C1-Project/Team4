@@ -9,6 +9,7 @@ from skimage.metrics import mean_squared_error
 from skimage.metrics import peak_signal_noise_ratio
 
 
+
 #Task 1
 
 # Ruta a la carpeta que contiene las imágenes
@@ -25,7 +26,8 @@ for image_path in image_paths:
     
     # Aplicar el filtro de mediana con un tamaño de kernel de 5
     #median_filtered = cv2.medianBlur(img, 3)
-    median_filtered = cv2.fastNlMeansDenoisingColored(img, None, 30, 30, 3,15)
+    #median_filtered = cv2.fastNlMeansDenoisingColored(img, None, 20, 20, 7,21)
+    median_filtered = cv2.GaussianBlur(img,(7,7),0)
     mse_value = mean_squared_error(img, median_filtered)
     psnr_value = peak_signal_noise_ratio(img,median_filtered)
     grayA = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -33,8 +35,8 @@ for image_path in image_paths:
     ssim_value, _ = ssim(grayA, grayB, full=True)
 
    
-    print(f"Image: {os.path.basename(image_path)},MSE: {mse_value:.2f}, PSNR: {psnr_value:.2f} dB, SSIM: {ssim_value:.4f}")
-    
+    #print(f"Image: {os.path.basename(image_path)},MSE: {mse_value:.2f}, PSNR: {psnr_value:.2f} dB, SSIM: {ssim_value:.2f}")
+    print(f"{mse_value:.2f}, {psnr_value:.2f}, {ssim_value:.2f}")
     # Mostrar la imagen original y la imagen filtrada
     #cv2.imshow("Original", img)
     #cv2.imshow("Filtrada con Mediana", median_filtered)
