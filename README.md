@@ -688,6 +688,23 @@ The Median filter generally performs best, but certain images, like **00006.jpg*
 
 ### Task 2: Implement texture descriptors and evaluate query system (QSD1-W3) using only texture descriptors
 
+- **Evaluate query system (QSD1-W3) with noise removal using the best color descriptors from previous week:**
+  
+```bash
+# Block 3D color histograms
+(env) PS C:\Users\34663\GitHub\Team4\week2\src> python main.py ./data/qsd1_w3/images_without_noise --color_space=HSV --num_blocks=256 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1
+Processing images: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 30/30 [00:00<00:00, 63.68image/s]
+Processing images: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 30/30 [00:00<00:00, 67.64image/s]
+mAP@1 for HSV: 0.7333333333333333
+
+# Hierarchical 3D color histograms
+(env) PS C:\Users\34663\GitHub\Team4\week2\src> py main.py ./data/qsd1_w3/images_without_noise --color_space=HSV --num_levels=5 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1 --is_pyramid=True
+Processing images: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 30/30 [00:00<00:00, 47.10image/s]
+Processing images: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 30/30 [00:00<00:00, 49.12image/s]
+mAP@1 for HSV: 0.7333333333333333
+```
+
+
 
 ## Team Members
 
