@@ -667,9 +667,15 @@ SSIM Results:
 00029.jpg -> SSIM: 0.8366
 ```
 
-#### Example
+#### Examples
 
-The table below compares the original images with those filtered using different noise reduction techniques: Gaussian, Median, and Non-Local Means. For each method, the SSIM score is calculated to evaluate how well the filter preserved the structural similarity of the image. Higher SSIM values indicate better noise reduction while maintaining image details. The Median filter generally performs best, but certain images, like **00006.jpg**, exhibit unique characteristics where the texture resembles noise, affecting the SSIM score.
+The table below compares the original noisy images with those filtered using different noise reduction techniques: Gaussian, Median, and Non-Local Means. 
+
+For each method, the SSIM score is calculated to evaluate how well the filter preserves the structural similarity of the image when compared with the ground truth. 
+
+Higher SSIM values indicate better noise reduction while maintaining image details.
+
+The Median filter generally performs best, but certain images, like **00006.jpg**, exhibit unique characteristics where the texture resembles noise, affecting the SSIM score.
 
 | Original Image        | Gaussian Filtered Image    | Median Filtered Image    | Non-Local Means Filtered Image    |
 |-----------------------|----------------------------|---------------------------|------------------------------------|
