@@ -4,8 +4,8 @@ import numpy as np
 import os
 import tqdm
 
-from week3.src.metrics import global_f1_score
-from week3.utils.utils import plot_mask_with_points, order_points
+from metrics import global_f1_score
+from utils import order_points
 
 
 def fill_surrounded_pixels(foreground):
@@ -32,26 +32,36 @@ def fill_surrounded_pixels(foreground):
 	return new_mask
 
 
-def get_extreme_points(mask):
-	# Step 1: Find contours
-	contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-
-	# Step 2: Get the largest contour (assuming the mask has one main object)
-	contour = max(contours, key=cv.contourArea)
-
-	# Step 3: Approximate the contour to a polygon (epsilon can be adjusted)
-	epsilon = 0.02 * cv.arcLength(contour, True)
+def get_extreme_points(contour):
+	# Step 1: Approximate the contour to a polygon (epsilon can be adjusted)
+	beta = 0.02
+	l = cv.arcLength(contour, True)
+	epsilon = beta * l
 	approx = cv.approxPolyDP(contour, epsilon, True)
+	while len(approx) > 4:
+		beta += 0.01
+		epsilon = beta * l
+		approx = cv.approxPolyDP(contour, epsilon, True)
 
-	# Step 4: If approxPolyDP does not return 4 points, we use cv2.goodFeaturesToTrack to get corners
-	if len(approx) != 4:
-		# Use corner detection if polygon approximation didn't give us 4 corners
-		corners = cv.goodFeaturesToTrack(mask, maxCorners=4, qualityLevel=0.01, minDistance=10)
-		corners = corners.astype(int)
-	else:
-		corners = approx.reshape(-1, 2)
+	# TODO: Fix this part for more than one artwork
+	# Step 2: If approxPolyDP does not return 4 points, we use cv2.goodFeaturesToTrack to get corners
+	#if len(approx) != 4:
+	#	# Use corner detection if polygon approximation didn't give us 4 corners
+	#	corners = cv.goodFeaturesToTrack(m, maxCorners=4, qualityLevel=0.2, minDistance=10)
+	#	corners = corners.astype(int).reshape(-1, 2)
+	#else:
+	corners = approx.reshape(-1, 2)
 
-	# Step 5: Sort the corners based on their positions
+	# (Optional) Uncomment to display the mask with the contours and corners
+	#mask = m.copy()
+	#cv.drawContours(mask, [approx], -1, (255, 0, 0), 2)  # Draw contour in blue color
+	#for corner in corners:
+	#	x, y = corner
+	#	cv.circle(mask, (x, y), 5, (255, 255, 255), -1)  # Draw corners in green color
+	#cv.imshow("Contours and Corners", mask)
+	#cv.waitKey(0)
+
+	# Step 3: Sort the corners based on their positions
 	ordered_corners = order_points(corners)
 	ordered_corners = ordered_corners.astype(int)
 
@@ -59,6 +69,31 @@ def get_extreme_points(mask):
 	# plot_mask_with_points(mask, ordered_corners)
 
 	return ordered_corners
+
+
+def get_artworks_points(mask):
+	"""
+	Get the points of the two largest artworks in the mask
+	:param mask: The mask of the image
+	:return: The points of the two largest artworks (if they exist)
+	"""
+	# Step 1: Find contours
+	contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+
+	# Step 2: Take the two largest contours (assuming the mask has two main objects)
+	contours = sorted(contours, key=cv.contourArea, reverse=True)[:2]
+
+	# Step 3: Get area of the two largest contours
+	if len(contours) < 2:
+		return [contours[0]]
+
+	# Step 4: Return the largest contour if the second largest is less than 90% of the largest otherwise return both
+	area1 = cv.contourArea(contours[0])
+	area2 = cv.contourArea(contours[1])
+	if (area1 - area2) > area1*0.9:
+		return [contours[0]]
+
+	return contours
 
 
 def remove_background(image_path):
@@ -93,32 +128,29 @@ def remove_background(image_path):
 	mask2 = cv.morphologyEx(mask2, cv.MORPH_OPEN, kernel)
 	foreground = cv.morphologyEx(mask2, cv.MORPH_CLOSE, kernel)
 
-	# Extract foreground
-	# foreground = image * mask2[:, :, np.newaxis]
-
-	cv.imshow('Foreground', foreground * 255)
-	cv.waitKey(0)
-
 	foreground = fill_surrounded_pixels(foreground)
 
-	# TODO: Update this part to allow multiple artworks in the image
-	# foreground = apply_square_mask(foreground)
+	# Get the contours of the artworks
+	contours = get_artworks_points(foreground)
 
-	# Find the bounding box of the non-background region
-	height, width = foreground.shape[:2]
-	pts1 = np.array(get_extreme_points(foreground), dtype="float32")
-	pts2 = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype="float32")
+	mask = np.zeros_like(foreground)
+	dsts = []
+	for contour in contours:
+		# Find the bounding box of the non-background region
+		_, _, width, height = cv.boundingRect(contour)
 
-	M = cv.getPerspectiveTransform(pts1, pts2)
-	dst = cv.warpPerspective(image, M, (width, height))
-	dst = cv.cvtColor(dst, cv.COLOR_HSV2BGR)
+		cv.drawContours(mask, [contour], -1, (255, 255, 255), thickness=cv.FILLED)
 
-	cv.imshow('Cropped Image', dst)
-	cv.waitKey(0)
+		pts1 = np.array(get_extreme_points(contour), dtype="float32")
+		pts2 = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype="float32")
 
-	cv.imshow('Foreground', foreground * 255)
-	cv.waitKey(0)
-	return dst, foreground
+		# Apply perspective transform
+		M = cv.getPerspectiveTransform(pts1, pts2)
+		dst = cv.warpPerspective(image, M, (width, height))
+		dst = cv.cvtColor(dst, cv.COLOR_HSV2BGR)
+		dsts.append(dst)
+
+	return dsts, mask*255
 
 
 def load_masks(imgs_path):
@@ -171,7 +203,7 @@ def main():
 			if filename.endswith(".jpg"):
 				# Get the full image path
 				image_path = os.path.join(imgs_path, filename)
-				final_image, mask = remove_background(image_path)
+				final_images, mask = remove_background(image_path)
 
 				# Get the base filename without extension
 				base_name = os.path.splitext(filename)[0]
@@ -181,12 +213,13 @@ def main():
 				# Save the mask
 				cv.imwrite(mask_path, mask * 255)
 
-				# Save the final image in a masked folder
+				# Save the final images in a masked folder
 				if not os.path.exists(os.path.join(imgs_path, "masked")):
 					os.makedirs(os.path.join(imgs_path, "masked"))
-				final_image_filename = f"masked/{base_name}.jpg"
-				final_image_path = os.path.join(imgs_path, final_image_filename)
-				cv.imwrite(final_image_path, final_image)
+				for i, final_image in enumerate(final_images):
+					final_image_filename = f"masked/{base_name}_{i}.jpg"
+					final_image_path = os.path.join(imgs_path, final_image_filename)
+					cv.imwrite(final_image_path, final_image)
 
 	if args.score:
 		# Load the ground truth and predicted masks
@@ -194,9 +227,9 @@ def main():
 
 		# Calculate the global F1 score
 		global_f1, global_precision, global_recall = global_f1_score(predicted_masks, ground_truths)
-		print(f"Global F1 Score: {global_f1}")
-		print(f"Global Precision: {global_precision}")
-		print(f"Global Recall: {global_recall}")
+		print(f"Global F1 Score: {np.round(global_f1, 2)}")
+		print(f"Global Precision: {np.round(global_precision, 2)}")
+		print(f"Global Recall: {np.round(global_recall, 2)}")
 
 
 if __name__ == "__main__":
