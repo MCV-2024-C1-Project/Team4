@@ -709,13 +709,6 @@ The background removal algorithm has been improved by relying on a combination o
 The algorithm focuses on identifying and isolating objects of interest (e.g., artworks) and transforming them to a canonical view.
 
 #### Algorithm Breakdown
-## README: Image Background Removal and Artwork Extraction
-
-### Overview
-
-This algorithm is designed to remove the background of an image and extract the largest artworks (contours) within the foreground. The process relies on a combination of computer vision techniques, including GrabCut for background segmentation, contour detection, polygon approximation, and perspective transformation. The algorithm focuses on identifying and isolating objects of interest (e.g., artworks) and transforming them to a canonical view.
-
-### Algorithm Breakdown
 
 The algorithm consists of several steps:
 
