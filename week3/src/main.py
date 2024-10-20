@@ -73,7 +73,7 @@ def main():
 
 		if descriptor_type == 'LBP':
 			img = cv.imread(os.path.join(q_path, filename),cv.COLOR_BGR2GRAY)
-			hist = lbp_block_histogram(img,(num_blocks,num_blocks))
+			hist = lbp_block_histogram(img,total_blocks = num_blocks)
 
 		
 
@@ -86,15 +86,15 @@ def main():
 
 	
 	# Save query histograms to a pickle file
-	with open(os.path.join(q_path, f'{descriptor_type}_histograms_{num_blocks},{num_blocks}_blocks_.pkl'), 'wb') as f:
+	with open(os.path.join(q_path, f'{descriptor_type}_histograms_{num_blocks}_blocks.pkl'), 'wb') as f:
 		pickle.dump(histograms, f)
 
 	# Load the precomputed image descriptors from '.pkl' files
 	# for both the query dataset  and the museum dataset (BBDD, computed offline)
-	with open(os.path.join(q_path, f'{descriptor_type}_histograms_{num_blocks},{num_blocks}_blocks_.pkl'), 'rb') as f:
+	with open(os.path.join(q_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks.pkl'), 'rb') as f:
 		query_histograms = pickle.load(f)
 
-	with open(os.path.join(bbdd_path, f'{descriptor_type}_histograms_{num_blocks},{num_blocks}_blocks_.pkl'), 'rb') as f:
+	with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks.pkl'), 'rb') as f:
 		bbdd_histograms = pickle.load(f)
 	
 
