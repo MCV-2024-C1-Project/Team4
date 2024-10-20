@@ -4,6 +4,9 @@ import numpy as np
 import os
 import tqdm
 
+from metrics import global_f1_score
+from utils import order_points
+
 
 def fill_surrounded_pixels(foreground):
 	"""
@@ -29,74 +32,68 @@ def fill_surrounded_pixels(foreground):
 	return new_mask
 
 
-def get_s_and_v_masks(hsv_image):
+def get_extreme_points(contour):
+	# Step 1: Approximate the contour to a polygon (epsilon can be adjusted)
+	beta = 0.02
+	l = cv.arcLength(contour, True)
+	epsilon = beta * l
+	approx = cv.approxPolyDP(contour, epsilon, True)
+	while len(approx) > 4:
+		beta += 0.01
+		epsilon = beta * l
+		approx = cv.approxPolyDP(contour, epsilon, True)
+
+	# TODO: Fix this part for more than one artwork
+	# Step 2: If approxPolyDP does not return 4 points, we use cv2.goodFeaturesToTrack to get corners
+	#if len(approx) != 4:
+	#	# Use corner detection if polygon approximation didn't give us 4 corners
+	#	corners = cv.goodFeaturesToTrack(m, maxCorners=4, qualityLevel=0.2, minDistance=10)
+	#	corners = corners.astype(int).reshape(-1, 2)
+	#else:
+	corners = approx.reshape(-1, 2)
+
+	# (Optional) Uncomment to display the mask with the contours and corners
+	#mask = m.copy()
+	#cv.drawContours(mask, [approx], -1, (255, 0, 0), 2)  # Draw contour in blue color
+	#for corner in corners:
+	#	x, y = corner
+	#	cv.circle(mask, (x, y), 5, (255, 255, 255), -1)  # Draw corners in green color
+	#cv.imshow("Contours and Corners", mask)
+	#cv.waitKey(0)
+
+	# Step 3: Sort the corners based on their positions
+	ordered_corners = order_points(corners)
+	ordered_corners = ordered_corners.astype(int)
+
+	# (Optional) Uncomment to display the mask with the points
+	# plot_mask_with_points(mask, ordered_corners)
+
+	return ordered_corners
+
+
+def get_artworks_points(mask):
 	"""
-	Get the S and V masks for the image
-	:param hsv_image: The HSV image
-	:return: The S and V masks
+	Get the points of the two largest artworks in the mask
+	:param mask: The mask of the image
+	:return: The points of the two largest artworks (if they exist)
 	"""
-	# Separate the HSV channels
-	H, S, V = cv.split(hsv_image)
+	# Step 1: Find contours
+	contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
-	# Extract top 10 rows, bottom 10 rows, left 10 columns, and right 10 columns
-	top_S = S[:10, :]
-	bottom_S = S[-10:, :]
-	left_S = S[:, :10]
-	right_S = S[:, -10:]
+	# Step 2: Take the two largest contours (assuming the mask has two main objects)
+	contours = sorted(contours, key=cv.contourArea, reverse=True)[:2]
 
-	top_V = V[:10, :]
-	bottom_V = V[-10:, :]
-	left_V = V[:, :10]
-	right_V = V[:, -10:]
+	# Step 3: Get area of the two largest contours
+	if len(contours) < 2:
+		return [contours[0]]
 
-	# Combine each channel's border pixels separately
-	S_border_pixels = np.concatenate((top_S.flatten(), bottom_S.flatten(), left_S.flatten(), right_S.flatten()))
-	V_border_pixels = np.concatenate((top_V.flatten(), bottom_V.flatten(), left_V.flatten(), right_V.flatten()))
+	# Step 4: Return the largest contour if the second largest is less than 90% of the largest otherwise return both
+	area1 = cv.contourArea(contours[0])
+	area2 = cv.contourArea(contours[1])
+	if (area1 - area2) > area1*0.9:
+		return [contours[0]]
 
-	if np.max(S_border_pixels) > 255 * 0.70:
-		upper_bound = np.percentile(S_border_pixels, 97)  # 97th percentile
-		S_border_pixels = S_border_pixels[(S_border_pixels <= upper_bound)]
-	if np.min(V_border_pixels) < 255 * 0.30:
-		lower_bound = np.percentile(V_border_pixels, 3)  # 3th percentile
-		V_border_pixels = V_border_pixels[(V_border_pixels >= lower_bound)]
-
-	return np.max(S_border_pixels), np.min(V_border_pixels)
-
-
-def apply_square_mask(mask):
-	# Image dimensions
-	height, width = mask.shape
-
-	# Step 1: Find the first row with more white than black from the top
-	try:
-		top_row = next(i for i in range(height) if np.sum(mask[i, :] == 1) > width // 2)
-	except StopIteration:
-		top_row = next(i for i in range(height) if np.sum(mask[i, :] == 1) > 0)
-
-	# Step 2: Find the first row with more white than black from the bottom
-	try:
-		bottom_row = next(i for i in range(height - 1, -1, -1) if np.sum(mask[i, :] == 1) > width // 2)
-	except StopIteration:
-		bottom_row = next(i for i in range(height - 1, -1, -1) if np.sum(mask[i, :] == 1) > 0)
-
-	# Step 3: Find the first column with more white than black from the left
-	try:
-		left_col = next(j for j in range(width) if np.sum(mask[:, j] == 1) > height // 2)
-	except StopIteration:
-		left_col = next(j for j in range(width) if np.sum(mask[:, j] == 1) > 0)
-
-	# Step 4: Find the first column with more white than black from the right
-	try:
-		right_col = next(j for j in range(width - 1, -1, -1) if np.sum(mask[:, j] == 1) > height // 2)
-	except StopIteration:
-		right_col = next(j for j in range(width - 1, -1, -1) if np.sum(mask[:, j] == 1) > 0)
-
-	# Create a new mask to draw the square
-	mask = np.zeros_like(mask, dtype=np.uint8)
-
-	# Fill the area inside the square with white
-	mask[top_row:bottom_row + 1, left_col:right_col + 1] = 1
-	return mask
+	return contours
 
 
 def remove_background(image_path):
@@ -107,79 +104,53 @@ def remove_background(image_path):
 	"""
 	# Read image
 	image = cv.imread(image_path)
+	image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
 
-	myimage_hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
-	threshold_s, threshold_v = get_s_and_v_masks(myimage_hsv)
+	# Create an empty mask
+	mask = np.zeros(image.shape[:2], np.uint8)
 
-	# Take S channel and create a mask so that each pixel with a saturation level below or equal
-	# to the threshold is set to 0 (background) and S_levels > th are set to 1 (painting)
-	s = myimage_hsv[:, :, 1]
-	s = np.where(s < threshold_s + 1, 0, 1)
+	# Define background and foreground models
+	bgdModel = np.zeros((1, 65), np.float64)
+	fgdModel = np.zeros((1, 65), np.float64)
 
-	# Take V channel and create a mask so that each pixel with a Value level above or equal
-	# to the threshold is set to 0 (background) and V_levels < th are set to 1 (painting)
-	v = myimage_hsv[:, :, 2]
-	v = np.where(v > threshold_v - 1, 0, 1)  # Any value above 255 will be part of our mask
+	# Define rectangle (x, y, width, height) around the artwork
+	height, width = image.shape[:2]
+	rect = (10, 10, width - 20, height - 20)  # Adjust as needed
 
-	# Combine our two masks based on S and V into a single "Foreground"
-	foreground = np.where((s == 0) & (v == 0), 0, 1).astype(np.uint8)
-	foreground[:10, :] = 0;
-	foreground[-10:, :] = 0;
-	foreground[:, :10] = 0;
-	foreground[:, -10:] = 0
+	# Apply GrabCut
+	cv.grabCut(image, mask, rect, bgdModel, fgdModel, 5, cv.GC_INIT_WITH_RECT)
+
+	# Create mask where sure and likely foreground are 1
+	mask2 = np.where((mask == cv.GC_FGD) | (mask == cv.GC_PR_FGD), 1, 0).astype('uint8')
+
+	# Opening + Closing to remove noise
+	kernel = np.ones((3, 3), np.uint8)
+	mask2 = cv.morphologyEx(mask2, cv.MORPH_OPEN, kernel)
+	foreground = cv.morphologyEx(mask2, cv.MORPH_CLOSE, kernel)
+
 	foreground = fill_surrounded_pixels(foreground)
 
-	# Opening -> removes foreground objects smaller than the kernel
-	kernel = np.ones((5, 5), np.uint8)
-	opening = cv.morphologyEx(foreground, cv.MORPH_OPEN, kernel)
-	# Closing -> removes background objects smaller than the kernel
-	kernel = np.ones((50, 50), np.uint8)
-	foreground = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernel)
-	foreground = apply_square_mask(foreground)
+	# Get the contours of the artworks
+	contours = get_artworks_points(foreground)
 
-	# Find the bounding box of the non-background region
-	y_indices, x_indices = np.where(foreground == 1)
-	top, bottom = y_indices.min(), y_indices.max()
-	left, right = x_indices.min(), x_indices.max()
+	mask = np.zeros_like(foreground)
+	dsts = []
+	for contour in contours:
+		# Find the bounding box of the non-background region
+		_, _, width, height = cv.boundingRect(contour)
 
-	cropped_image = image[top:bottom + 1, left:right + 1]
-	return cropped_image, foreground
+		cv.drawContours(mask, [contour], -1, (255, 255, 255), thickness=cv.FILLED)
 
+		pts1 = np.array(get_extreme_points(contour), dtype="float32")
+		pts2 = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype="float32")
 
-def global_f1_score(masks, ground_truths):
-	"""
-	Calculate the global F1 score for a dataset of masks and ground truths.
+		# Apply perspective transform
+		M = cv.getPerspectiveTransform(pts1, pts2)
+		dst = cv.warpPerspective(image, M, (width, height))
+		dst = cv.cvtColor(dst, cv.COLOR_HSV2BGR)
+		dsts.append(dst)
 
-	Args:
-	- masks (list of np.array): List of mask arrays.
-	- ground_truths (list of np.array): List of corresponding ground truth arrays.
-
-	Returns:
-	- global_f1 (float): The global F1 score for the dataset.
-	"""
-	total_tp, total_fp, total_fn = 0, 0, 0
-
-	for pred_mask, gt_mask in zip(masks, ground_truths):
-		# Calculate TP, FP, FN for each mask
-		tp = np.sum((pred_mask == 255) & (gt_mask == 255))
-		fp = np.sum((pred_mask == 255) & (gt_mask == 0))
-		fn = np.sum((pred_mask == 0) & (gt_mask == 255))
-
-		total_tp += tp
-		total_fp += fp
-		total_fn += fn
-
-	# Calculate global precision and recall
-	global_precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 0
-	global_recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0
-
-	# Calculate global F1 score
-	if global_precision + global_recall > 0:
-		global_f1 = 2 * (global_precision * global_recall) / (global_precision + global_recall)
-	else:
-		global_f1 = 0
-
-	return global_f1, global_precision, global_recall
+	return dsts, mask*255
 
 
 def load_masks(imgs_path):
@@ -232,7 +203,7 @@ def main():
 			if filename.endswith(".jpg"):
 				# Get the full image path
 				image_path = os.path.join(imgs_path, filename)
-				final_image, mask = remove_background(image_path)
+				final_images, mask = remove_background(image_path)
 
 				# Get the base filename without extension
 				base_name = os.path.splitext(filename)[0]
@@ -242,12 +213,13 @@ def main():
 				# Save the mask
 				cv.imwrite(mask_path, mask * 255)
 
-				# Save the final image in a masked folder
+				# Save the final images in a masked folder
 				if not os.path.exists(os.path.join(imgs_path, "masked")):
 					os.makedirs(os.path.join(imgs_path, "masked"))
-				final_image_filename = f"masked/{base_name}.jpg"
-				final_image_path = os.path.join(imgs_path, final_image_filename)
-				cv.imwrite(final_image_path, final_image)
+				for i, final_image in enumerate(final_images):
+					final_image_filename = f"masked/{base_name}_{i}.jpg"
+					final_image_path = os.path.join(imgs_path, final_image_filename)
+					cv.imwrite(final_image_path, final_image)
 
 	if args.score:
 		# Load the ground truth and predicted masks
@@ -255,9 +227,9 @@ def main():
 
 		# Calculate the global F1 score
 		global_f1, global_precision, global_recall = global_f1_score(predicted_masks, ground_truths)
-		print(f"Global F1 Score: {global_f1}")
-		print(f"Global Precision: {global_precision}")
-		print(f"Global Recall: {global_recall}")
+		print(f"Global F1 Score: {np.round(global_f1, 2)}")
+		print(f"Global Precision: {np.round(global_precision, 2)}")
+		print(f"Global Recall: {np.round(global_recall, 2)}")
 
 
 if __name__ == "__main__":
