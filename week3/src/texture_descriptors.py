@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 from skimage.feature import local_binary_pattern
 import matplotlib.pyplot as plt
+import os 
+import pickle
 
 def lbp_block_histogram(image, num_blocks=(4, 4)):
     """
@@ -73,16 +75,38 @@ def plot_histogram(histogram):
 
 
 
-# Example usage
-image_path = 'C:/Users/34634/Downloads/C1\Team4/week3/data/qsd1_w3/qsd1_w3/00001.jpg'  # Actualitza amb el camí de la teva imatge
-image = cv2.imread(image_path)
 
-# Compute the concatenated LBP histogram for a specified number of blocks
-num_blocks = (2,2)  # 4 verticals, 4 horitzontals
-lbp_histogram = lbp_block_histogram(image, num_blocks)
-plot_histogram(lbp_histogram)
 
-# Display the length of the final histogram
-print("Length of concatenated LBP histogram:", len(lbp_histogram))
+def process_images_in_directory(directory_path):
+    # List to hold all histograms
+    histograms = []
+    files = [f for f in os.listdir(directory_path) if f.endswith(".jpg")]
+    
+    # Sort filenames based on the number after the last underscore
+    files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))  # Sort based on the number at the end
+    
+    # Process each image in the sorted list
+    for filename in files:
+            file_path = os.path.join(directory_path, filename)
+            # Read the image
+            image = cv2.imread(file_path,cv2.COLOR_BGR2GRAY)
+            if image is not None:
+                # Calculate LBP histogram for the image
+                blocks = (4,4)
+                hist = lbp_block_histogram(image,blocks)
+                index = int(filename.split('_')[-1].split('.')[0])
+                if len(histograms) <= index:
+                    histograms.extend([None] * (index + 1 - len(histograms)))
+                    histograms[index] = hist
+    with open(os.path.join(directory_path, '_LBP_'+str(blocks)+'_blocks_'+ '.pkl'), 'wb') as f:
+        pickle.dump(histograms, f)
+
+
+# Directory path
+directory_path = r'C:/Users/34634/Downloads/C1/Team4/week3/data/qsd1_w3/qsd1_w3'
+
+# Process all images in the directory
+histograms = process_images_in_directory(directory_path)
+
 
 
