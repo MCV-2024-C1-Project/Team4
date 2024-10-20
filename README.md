@@ -522,11 +522,14 @@ Images with noise:
 ```
 
 *Gaussian Filter Testing:*
+
+The script compares filtered images with their original noise-free versions (ground truth) using the SSIM metric to assess the quality of noise filtering.
+
 ```bash
 python .\filter_test.py ./data/qsd1_w3
 ```
 
-**Note:** The images detected as noise-free should ideally have an SSIM value of 1. However, since we are comparing them with images in the "non_augmented" folder, which may differ in factors such as resolution or compression, the SSIM values do not reach 1.
+**Note:** The images detected as noise-free should ideally have an SSIM value of 1. However, since we are comparing them with images in the `non_augmented` folder, which may differ in factors such as resolution or compression, the SSIM values do not reach 1.
 
 ```bash
 SSIM Results:
@@ -666,6 +669,8 @@ SSIM Results:
 
 #### Example
 
+The table below compares the original images with those filtered using different noise reduction techniques: Gaussian, Median, and Non-Local Means. For each method, the SSIM score is calculated to evaluate how well the filter preserved the structural similarity of the image. Higher SSIM values indicate better noise reduction while maintaining image details. The Median filter generally performs best, but certain images, like **00006.jpg**, exhibit unique characteristics where the texture resembles noise, affecting the SSIM score.
+
 | Original Image        | Gaussian Filtered Image    | Median Filtered Image    | Non-Local Means Filtered Image    |
 |-----------------------|----------------------------|---------------------------|------------------------------------|
 | ![image](https://github.com/user-attachments/assets/b3726eff-57e6-47d0-ad20-7dcb308bb4da) | ![image](https://github.com/user-attachments/assets/5e25824d-ba7a-4e68-800d-9a1d4e2480d0) |  ![image](https://github.com/user-attachments/assets/d328af13-a54d-4554-907b-508266cfbb9b) | ![image](https://github.com/user-attachments/assets/56d1c77c-ac2a-49d8-8dd1-0948e619202b) |
@@ -674,8 +679,6 @@ SSIM Results:
 | 00018.jpg -> SSIM: | 0.8959 |  **0.9406** | 0.9298 |
 | ![image](https://github.com/user-attachments/assets/52b878bc-4f5e-43ab-9b6d-488a905c703b)  | ![image](https://github.com/user-attachments/assets/8f0d10fb-aa24-4ed2-9ac6-eb862dd62f9a) | ![image](https://github.com/user-attachments/assets/3e180932-cec5-495c-bb0e-596849afe944) | ![image](https://github.com/user-attachments/assets/07a52a5e-1f3a-40a0-98f0-f56ce6b2344d) |
 | 00006.jpg -> SSIM: | 0.5234 |  0.4671 | **0.5303** |
-
-**Note:** In general, the filter that performs best is the **Median** filter, except for image **00006.jpg**, which has the lowest SSIM. This case is unique because the original noise-free image has a texture that resembles noise, but it is not actually noise.
 
 ### Task 2: Implement texture descriptors and evaluate query system (QSD1-W3) using only texture descriptors
 
