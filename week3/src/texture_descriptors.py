@@ -1,61 +1,69 @@
-import cv2
+import cv2 as cv
 import numpy as np
 from skimage.feature import local_binary_pattern
 import matplotlib.pyplot as plt
 import os 
 import pickle
 
-def lbp_block_histogram(image, num_blocks=(4, 4)):
+def lbp_block_histogram(image, total_blocks=16, R=1):
     """
-    Compute concatenated LBP histograms for an image divided into specified number of blocks.
+    Computes the concatenated LBP histograms for an image divided into a specified number of blocks.
     
     :param image: Input grayscale image
-    :param num_blocks: Number of blocks in (height_blocks, width_blocks)
-    :return: Concatenated histogram of LBP values for the entire image
+    :param total_blocks: Total number of blocks to divide the image into (must be a perfect square).
+    :param P: Number of circularly symmetric neighbor set points for LBP.
+    :param R: Radius of the circle for LBP.
+    :param bins: Number of bins for the histogram.
+    :param ranges: Range of values for the histogram.
+    :param normalized: Boolean, whether to normalize histograms or not.
+    :return: 1D array containing the concatenated histograms of all blocks.
     """
     # Convert image to grayscale if it's not already
     if len(image.shape) == 3:
-        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     else:
         gray_image = image
     
-    height, width = gray_image.shape
-    lbp_histograms = []
-    
-    # Define the LBP parameters
-    P = 8  # Number of circularly symmetric neighbor set points (podeu ajustar això)
-    R = 1  # Radius (podeu ajustar això)
+    # Get the image dimensions (height and width)
+    height, width = gray_image.shape[:2]
 
-    # Calculate block size based on the number of blocks requested
-    block_height = height // num_blocks[0]
-    block_width = width // num_blocks[1]
+    P = 8*R
 
-    # Loop through the image in defined blocks
-    for i in range(num_blocks[0]):
-        for j in range(num_blocks[1]):
-            # Define block boundaries
-            i_start = i * block_height
-            j_start = j * block_width
-            i_end = (i + 1) * block_height if (i + 1) * block_height <= height else height
-            j_end = (j + 1) * block_width if (j + 1) * block_width <= width else width
-            
-            # Extract the block from the image
-            block = gray_image[i_start:i_end, j_start:j_end]
-            
-            # Calculate the LBP for the block
-            lbp_matrix = local_binary_pattern(block, P, R, method="uniform")
-            
-            # Calculate the histogram for the block
-            (hist, _) = np.histogram(lbp_matrix.ravel(), bins=np.arange(0, P + 3), range=(0, P + 2))
-            hist = hist.astype("float")
-            hist /= hist.sum()  # Normalize the histogram
-            
-            lbp_histograms.append(hist)
-    
-    # Concatenate all block histograms into a single histogram
-    final_histogram = np.concatenate(lbp_histograms)
+    # Determine block size
+    if total_blocks == 1:
+        blocks_per_dim = 1
+        block_height = height
+        block_width = width
+    else:
+        blocks_per_dim = int(np.sqrt(total_blocks))  # Assume perfect square number of blocks
+        block_height = height // blocks_per_dim
+        block_width = width // blocks_per_dim
 
-    return final_histogram
+    histograms = []
+
+    # Loop over each block and compute the LBP histogram
+    for n in range(blocks_per_dim):
+        for m in range(blocks_per_dim):
+            # Define the current block using slicing
+            block = gray_image[n*block_height:(n+1)*block_height, m*block_width:(m+1)*block_width]
+            
+            # Compute the LBP for the block
+            lbp = local_binary_pattern(block, P, R, method="uniform")
+            
+            # Compute the histogram using cv.calcHist
+            (hist, _) = np.histogram(lbp.ravel(),bins=np.arange(0, P + 3),range=(0, P + 2))
+            
+            
+            hist = np.float32(hist)
+            eps = 1e-7
+            hist /= (hist.sum() + eps)
+
+           
+
+            # Append the histogram for this block
+            histograms = np.concatenate([histograms, hist])
+
+    return histograms
 
 def plot_histogram(histogram):
     """
@@ -72,6 +80,7 @@ def plot_histogram(histogram):
     plt.grid(axis='y')
     plt.tight_layout()
     plt.show() 
+
 
 
 

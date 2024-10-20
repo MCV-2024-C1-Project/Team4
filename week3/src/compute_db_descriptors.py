@@ -24,7 +24,7 @@ def main():
 
 	NUM_BLOCKS = args.num_blocks
 	DESCRIPTOR_TYPE = args.descriptor_type
-	print(DESCRIPTOR_TYPE)
+	
 
 	# Compute descriptors for the BBDD images (offline)
 	imgs_path = os.path.join(base_path, "data", "BBDD")
@@ -39,7 +39,7 @@ def main():
 
 		if DESCRIPTOR_TYPE == 'LBP':
 			img = cv.imread(os.path.join(imgs_path, filename),cv.COLOR_BGR2GRAY)
-			hist = lbp_block_histogram(img,(NUM_BLOCKS,NUM_BLOCKS))
+			hist = lbp_block_histogram(img,total_blocks = NUM_BLOCKS)
 			
 
 		index = int(filename.split('_')[-1].split('.')[0])
@@ -49,7 +49,7 @@ def main():
 		histograms[index] = hist
 
 	
-	with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{NUM_BLOCKS},{NUM_BLOCKS}_blocks_.pkl'), 'wb') as f:
+	with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{NUM_BLOCKS}_blocks.pkl'), 'wb') as f:
 		pickle.dump(histograms, f)
 	
 
