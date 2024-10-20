@@ -714,12 +714,11 @@ The algorithm consists of several steps:
 
 1. **Background detection using GrabCut algorithm**  
    Using the GrabCut algorithm, we create a mask that distinguishes between the foreground (artwork) and the background. GrabCut uses an iterative optimization process to classify pixels as either foreground or background based on a provided initial rectangle that encloses the object of interest.
-    
-   \[
-   E(x, z) = U(x, z) + V(x)
-   \]
- 
-    where: \(U(x, z)\) is the data term, representing the likelihood of pixel \(x\) being foreground or background given its label \(z\), and \(V(x)\) is the smoothness term, encouraging neighboring pixels to have similar labels.
+
+   ![Equation](https://latex.codecogs.com/png.latex?E%28x%2C%20z%29%20%3D%20U%28x%2C%20z%29%20%2B%20V%28x%29)
+
+   where: ![Equation](https://latex.codecogs.com/png.latex?U%28x%2C%20z%29) is the data term, representing the likelihood of pixel ![Equation](https://latex.codecogs.com/png.latex?x) being foreground or background given its label ![Equation](https://latex.codecogs.com/png.latex?z), and ![Equation](https://latex.codecogs.com/png.latex?V%28x%29) is the smoothness term, encouraging neighboring pixels to have similar labels.
+
 2. **Morphology + Fill surrounded pixels**  
    After GrabCut, morphological operations (opening and closing) are applied to clean up noise and fill holes in the foreground mask. Additionally, the `fill_surrounded_pixels` function ensures that any pixels surrounded by foreground in all directions are included in the mask.
 
@@ -729,22 +728,19 @@ The algorithm consists of several steps:
 4. **Contour approximation and corner detection**  
    The contours are approximated into polygons using Douglas-Peucker's algorithm, which simplifies the contours into fewer points.
 
-   The goal is to approximate each contour to a quadrilateral (four corners), representing the artwork's bounding box. The simplification is controlled by the parameter \( \epsilon \), which is a fraction of the contour's perimeter:
+   The goal is to approximate each contour to a quadrilateral (four corners), representing the artwork's bounding box. The simplification is controlled by the parameter ![Equation](https://latex.codecogs.com/png.latex?%5Cepsilon), which is a fraction of the contour's perimeter:
 
-   \[
-   \epsilon = \beta \times l
-   \]
+   ![Equation](https://latex.codecogs.com/png.latex?%5Cepsilon%20%3D%20%5Cbeta%20%5Ctimes%20l)
 
-   where \( l \) is the perimeter of the contour, and \( \beta \) is a small constant (e.g., 0.02). The algorithm keeps increasing \( \beta \) until the contour has exactly four points.
+   where ![Equation](https://latex.codecogs.com/png.latex?l) is the perimeter of the contour, and ![Equation](https://latex.codecogs.com/png.latex?%5Cbeta) is a small constant (e.g., 0.02). The algorithm keeps increasing ![Equation](https://latex.codecogs.com/png.latex?%5Cbeta) until the contour has exactly four points.
+
 5. **Perspective Transformation**  
    Once the corner points of the artwork are identified, a perspective transformation is applied to align the object into a rectangular view, correcting any perspective distortions.
-   The transformation matrix \(M\) is calculated using the four corner points from the artwork (source points) and mapping them to the desired output rectangle (destination points). The transformation is applied using the equation:
+   The transformation matrix ![Equation](https://latex.codecogs.com/png.latex?M) is calculated using the four corner points from the artwork (source points) and mapping them to the desired output rectangle (destination points). The transformation is applied using the equation:
 
-   \[
-   \mathbf{p'} = M \cdot \mathbf{p}
-   \]
+   ![Equation](https://latex.codecogs.com/png.latex?%5Cmathbf%7Bp%27%7D%20%3D%20M%20%5Ccdot%20%5Cmathbf%7Bp%7D)
 
-   where \( \mathbf{p} \) is the original point in the source image, \( M \) is the transformation matrix, and \( \mathbf{p'} \) is the point in the transformed image.
+   where ![Equation](https://latex.codecogs.com/png.latex?%5Cmathbf%7Bp%7D) is the original point in the source image, ![Equation](https://latex.codecogs.com/png.latex?M) is the transformation matrix, and ![Equation](https://latex.codecogs.com/png.latex?%5Cmathbf%7Bp%27%7D) is the point in the transformed image.
 
 ## Team Members
 
