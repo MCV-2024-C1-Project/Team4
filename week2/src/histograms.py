@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pickle
 import os
 from compute_similarities import compute_similarities
-from compute_descriptors import compute_histogram
+#from compute_descriptors import compute_histogram
 from mpl_toolkits.mplot3d import Axes3D
 from metrics import Metrics
 from average_precision import *
