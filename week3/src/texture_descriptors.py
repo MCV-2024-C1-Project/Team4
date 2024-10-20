@@ -77,36 +77,3 @@ def plot_histogram(histogram):
 
 
 
-def process_images_in_directory(directory_path):
-    # List to hold all histograms
-    histograms = []
-    files = [f for f in os.listdir(directory_path) if f.endswith(".jpg")]
-    
-    # Sort filenames based on the number after the last underscore
-    files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))  # Sort based on the number at the end
-    
-    # Process each image in the sorted list
-    for filename in files:
-            file_path = os.path.join(directory_path, filename)
-            # Read the image
-            image = cv2.imread(file_path,cv2.COLOR_BGR2GRAY)
-            if image is not None:
-                # Calculate LBP histogram for the image
-                blocks = (4,4)
-                hist = lbp_block_histogram(image,blocks)
-                index = int(filename.split('_')[-1].split('.')[0])
-                if len(histograms) <= index:
-                    histograms.extend([None] * (index + 1 - len(histograms)))
-                    histograms[index] = hist
-    with open(os.path.join(directory_path, '_LBP_'+str(blocks)+'_blocks_'+ '.pkl'), 'wb') as f:
-        pickle.dump(histograms, f)
-
-
-# Directory path
-directory_path = r'C:/Users/34634/Downloads/C1/Team4/week3/data/qsd1_w3/qsd1_w3'
-
-# Process all images in the directory
-histograms = process_images_in_directory(directory_path)
-
-
-
