@@ -13,9 +13,6 @@ def lbp_block_histogram(image, total_blocks=16, R=1):
     :param total_blocks: Total number of blocks to divide the image into (must be a perfect square).
     :param P: Number of circularly symmetric neighbor set points for LBP.
     :param R: Radius of the circle for LBP.
-    :param bins: Number of bins for the histogram.
-    :param ranges: Range of values for the histogram.
-    :param normalized: Boolean, whether to normalize histograms or not.
     :return: 1D array containing the concatenated histograms of all blocks.
     """
     # Convert image to grayscale if it's not already
