@@ -14,7 +14,6 @@ def fill_surrounded_pixels(foreground):
 	:param foreground: The foreground mask
 	:return: The new mask with surrounded pixels filled
 	"""
-	h, w = foreground.shape
 	new_mask = foreground.copy()
 
 	# Cumulative sums to check for foreground presence in each direction

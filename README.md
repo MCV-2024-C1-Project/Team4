@@ -688,6 +688,55 @@ The Median filter generally performs best, but certain images, like **00006.jpg*
 
 ### Task 2: Implement texture descriptors and evaluate query system (QSD1-W3) using only texture descriptors
 
+### Task 3: : Detect all the paintings (max 2 per image) + Remove background
+The background removal algorithm has been improved by relying on a combination of computer vision techniques, including GrabCut for background segmentation, contour detection, polygon approximation, and perspective transformation. 
+
+The algorithm focuses on identifying and isolating objects of interest (e.g., artworks) and transforming them to a canonical view.
+
+#### Algorithm Breakdown
+## README: Image Background Removal and Artwork Extraction
+
+### Overview
+
+This algorithm is designed to remove the background of an image and extract the largest artworks (contours) within the foreground. The process relies on a combination of computer vision techniques, including GrabCut for background segmentation, contour detection, polygon approximation, and perspective transformation. The algorithm focuses on identifying and isolating objects of interest (e.g., artworks) and transforming them to a canonical view.
+
+### Algorithm Breakdown
+
+The algorithm consists of several steps:
+
+1. **Background detection using GrabCut algorithm**  
+   Using the GrabCut algorithm, we create a mask that distinguishes between the foreground (artwork) and the background. GrabCut uses an iterative optimization process to classify pixels as either foreground or background based on a provided initial rectangle that encloses the object of interest.
+    
+   \[
+   E(x, z) = U(x, z) + V(x)
+   \]
+ 
+    where: \(U(x, z)\) is the data term, representing the likelihood of pixel \(x\) being foreground or background given its label \(z\), and \(V(x)\) is the smoothness term, encouraging neighboring pixels to have similar labels.
+2. **Morphology + Fill surrounded pixels**  
+   After GrabCut, morphological operations (opening and closing) are applied to clean up noise and fill holes in the foreground mask. Additionally, the `fill_surrounded_pixels` function ensures that any pixels surrounded by foreground in all directions are included in the mask.
+
+3. **Artwork detection via contour extraction**  
+   Contours, which represent the boundaries of objects in the mask, are extracted. The two largest contours are assumed to represent the primary objects (artworks) in the image. If only one object is present, only one contour is returned.
+
+4. **Contour approximation and corner detection**  
+   The contours are approximated into polygons using Douglas-Peucker's algorithm, which simplifies the contours into fewer points.
+
+   The goal is to approximate each contour to a quadrilateral (four corners), representing the artwork's bounding box. The simplification is controlled by the parameter \( \epsilon \), which is a fraction of the contour's perimeter:
+
+   \[
+   \epsilon = \beta \times l
+   \]
+
+   where \( l \) is the perimeter of the contour, and \( \beta \) is a small constant (e.g., 0.02). The algorithm keeps increasing \( \beta \) until the contour has exactly four points.
+5. **Perspective Transformation**  
+   Once the corner points of the artwork are identified, a perspective transformation is applied to align the object into a rectangular view, correcting any perspective distortions.
+   The transformation matrix \(M\) is calculated using the four corner points from the artwork (source points) and mapping them to the desired output rectangle (destination points). The transformation is applied using the equation:
+
+   \[
+   \mathbf{p'} = M \cdot \mathbf{p}
+   \]
+
+   where \( \mathbf{p} \) is the original point in the source image, \( M \) is the transformation matrix, and \( \mathbf{p'} \) is the point in the transformed image.
 
 ## Team Members
 
