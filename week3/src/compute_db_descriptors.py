@@ -53,7 +53,7 @@ def main():
 		histograms[index] = hist
 
 	
-	with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{NUM_BLOCKS}_blocks.pkl'), 'wb') as f:
+	with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{NUM_BLOCKS}_blocks_{NUM_BINS}_bins.pkl'), 'wb') as f:
 		pickle.dump(histograms, f)
 	
 

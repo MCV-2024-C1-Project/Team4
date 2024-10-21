@@ -95,10 +95,10 @@ def main():
 
 	# Load the precomputed image descriptors from '.pkl' files
 	# for both the query dataset  and the museum dataset (BBDD, computed offline)
-	with open(os.path.join(q_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks.pkl'), 'rb') as f:
+	with open(os.path.join(q_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'rb') as f:
 		query_histograms = pickle.load(f)
 
-	with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks.pkl'), 'rb') as f:
+	with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'rb') as f:
 		bbdd_histograms = pickle.load(f)
 	
 
@@ -111,7 +111,7 @@ def main():
 	# If we are not in testing mode
 	if not is_test:
 		# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
-		with open(os.path.join(q_path, f'{descriptor_type}_{num_blocks},{num_blocks}_blocks_{similarity_measure}_{str(k_value)}_results.pkl'), 'wb') as f:
+		with open(os.path.join(q_path, f'{descriptor_type}_{num_blocks}_blocks_{num_bins}_bins_{similarity_measure}_{str(k_value)}_results.pkl'), 'wb') as f:
 			pickle.dump(res_m, f)
 
 		# Evaluate the results using mAP@K if we are not in testing mode	
