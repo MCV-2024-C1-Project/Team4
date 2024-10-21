@@ -468,6 +468,280 @@ python background_removal.py data/qst2_w1
 python main.py ./data/qst2_w1/masked --color_space=HSV --num_levels=5 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=10 --is_test=True --is_pyramid=True
 ```
 
+<h2 align="center">WEEK 3: Tasks</h2>
+
+### Project Structure --> arreglar al final
+
+    week3/
+    ├── evaluation/
+    │   ├── bbox_iou.py
+    │   └── evaluation_funcs.py
+    ├── src/
+    │   ├── average_precision.py
+    │   ├── compute_db_descriptors.py
+    │   ├── compute_descriptors.py
+    │   ├── compute_img_descriptors.py
+    │   ├── compute_similarities.py
+    │   ├── main.py
+    │   ├── metrics.py
+    │   └── utils.py
+    ├── utils/
+    │   ├── plot_results.py
+    │   └── print_dict.py
+    
+### Task 1: Filter noise with linear or non-linear filters
+
+#### Linear Filters
+
+- **Gaussian Filter:**
+
+The Gaussian filter is a linear filtering technique commonly used in image processing to reduce noise and smooth images. It works by convolving the image with a Gaussian function, which gives higher weight to pixels closer to the center of the kernel and lower weight to those further away. This results in a weighted average of the neighboring pixels, effectively blurring the image while preserving its edges better than uniform averaging methods.
+
+*Example of execution:*
+```bash
+python .\noise_filtering.py ./data/qsd1_w3 --filter gaussian
+```
+
+This script first filters the image using the Gaussian filter (selected in this case) and then compares the filtered image to the original to detect whether the image had noise. 
+
+The comparison is made using the SSIM (Structural Similarity Index) metric. 
+
+If the SSIM value is greater than 0.56, the image is considered to be free of noise, and the original image is saved in a new folder named `images_without_noise`. If the SSIM value is less than or equal to 0.56, the image is considered to have noise, and the filtered image is saved instead. 
+
+Additionally, the script prints a list of images that were identified as noisy.
+
+```bash
+Images with noise:
+00005.jpg
+00006.jpg
+00016.jpg
+00018.jpg
+00020.jpg
+00023.jpg
+00029.jpg
+```
+
+*Gaussian Filter Testing:*
+
+The script compares filtered images with their original noise-free versions (ground truth) using the SSIM metric to assess the quality of noise filtering.
+
+```bash
+python .\filter_test.py ./data/qsd1_w3
+```
+
+**Note:** The images detected as noise-free should ideally have an SSIM value of 1. However, since we are comparing them with images in the `non_augmented` folder, which may differ in factors such as resolution or compression, the SSIM values do not reach 1.
+
+```bash
+SSIM Results:
+00000.jpg -> SSIM: 0.9702
+00001.jpg -> SSIM: 0.9993
+00002.jpg -> SSIM: 0.9942
+00003.jpg -> SSIM: 0.9945
+00004.jpg -> SSIM: 0.9993
+00005.jpg -> SSIM: 0.8296
+00006.jpg -> SSIM: 0.5234
+00007.jpg -> SSIM: 0.9908
+00008.jpg -> SSIM: 0.9994
+00009.jpg -> SSIM: 0.9905
+00010.jpg -> SSIM: 0.9994
+00011.jpg -> SSIM: 0.9993
+00012.jpg -> SSIM: 0.9862
+00013.jpg -> SSIM: 0.9923
+00014.jpg -> SSIM: 0.9911
+00015.jpg -> SSIM: 0.9928
+00016.jpg -> SSIM: 0.8201
+00017.jpg -> SSIM: 0.9844
+00018.jpg -> SSIM: 0.8959
+00019.jpg -> SSIM: 0.9863
+00020.jpg -> SSIM: 0.7833
+00021.jpg -> SSIM: 0.9993
+00022.jpg -> SSIM: 0.9994
+00023.jpg -> SSIM: 0.7898
+00024.jpg -> SSIM: 0.9995
+00025.jpg -> SSIM: 0.9888
+00026.jpg -> SSIM: 0.8266
+00027.jpg -> SSIM: 0.9995
+00028.jpg -> SSIM: 0.9966
+00029.jpg -> SSIM: 0.8810
+```
+
+#### Non-linear Filters
+
+- **Median Filter:**
+
+The median filter is a non-linear digital filtering technique, often used to remove noise from images. It works by replacing each pixel's value with the median value of the intensities in the neighborhood of that pixel. This is particularly effective for reducing salt-and-pepper noise.
+
+*Example of execution:*
+```bash
+python .\noise_filtering.py ./data/qsd1_w3 --filter median
+```
+
+*Median Filter Testing:*
+```bash
+python .\filter_test.py ./data/qsd1_w3
+```
+
+**Note:** The images detected as noise-free should ideally have an SSIM value of 1. However, since we are comparing them with images in the "non_augmented" folder, which may differ in factors such as resolution or compression, the SSIM values do not reach 1.
+
+```bash
+SSIM Results:
+00000.jpg -> SSIM: 0.9702
+00001.jpg -> SSIM: 0.9993
+00002.jpg -> SSIM: 0.9942
+00003.jpg -> SSIM: 0.9945
+00004.jpg -> SSIM: 0.9993
+00005.jpg -> SSIM: 0.8380
+00006.jpg -> SSIM: 0.4671
+00007.jpg -> SSIM: 0.9908
+00008.jpg -> SSIM: 0.9994
+00009.jpg -> SSIM: 0.9905
+00010.jpg -> SSIM: 0.9994
+00011.jpg -> SSIM: 0.9993
+00012.jpg -> SSIM: 0.9862
+00013.jpg -> SSIM: 0.9923
+00014.jpg -> SSIM: 0.9911
+00015.jpg -> SSIM: 0.9928
+00016.jpg -> SSIM: 0.8519
+00017.jpg -> SSIM: 0.9844
+00018.jpg -> SSIM: 0.9406
+00019.jpg -> SSIM: 0.9863
+00020.jpg -> SSIM: 0.8145
+00021.jpg -> SSIM: 0.9993
+00022.jpg -> SSIM: 0.9994
+00023.jpg -> SSIM: 0.8893
+00024.jpg -> SSIM: 0.9995
+00025.jpg -> SSIM: 0.9888
+00026.jpg -> SSIM: 0.8266
+00027.jpg -> SSIM: 0.9995
+00028.jpg -> SSIM: 0.9966
+00029.jpg -> SSIM: 0.9102
+```
+
+- **Non-Local Means (NLM) Filter:**
+
+The Non-Local Means filter is another effective non-linear filtering technique that reduces noise while preserving details. It works by averaging the pixels based on their similarity to the target pixel, considering pixels from the entire image rather than just the local neighborhood.
+
+*Example of execution:*
+```bash
+python .\noise_filtering.py ./data/qsd1_w3 --filter nlm
+```
+
+*Non-Local Means Filter Testing:*
+```bash
+python .\filter_test.py ./data/qsd1_w3
+```
+
+**Note:** The images detected as noise-free should ideally have an SSIM value of 1. However, since we are comparing them with images in the "non_augmented" folder, which may differ in factors such as resolution or compression, the SSIM values do not reach 1.
+
+```bash
+SSIM Results:
+00000.jpg -> SSIM: 0.9702
+00001.jpg -> SSIM: 0.9993
+00002.jpg -> SSIM: 0.9942
+00003.jpg -> SSIM: 0.9945
+00004.jpg -> SSIM: 0.9993
+00005.jpg -> SSIM: 0.7050
+00006.jpg -> SSIM: 0.5303
+00007.jpg -> SSIM: 0.9908
+00008.jpg -> SSIM: 0.9994
+00009.jpg -> SSIM: 0.9905
+00010.jpg -> SSIM: 0.9994
+00011.jpg -> SSIM: 0.9993
+00012.jpg -> SSIM: 0.9862
+00013.jpg -> SSIM: 0.9923
+00014.jpg -> SSIM: 0.9911
+00015.jpg -> SSIM: 0.9928
+00016.jpg -> SSIM: 0.7707
+00017.jpg -> SSIM: 0.9844
+00018.jpg -> SSIM: 0.9298
+00019.jpg -> SSIM: 0.9863
+00020.jpg -> SSIM: 0.7680
+00021.jpg -> SSIM: 0.9993
+00022.jpg -> SSIM: 0.9994
+00023.jpg -> SSIM: 0.7864
+00024.jpg -> SSIM: 0.9995
+00025.jpg -> SSIM: 0.9888
+00026.jpg -> SSIM: 0.8266
+00027.jpg -> SSIM: 0.9995
+00028.jpg -> SSIM: 0.9966
+00029.jpg -> SSIM: 0.8366
+```
+
+#### Examples
+
+The table below compares the original noisy images with those filtered using different noise reduction techniques: Gaussian, Median, and Non-Local Means. 
+
+For each method, the SSIM score is calculated to evaluate how well the filter preserves the structural similarity of the image when compared with the ground truth. 
+
+Higher SSIM values indicate better noise reduction while maintaining image details.
+
+The Median filter generally performs best, but certain images, like **00006.jpg**, exhibit unique characteristics where the texture resembles noise, affecting the SSIM score.
+
+| Original Image        | Gaussian Filtered Image    | Median Filtered Image    | Non-Local Means Filtered Image    |
+|-----------------------|----------------------------|---------------------------|------------------------------------|
+| ![image](https://github.com/user-attachments/assets/b3726eff-57e6-47d0-ad20-7dcb308bb4da) | ![image](https://github.com/user-attachments/assets/5e25824d-ba7a-4e68-800d-9a1d4e2480d0) |  ![image](https://github.com/user-attachments/assets/d328af13-a54d-4554-907b-508266cfbb9b) | ![image](https://github.com/user-attachments/assets/56d1c77c-ac2a-49d8-8dd1-0948e619202b) |
+| 00023.jpg -> SSIM: | 0.7898 |  **0.8893** | 0.7864 |
+| ![image](https://github.com/user-attachments/assets/4cf13edc-e2e3-4f8f-8367-96a0e0141231) | ![image](https://github.com/user-attachments/assets/12b4503a-a80e-44eb-b70d-afc03f949ca6) | ![image](https://github.com/user-attachments/assets/4cbd9a80-79dc-41f4-8d09-7abf78f4340f) | ![image](https://github.com/user-attachments/assets/7ae5c131-e32c-4c21-9fc3-25e24acedeba) |
+| 00018.jpg -> SSIM: | 0.8959 |  **0.9406** | 0.9298 |
+| ![image](https://github.com/user-attachments/assets/52b878bc-4f5e-43ab-9b6d-488a905c703b)  | ![image](https://github.com/user-attachments/assets/8f0d10fb-aa24-4ed2-9ac6-eb862dd62f9a) | ![image](https://github.com/user-attachments/assets/3e180932-cec5-495c-bb0e-596849afe944) | ![image](https://github.com/user-attachments/assets/07a52a5e-1f3a-40a0-98f0-f56ce6b2344d) |
+| 00006.jpg -> SSIM: | 0.5234 |  0.4671 | **0.5303** |
+
+### Task 2: Implement texture descriptors and evaluate query system (QSD1-W3) using only texture descriptors
+- **Evaluate query system (QSD1-W3) with noise removal using the best color descriptors from previous week:**
+  
+```bash
+# Block 3D color histograms
+(env) PS C:\Users\34663\GitHub\Team4\week2\src> python main.py ./data/qsd1_w3/images_without_noise --color_space=HSV --num_blocks=256 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1
+Processing images: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 30/30 [00:00<00:00, 63.68image/s]
+Processing images: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 30/30 [00:00<00:00, 67.64image/s]
+mAP@1 for HSV: 0.7333333333333333
+
+# Hierarchical 3D color histograms
+(env) PS C:\Users\34663\GitHub\Team4\week2\src> py main.py ./data/qsd1_w3/images_without_noise --color_space=HSV --num_levels=5 --num_bins=4 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1 --is_pyramid=True
+Processing images: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 30/30 [00:00<00:00, 47.10image/s]
+Processing images: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 30/30 [00:00<00:00, 49.12image/s]
+mAP@1 for HSV: 0.7333333333333333
+```
+
+### Task 3: : Detect all the paintings (max 2 per image) + Remove background
+The background removal algorithm has been improved by relying on a combination of computer vision techniques, including GrabCut for background segmentation, contour detection, polygon approximation, and perspective transformation. 
+
+The algorithm focuses on identifying and isolating objects of interest (e.g., artworks) and transforming them to a canonical view.
+
+#### Algorithm Breakdown
+
+The algorithm consists of several steps:
+
+1. **Background detection using GrabCut algorithm**  
+   Using the GrabCut algorithm, we create a mask that distinguishes between the foreground (artwork) and the background. GrabCut uses an iterative optimization process to classify pixels as either foreground or background based on a provided initial rectangle that encloses the object of interest.
+
+   ![Equation](https://latex.codecogs.com/png.latex?E%28x%2C%20z%29%20%3D%20U%28x%2C%20z%29%20%2B%20V%28x%29)
+
+   where: ![Equation](https://latex.codecogs.com/png.latex?U%28x%2C%20z%29) is the data term, representing the likelihood of pixel ![Equation](https://latex.codecogs.com/png.latex?x) being foreground or background given its label ![Equation](https://latex.codecogs.com/png.latex?z), and ![Equation](https://latex.codecogs.com/png.latex?V%28x%29) is the smoothness term, encouraging neighboring pixels to have similar labels.
+
+2. **Morphology + Fill surrounded pixels**  
+   After GrabCut, morphological operations (opening and closing) are applied to clean up noise and fill holes in the foreground mask. Additionally, the `fill_surrounded_pixels` function ensures that any pixels surrounded by foreground in all directions are included in the mask.
+
+3. **Artwork detection via contour extraction**  
+   Contours, which represent the boundaries of objects in the mask, are extracted. The two largest contours are assumed to represent the primary objects (artworks) in the image. If only one object is present, only one contour is returned.
+
+4. **Contour approximation and corner detection**  
+   The contours are approximated into polygons using Douglas-Peucker's algorithm, which simplifies the contours into fewer points.
+
+   The goal is to approximate each contour to a quadrilateral (four corners), representing the artwork's bounding box. The simplification is controlled by the parameter ![Equation](https://latex.codecogs.com/png.latex?%5Cepsilon), which is a fraction of the contour's perimeter:
+
+   ![Equation](https://latex.codecogs.com/png.latex?%5Cepsilon%20%3D%20%5Cbeta%20%5Ctimes%20l)
+
+   where ![Equation](https://latex.codecogs.com/png.latex?l) is the perimeter of the contour, and ![Equation](https://latex.codecogs.com/png.latex?%5Cbeta) is a small constant (e.g., 0.02). The algorithm keeps increasing ![Equation](https://latex.codecogs.com/png.latex?%5Cbeta) until the contour has exactly four points.
+
+5. **Perspective Transformation**  
+   Once the corner points of the artwork are identified, a perspective transformation is applied to align the object into a rectangular view, correcting any perspective distortions.
+   The transformation matrix ![Equation](https://latex.codecogs.com/png.latex?M) is calculated using the four corner points from the artwork (source points) and mapping them to the desired output rectangle (destination points). The transformation is applied using the equation:
+
+   ![Equation](https://latex.codecogs.com/png.latex?%5Cmathbf%7Bp%27%7D%20%3D%20M%20%5Ccdot%20%5Cmathbf%7Bp%7D)
+
+   where ![Equation](https://latex.codecogs.com/png.latex?%5Cmathbf%7Bp%7D) is the original point in the source image, ![Equation](https://latex.codecogs.com/png.latex?M) is the transformation matrix, and ![Equation](https://latex.codecogs.com/png.latex?%5Cmathbf%7Bp%27%7D) is the point in the transformed image.
+
 ## Team Members
 
 This project was developed by the following team members:

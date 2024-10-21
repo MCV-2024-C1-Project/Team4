@@ -1,6 +1,7 @@
 
 import cv2
 import os
+import argparse
 import glob
 import numpy as np
 from tqdm import tqdm
@@ -10,10 +11,16 @@ from skimage.metrics import peak_signal_noise_ratio
 
 # Task 1: Noise filtering on images
 
+# Argument parser
+parser = argparse.ArgumentParser(description="Filter noise from images.")
+parser.add_argument("query_path", help="Path to the query dataset")
+args = parser.parse_args()
+
 # Path to the folder containing the images
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-folder_path_images_without_noise = os.path.join(base_path, "./data/qsd1_w3/images_without_noise")
-folder_path_non_augmented = os.path.join(base_path, "./data/qsd1_w3/non_augmented")
+folder_path = os.path.join(base_path, args.query_path)
+folder_path_images_without_noise = os.path.join(folder_path, "images_without_noise")
+folder_path_non_augmented = os.path.join(folder_path, "non_augmented")
 
 # Get all images with .jpg extension
 filtered_images = glob.glob(os.path.join(folder_path_images_without_noise, "*.jpg"))
