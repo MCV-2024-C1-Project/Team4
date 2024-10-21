@@ -9,7 +9,7 @@ import pickle
 import argparse
 from tqdm import tqdm
 
-from texture_descriptors import lbp_block_histogram
+from texture_descriptors import *
 
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -40,7 +40,9 @@ def main():
 		if DESCRIPTOR_TYPE == 'LBP':
 			img = cv.imread(os.path.join(imgs_path, filename),cv.COLOR_BGR2GRAY)
 			hist = lbp_block_histogram(img,total_blocks = NUM_BLOCKS)
-			
+		
+
+
 
 		index = int(filename.split('_')[-1].split('.')[0])
 

@@ -74,6 +74,8 @@ def main():
 		if descriptor_type == 'LBP':
 			img = cv.imread(os.path.join(q_path, filename),cv.COLOR_BGR2GRAY)
 			hist = lbp_block_histogram(img,total_blocks = num_blocks)
+		
+
 
 		
 
