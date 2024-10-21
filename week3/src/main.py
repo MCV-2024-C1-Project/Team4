@@ -21,12 +21,14 @@ def main():
 	parser.add_argument("query_path", help="Path to the query dataset")
 	parser.add_argument("--num_blocks", help="Number of blocks fot the block histogram", default=1)
 	parser.add_argument("--similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)", default="HISTCMP_HELLINGER")
+	parser.add_argument("--num_bins")
 	parser.add_argument("--k_value", help="Top k results", default=1)
 	parser.add_argument("--descriptor_type", help ="Descriptor texture type")
 	parser.add_argument("--is_test", help="True if we are testing the model (without ground truth)", default=False, type=bool)
 
 	args = parser.parse_args()
 	num_blocks = int(args.num_blocks)
+	num_bins = int(args.num_bins)
 	similarity_measure = args.similarity_measure
 	k_value = int(args.k_value)
 	q_path = os.path.join(base_path, args.query_path)
@@ -73,7 +75,9 @@ def main():
 
 		if descriptor_type == 'LBP':
 			img = cv.imread(os.path.join(q_path, filename),cv.COLOR_BGR2GRAY)
-			hist = lbp_block_histogram(img,total_blocks = num_blocks)
+			hist = lbp_block_histogram(img,total_blocks = num_blocks,bins = num_bins)
+		
+
 
 		
 
@@ -86,15 +90,15 @@ def main():
 
 	
 	# Save query histograms to a pickle file
-	with open(os.path.join(q_path, f'{descriptor_type}_histograms_{num_blocks}_blocks.pkl'), 'wb') as f:
+	with open(os.path.join(q_path, f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'wb') as f:
 		pickle.dump(histograms, f)
 
 	# Load the precomputed image descriptors from '.pkl' files
 	# for both the query dataset  and the museum dataset (BBDD, computed offline)
-	with open(os.path.join(q_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks.pkl'), 'rb') as f:
+	with open(os.path.join(q_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'rb') as f:
 		query_histograms = pickle.load(f)
 
-	with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks.pkl'), 'rb') as f:
+	with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'rb') as f:
 		bbdd_histograms = pickle.load(f)
 	
 
@@ -107,7 +111,7 @@ def main():
 	# If we are not in testing mode
 	if not is_test:
 		# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
-		with open(os.path.join(q_path, f'{descriptor_type}_{num_blocks},{num_blocks}_blocks_{similarity_measure}_{str(k_value)}_results.pkl'), 'wb') as f:
+		with open(os.path.join(q_path, f'{descriptor_type}_{num_blocks}_blocks_{num_bins}_bins_{similarity_measure}_{str(k_value)}_results.pkl'), 'wb') as f:
 			pickle.dump(res_m, f)
 
 		# Evaluate the results using mAP@K if we are not in testing mode	

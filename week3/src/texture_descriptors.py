@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os 
 import pickle
 
-def lbp_block_histogram(image, total_blocks=16, R=1):
+def lbp_block_histogram(image, total_blocks=16, R=1, bins = 16):
     """
     Computes the concatenated LBP histograms for an image divided into a specified number of blocks.
     
@@ -45,10 +45,10 @@ def lbp_block_histogram(image, total_blocks=16, R=1):
             block = gray_image[n*block_height:(n+1)*block_height, m*block_width:(m+1)*block_width]
             
             # Compute the LBP for the block
-            lbp = local_binary_pattern(block, P, R, method="uniform")
+            lbp = local_binary_pattern(block, P, R, method="default")
             
-            # Compute the histogram using cv.calcHist
-            (hist, _) = np.histogram(lbp.ravel(),bins=np.arange(0, P + 3),range=(0, P + 2))
+            
+            (hist, _) = np.histogram(lbp.ravel(),bins=bins)
             
             
             hist = np.float32(hist)
@@ -62,21 +62,9 @@ def lbp_block_histogram(image, total_blocks=16, R=1):
 
     return histograms
 
-def plot_histogram(histogram):
-    """
-    Plot the histogram.
-    
-    :param histogram: Histogram to plot
-    """
-    plt.figure(figsize=(10, 5))
-    plt.bar(range(len(histogram)), histogram, width=0.5, color='blue', alpha=0.7)
-    plt.title('Concatenated LBP Histogram')
-    plt.xlabel('LBP Value')
-    plt.ylabel('Frequency')
-    plt.xticks(ticks=range(len(histogram)), labels=range(len(histogram)), rotation=90)
-    plt.grid(axis='y')
-    plt.tight_layout()
-    plt.show() 
+
+
+
 
 
 
