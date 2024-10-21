@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 from skimage.feature import local_binary_pattern
+import pywt
 
 
 def dct_block_histogram(image, total_blocks=16, bins=16):
@@ -111,9 +112,42 @@ def lbp_block_histogram(image, total_blocks=16, R=1, bins = 16):
     return histograms
 
 
+def wavelet_histogram(image, wavelet='db1', bins=16, level=1):
+    """
+    Computes the concatenated Wavelet histograms for the entire image (without dividing into blocks).
 
+    :param image: Input grayscale image. If the input image is in color, it will be converted to grayscale.
+    :param wavelet: Type of wavelet to use ('db1', 'haar', etc.).
+    :param bins: Number of bins for the histogram.
+    :param level: Level of the wavelet decomposition.
+    :return: 1D array containing the concatenated histograms of all wavelet subbands.
+    """
+    # Convert image to grayscale if needed
+    if len(image.shape) == 3:
+        gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    else:
+        gray_image = image
 
+    # Apply wavelet decomposition (DWT) on the entire image
+    coeffs = pywt.wavedec2(gray_image, wavelet, level=level)
 
+    # Extract subbands (approximation and details)
+    cA, (cH, cV, cD) = coeffs[0], coeffs[1]
+
+    # List to store histograms
+    descriptors = []
+
+    # Compute histograms for each subband (approximation and details)
+    for coeff in [cA, cH, cV, cD]:
+        hist, _ = np.histogram(coeff.ravel(), bins=bins)
+        hist = np.float32(hist)
+        eps = 1e-7
+        hist /= (hist.sum() + eps)  # Normalize the histogram
+
+        # Append the histogram for this subband
+        descriptors = np.concatenate([descriptors, hist])
+
+    return descriptors
 
 
 

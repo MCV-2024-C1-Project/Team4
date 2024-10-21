@@ -5,3 +5,4 @@ pypickle
 matplotlib
 tqdm
 scikit-image
+PyWavelets

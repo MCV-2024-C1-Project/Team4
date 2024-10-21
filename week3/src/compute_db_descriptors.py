@@ -18,14 +18,18 @@ def main():
 
 	# Argument parser
 	parser = argparse.ArgumentParser(description="")
-	parser.add_argument('--num_blocks', type=int, help='Number of blocks for block histogram')
+	parser.add_argument('--num_blocks', type=int, help='Number of blocks for block histogram', default=4)
 	parser.add_argument('--num_bins')
+	parser.add_argument('--num_levels')
 	parser.add_argument('--descriptor_type')
+	parser.add_argument('--wavelet_type', help='Type of wavelet to use (db1, haar)')
 	args = parser.parse_args()
 
 	NUM_BLOCKS = int(args.num_blocks)
 	NUM_BINS = int(args.num_bins)
 	DESCRIPTOR_TYPE = args.descriptor_type
+	NUM_LEVELS = int(args.num_levels)
+	WAVELET_TYPE = args.wavelet_type
 	
 
 	# Compute descriptors for the BBDD images (offline)
@@ -40,11 +44,13 @@ def main():
 		img_bgr = cv.imread(os.path.join(imgs_path, filename))
 
 		if DESCRIPTOR_TYPE == 'LBP':
-			img = cv.imread(os.path.join(imgs_path, filename),cv.COLOR_BGR2GRAY)
-			hist = lbp_block_histogram(img,total_blocks = NUM_BLOCKS, bins = NUM_BINS)
+			hist = lbp_block_histogram(img_bgr,total_blocks = NUM_BLOCKS, bins = NUM_BINS)
 
 		elif DESCRIPTOR_TYPE == 'DCT':
 			hist = dct_block_histogram(img_bgr, total_blocks=NUM_BLOCKS, bins=NUM_BINS)
+		
+		elif DESCRIPTOR_TYPE == 'wavelet':
+			hist = wavelet_histogram(img_bgr, wavelet=WAVELET_TYPE, bins=NUM_BINS, level=NUM_LEVELS)
 		
 		# TODO: Add more texture descriptors here
 
@@ -54,9 +60,12 @@ def main():
 			histograms.extend([None] * (index + 1 - len(histograms)))
 		histograms[index] = hist
 
-	
-	with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{NUM_BLOCKS}_blocks_{NUM_BINS}_bins.pkl'), 'wb') as f:
-		pickle.dump(histograms, f)
+	if DESCRIPTOR_TYPE == 'wavelet':
+		with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{WAVELET_TYPE}_type_{NUM_LEVELS}_levels_{NUM_BINS}_bins.pkl'), 'wb') as f:
+			pickle.dump(histograms, f)
+	else:
+		with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{NUM_BLOCKS}_blocks_{NUM_BINS}_bins.pkl'), 'wb') as f:
+			pickle.dump(histograms, f)
 	
 
 

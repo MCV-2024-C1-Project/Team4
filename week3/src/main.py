@@ -7,7 +7,7 @@ from tqdm import tqdm
 from compute_similarities import compute_similarities
 from average_precision import mapk
 from metrics import Metrics
-from texture_descriptors import lbp_block_histogram, dct_block_histogram
+from texture_descriptors import *
 
 # Get the path of the folder containing the museum dataset (BBDD)
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -22,9 +22,11 @@ def main():
 	parser.add_argument("--num_blocks", help="Number of blocks fot the block histogram", default=1)
 	parser.add_argument("--similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)", default="HISTCMP_HELLINGER")
 	parser.add_argument("--num_bins", help="Number of bins for the histogram", default=16)
+	parser.add_argument('--num_levels')
 	parser.add_argument("--k_value", help="Top k results", default=1)
 	parser.add_argument("--descriptor_type", help ="Descriptor texture type")
 	parser.add_argument("--is_test", help="True if we are testing the model (without ground truth)", default=False, type=bool)
+	parser.add_argument('--wavelet_type', help='Type of wavelet to use (db1, haar)')
 
 	args = parser.parse_args()
 	num_blocks = int(args.num_blocks)
@@ -34,6 +36,8 @@ def main():
 	q_path = os.path.join(base_path, args.query_path)
 	is_test = args.is_test
 	descriptor_type = args.descriptor_type
+	num_levels = int(args.num_levels)
+	wavelet_type = args.wavelet_type
 
 	# Select the appropriate similarity measure based on the command line argument. 
 	# For those distances that we have defined manually, we have assigned
@@ -75,11 +79,13 @@ def main():
 		img_bgr = cv.imread(os.path.join(q_path, filename))
 
 		if descriptor_type == 'LBP':
-			img = cv.imread(os.path.join(q_path, filename),cv.COLOR_BGR2GRAY)
-			hist = lbp_block_histogram(img,total_blocks = num_blocks,bins = num_bins)
+			hist = lbp_block_histogram(img_bgr,total_blocks = num_blocks,bins = num_bins)
 
 		elif descriptor_type == 'DCT':
 			hist = dct_block_histogram(img_bgr, total_blocks=num_blocks, bins=num_bins)
+		
+		elif descriptor_type == 'wavelet':
+			hist = wavelet_histogram(img_bgr, wavelet=wavelet_type, bins=num_bins, level=num_levels)
 
 		# TODO: Add more texture descriptors here
 
@@ -90,18 +96,31 @@ def main():
 			histograms.extend([None] * (index + 1 - len(histograms)))
 		histograms[index] = hist
 
+	if descriptor_type == 'wavelet':
+		# Save query histograms to a pickle file
+		with open(os.path.join(q_path, f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels_{num_bins}_bins.pkl'), 'wb') as f:
+			pickle.dump(histograms, f)
+
+		# Load the precomputed image descriptors from '.pkl' files
+		# for both the query dataset  and the museum dataset (BBDD, computed offline)
+		with open(os.path.join(q_path,  f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels_{num_bins}_bins.pkl'), 'rb') as f:
+			query_histograms = pickle.load(f)
+
+		with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels_{num_bins}_bins.pkl'), 'rb') as f:
+			bbdd_histograms = pickle.load(f)
 	
-	# Save query histograms to a pickle file
-	with open(os.path.join(q_path, f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'wb') as f:
-		pickle.dump(histograms, f)
+	else:
+		# Save query histograms to a pickle file
+		with open(os.path.join(q_path, f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'wb') as f:
+			pickle.dump(histograms, f)
 
-	# Load the precomputed image descriptors from '.pkl' files
-	# for both the query dataset  and the museum dataset (BBDD, computed offline)
-	with open(os.path.join(q_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'rb') as f:
-		query_histograms = pickle.load(f)
+		# Load the precomputed image descriptors from '.pkl' files
+		# for both the query dataset  and the museum dataset (BBDD, computed offline)
+		with open(os.path.join(q_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'rb') as f:
+			query_histograms = pickle.load(f)
 
-	with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'rb') as f:
-		bbdd_histograms = pickle.load(f)
+		with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'rb') as f:
+			bbdd_histograms = pickle.load(f)
 	
 
 	# For each image in the query set, compute its similarity to all museum images (BBDD).
@@ -112,12 +131,21 @@ def main():
 	
 	# If we are not in testing mode
 	if not is_test:
-		# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
-		with open(os.path.join(q_path, f'{descriptor_type}_{num_blocks}_blocks_{num_bins}_bins_{similarity_measure}_{str(k_value)}_results.pkl'), 'wb') as f:
-			pickle.dump(res_m, f)
+		if descriptor_type == 'wavelet':
+			# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
+			with open(os.path.join(q_path, f'{descriptor_type}_{num_levels}_levels_{num_bins}_bins_{similarity_measure}_{wavelet_type}_type_{str(k_value)}_results.pkl'), 'wb') as f:
+				pickle.dump(res_m, f)
 
-		# Evaluate the results using mAP@K if we are not in testing mode	
-		print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
+			# Evaluate the results using mAP@K if we are not in testing mode	
+			print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
+
+		else:
+			# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
+			with open(os.path.join(q_path, f'{descriptor_type}_{num_blocks}_blocks_{num_bins}_bins_{similarity_measure}_{str(k_value)}_results.pkl'), 'wb') as f:
+				pickle.dump(res_m, f)
+
+			# Evaluate the results using mAP@K if we are not in testing mode	
+			print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
 
 	'''
 	# Save the 'blind' results for the test query set 
