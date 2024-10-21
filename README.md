@@ -523,45 +523,45 @@ Images with noise:
 
 *Gaussian Filter Testing:*
 
-The script compares filtered images with their original noise-free versions (ground truth) using the SSIM metric to assess the quality of noise filtering.
+The script compares filtered images with their original noise-free versions (`non_augmented` folder) using the SSIM metric to assess the quality of noise filtering.
 
 ```bash
 python .\filter_test.py ./data/qsd1_w3
 ```
 
-**Note:** The images detected as noise-free should ideally have an SSIM value of 1. However, since we are comparing them with images in the `non_augmented` folder, which may differ in factors such as resolution or compression, the SSIM values do not reach 1.
+**Note:** Not all noise-free images have an SSIM score of 1 because some images in the `qsd1_w3` dataset were altered either by noise or by color changes. Images with an SSIM value of 1 are unaltered. In this section, we focus on noise removal, specifically targeting the images listed as noisy above.
 
 ```bash
 SSIM Results:
-00000.jpg -> SSIM: 0.9702
-00001.jpg -> SSIM: 0.9993
-00002.jpg -> SSIM: 0.9942
-00003.jpg -> SSIM: 0.9945
-00004.jpg -> SSIM: 0.9993
+00000.jpg -> SSIM: 0.9704
+00001.jpg -> SSIM: 1.0000
+00002.jpg -> SSIM: 0.9947
+00003.jpg -> SSIM: 0.9948
+00004.jpg -> SSIM: 1.0000
 00005.jpg -> SSIM: 0.8296
 00006.jpg -> SSIM: 0.5234
-00007.jpg -> SSIM: 0.9908
-00008.jpg -> SSIM: 0.9994
-00009.jpg -> SSIM: 0.9905
-00010.jpg -> SSIM: 0.9994
-00011.jpg -> SSIM: 0.9993
-00012.jpg -> SSIM: 0.9862
-00013.jpg -> SSIM: 0.9923
-00014.jpg -> SSIM: 0.9911
-00015.jpg -> SSIM: 0.9928
+00007.jpg -> SSIM: 0.9910
+00008.jpg -> SSIM: 1.0000
+00009.jpg -> SSIM: 0.9907
+00010.jpg -> SSIM: 1.0000
+00011.jpg -> SSIM: 1.0000
+00012.jpg -> SSIM: 0.9865
+00013.jpg -> SSIM: 0.9925
+00014.jpg -> SSIM: 0.9912
+00015.jpg -> SSIM: 0.9931
 00016.jpg -> SSIM: 0.8201
-00017.jpg -> SSIM: 0.9844
+00017.jpg -> SSIM: 0.9848
 00018.jpg -> SSIM: 0.8959
-00019.jpg -> SSIM: 0.9863
+00019.jpg -> SSIM: 0.9867
 00020.jpg -> SSIM: 0.7833
-00021.jpg -> SSIM: 0.9993
-00022.jpg -> SSIM: 0.9994
+00021.jpg -> SSIM: 1.0000
+00022.jpg -> SSIM: 1.0000
 00023.jpg -> SSIM: 0.7898
-00024.jpg -> SSIM: 0.9995
-00025.jpg -> SSIM: 0.9888
+00024.jpg -> SSIM: 1.0000
+00025.jpg -> SSIM: 0.9892
 00026.jpg -> SSIM: 0.8266
-00027.jpg -> SSIM: 0.9995
-00028.jpg -> SSIM: 0.9966
+00027.jpg -> SSIM: 1.0000
+00028.jpg -> SSIM: 0.9967
 00029.jpg -> SSIM: 0.8810
 ```
 
@@ -581,39 +581,39 @@ python .\noise_filtering.py ./data/qsd1_w3 --filter median
 python .\filter_test.py ./data/qsd1_w3
 ```
 
-**Note:** The images detected as noise-free should ideally have an SSIM value of 1. However, since we are comparing them with images in the "non_augmented" folder, which may differ in factors such as resolution or compression, the SSIM values do not reach 1.
+**Note:** Not all noise-free images have an SSIM score of 1 because some images in the `qsd1_w3` dataset were altered either by noise or by color changes. Images with an SSIM value of 1 are unaltered. In this section, we focus on noise removal, specifically targeting the images listed as noisy above.
 
 ```bash
 SSIM Results:
-00000.jpg -> SSIM: 0.9702
-00001.jpg -> SSIM: 0.9993
-00002.jpg -> SSIM: 0.9942
-00003.jpg -> SSIM: 0.9945
-00004.jpg -> SSIM: 0.9993
+00000.jpg -> SSIM: 0.9704
+00001.jpg -> SSIM: 1.0000
+00002.jpg -> SSIM: 0.9947
+00003.jpg -> SSIM: 0.9948
+00004.jpg -> SSIM: 1.0000
 00005.jpg -> SSIM: 0.8380
 00006.jpg -> SSIM: 0.4671
-00007.jpg -> SSIM: 0.9908
-00008.jpg -> SSIM: 0.9994
-00009.jpg -> SSIM: 0.9905
-00010.jpg -> SSIM: 0.9994
-00011.jpg -> SSIM: 0.9993
-00012.jpg -> SSIM: 0.9862
-00013.jpg -> SSIM: 0.9923
-00014.jpg -> SSIM: 0.9911
-00015.jpg -> SSIM: 0.9928
+00007.jpg -> SSIM: 0.9910
+00008.jpg -> SSIM: 1.0000
+00009.jpg -> SSIM: 0.9907
+00010.jpg -> SSIM: 1.0000
+00011.jpg -> SSIM: 1.0000
+00012.jpg -> SSIM: 0.9865
+00013.jpg -> SSIM: 0.9925
+00014.jpg -> SSIM: 0.9912
+00015.jpg -> SSIM: 0.9931
 00016.jpg -> SSIM: 0.8519
-00017.jpg -> SSIM: 0.9844
+00017.jpg -> SSIM: 0.9848
 00018.jpg -> SSIM: 0.9406
-00019.jpg -> SSIM: 0.9863
+00019.jpg -> SSIM: 0.9867
 00020.jpg -> SSIM: 0.8145
-00021.jpg -> SSIM: 0.9993
-00022.jpg -> SSIM: 0.9994
+00021.jpg -> SSIM: 1.0000
+00022.jpg -> SSIM: 1.0000
 00023.jpg -> SSIM: 0.8893
-00024.jpg -> SSIM: 0.9995
-00025.jpg -> SSIM: 0.9888
+00024.jpg -> SSIM: 1.0000
+00025.jpg -> SSIM: 0.9892
 00026.jpg -> SSIM: 0.8266
-00027.jpg -> SSIM: 0.9995
-00028.jpg -> SSIM: 0.9966
+00027.jpg -> SSIM: 1.0000
+00028.jpg -> SSIM: 0.9967
 00029.jpg -> SSIM: 0.9102
 ```
 
@@ -631,39 +631,39 @@ python .\noise_filtering.py ./data/qsd1_w3 --filter nlm
 python .\filter_test.py ./data/qsd1_w3
 ```
 
-**Note:** The images detected as noise-free should ideally have an SSIM value of 1. However, since we are comparing them with images in the "non_augmented" folder, which may differ in factors such as resolution or compression, the SSIM values do not reach 1.
+**Note:** Not all noise-free images have an SSIM score of 1 because some images in the `qsd1_w3` dataset were altered either by noise or by color changes. Images with an SSIM value of 1 are unaltered. In this section, we focus on noise removal, specifically targeting the images listed as noisy above.
 
 ```bash
 SSIM Results:
-00000.jpg -> SSIM: 0.9702
-00001.jpg -> SSIM: 0.9993
-00002.jpg -> SSIM: 0.9942
-00003.jpg -> SSIM: 0.9945
-00004.jpg -> SSIM: 0.9993
+00000.jpg -> SSIM: 0.9704
+00001.jpg -> SSIM: 1.0000
+00002.jpg -> SSIM: 0.9947
+00003.jpg -> SSIM: 0.9948
+00004.jpg -> SSIM: 1.0000
 00005.jpg -> SSIM: 0.7050
 00006.jpg -> SSIM: 0.5303
-00007.jpg -> SSIM: 0.9908
-00008.jpg -> SSIM: 0.9994
-00009.jpg -> SSIM: 0.9905
-00010.jpg -> SSIM: 0.9994
-00011.jpg -> SSIM: 0.9993
-00012.jpg -> SSIM: 0.9862
-00013.jpg -> SSIM: 0.9923
-00014.jpg -> SSIM: 0.9911
-00015.jpg -> SSIM: 0.9928
+00007.jpg -> SSIM: 0.9910
+00008.jpg -> SSIM: 1.0000
+00009.jpg -> SSIM: 0.9907
+00010.jpg -> SSIM: 1.0000
+00011.jpg -> SSIM: 1.0000
+00012.jpg -> SSIM: 0.9865
+00013.jpg -> SSIM: 0.9925
+00014.jpg -> SSIM: 0.9912
+00015.jpg -> SSIM: 0.9931
 00016.jpg -> SSIM: 0.7707
-00017.jpg -> SSIM: 0.9844
+00017.jpg -> SSIM: 0.9848
 00018.jpg -> SSIM: 0.9298
-00019.jpg -> SSIM: 0.9863
+00019.jpg -> SSIM: 0.9867
 00020.jpg -> SSIM: 0.7680
-00021.jpg -> SSIM: 0.9993
-00022.jpg -> SSIM: 0.9994
+00021.jpg -> SSIM: 1.0000
+00022.jpg -> SSIM: 1.0000
 00023.jpg -> SSIM: 0.7864
-00024.jpg -> SSIM: 0.9995
-00025.jpg -> SSIM: 0.9888
+00024.jpg -> SSIM: 1.0000
+00025.jpg -> SSIM: 0.9892
 00026.jpg -> SSIM: 0.8266
-00027.jpg -> SSIM: 0.9995
-00028.jpg -> SSIM: 0.9966
+00027.jpg -> SSIM: 1.0000
+00028.jpg -> SSIM: 0.9967
 00029.jpg -> SSIM: 0.8366
 ```
 
