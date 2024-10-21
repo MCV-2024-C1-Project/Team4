@@ -90,7 +90,7 @@ def main():
 
 	
 	# Save query histograms to a pickle file
-	with open(os.path.join(q_path, f'{descriptor_type}_histograms_{num_blocks}_blocks.pkl'), 'wb') as f:
+	with open(os.path.join(q_path, f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'wb') as f:
 		pickle.dump(histograms, f)
 
 	# Load the precomputed image descriptors from '.pkl' files
