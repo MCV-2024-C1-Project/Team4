@@ -8,6 +8,7 @@ from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import mean_squared_error
 from skimage.metrics import peak_signal_noise_ratio
 import shutil
+import pickle
 
 # Task 1: Noise filtering on images
 
@@ -74,7 +75,11 @@ print("Images with noise:")
 for img_name in images_with_noise:
     print(img_name)
 
-
-
+'''
+with open(folder_path + "/augmentations.pkl", 'rb') as f:
+			y = pickle.load(f) 
+                  
+print(y)
+'''
 
 
