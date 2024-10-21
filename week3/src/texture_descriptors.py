@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 from skimage.feature import local_binary_pattern
 import pywt
+import matplotlib.pyplot as plt
 
 
 def dct_block_histogram(image, total_blocks=16, bins=16):
@@ -112,7 +113,7 @@ def lbp_block_histogram(image, total_blocks=16, R=1, bins = 16):
     return histograms
 
 
-def wavelet_histogram(image, wavelet='db1', bins=16, level=1):
+def wavelet_histogram(image, wavelet, bins, level):
     """
     Computes the concatenated Wavelet histograms for the entire image (without dividing into blocks).
 
@@ -122,34 +123,40 @@ def wavelet_histogram(image, wavelet='db1', bins=16, level=1):
     :param level: Level of the wavelet decomposition.
     :return: 1D array containing the concatenated histograms of all wavelet subbands.
     """
-    # Convert image to grayscale if needed
+    # Convert image to grayscale
     if len(image.shape) == 3:
-        gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+        gray_image = np.mean(image, -1)
     else:
         gray_image = image
 
     # Apply wavelet decomposition (DWT) on the entire image
     coeffs = pywt.wavedec2(gray_image, wavelet, level=level)
 
-    # Extract subbands (approximation and details)
-    cA, (cH, cV, cD) = coeffs[0], coeffs[1]
-
     # List to store histograms
     descriptors = []
 
-    # Compute histograms for each subband (approximation and details)
-    for coeff in [cA, cH, cV, cD]:
-        hist, _ = np.histogram(coeff.ravel(), bins=bins)
-        hist = np.float32(hist)
-        eps = 1e-7
-        hist /= (hist.sum() + eps)  # Normalize the histogram
+    # Iterate over all decomposition levels
+    for i, coeff in enumerate(coeffs):
+        if i == 0:
+            # Approximation coefficients (cA)
+            cA = coeff
+            hist, _ = np.histogram(cA.ravel(), bins=bins)
+        else:
+            # Detail coefficients (cH, cV, cD)
+            cH, cV, cD = coeff
+            # Compute histograms for each detail subband
+            for detail_coeff in [cH, cV, cD]:
+                hist_detail, _ = np.histogram(detail_coeff.ravel(), bins=bins)
+                hist_detail = np.float32(hist_detail)
+                eps = 1e-7
+                hist_detail /= (hist_detail.sum() + eps)  # Normalize the histogram
+                # Append the normalized histogram
+                descriptors = np.concatenate([descriptors, hist_detail])
 
-        # Append the histogram for this subband
-        descriptors = np.concatenate([descriptors, hist])
+    # Normalize the approximation coefficients histogram
+    hist = np.float32(hist)
+    eps = 1e-7
+    hist /= (hist.sum() + eps)  # Normalize the histogram
+    descriptors = np.concatenate([descriptors, hist])
 
     return descriptors
-
-
-
-
-

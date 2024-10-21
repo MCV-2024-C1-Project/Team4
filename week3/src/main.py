@@ -108,6 +108,7 @@ def main():
 
 		with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels_{num_bins}_bins.pkl'), 'rb') as f:
 			bbdd_histograms = pickle.load(f)
+
 	
 	else:
 		# Save query histograms to a pickle file

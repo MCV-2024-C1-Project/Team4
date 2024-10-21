@@ -20,7 +20,7 @@ def main():
 	parser = argparse.ArgumentParser(description="")
 	parser.add_argument('--num_blocks', type=int, help='Number of blocks for block histogram', default=4)
 	parser.add_argument('--num_bins')
-	parser.add_argument('--num_levels')
+	parser.add_argument('--num_levels', type=int, help='Number of wavelet decomposition levels')
 	parser.add_argument('--descriptor_type')
 	parser.add_argument('--wavelet_type', help='Type of wavelet to use (db1, haar)')
 	args = parser.parse_args()
