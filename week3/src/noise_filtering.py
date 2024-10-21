@@ -7,6 +7,7 @@ from tqdm import tqdm
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import mean_squared_error
 from skimage.metrics import peak_signal_noise_ratio
+import shutil
 
 # Task 1: Noise filtering on images
 
@@ -61,7 +62,7 @@ for image_path in tqdm(image_paths, desc="Processing Images", unit="image"):
 
     if ssim_value > 0.56:
         # Save original image
-        cv2.imwrite(os.path.join(output_dir, os.path.basename(image_path)), img)
+        shutil.copy(image_path, os.path.join(output_dir, os.path.basename(image_path)))
     else:
         # If SSIM is below threshold, save the median filtered image
         images_with_noise.append(os.path.basename(image_path))
@@ -72,6 +73,7 @@ for image_path in tqdm(image_paths, desc="Processing Images", unit="image"):
 print("Images with noise:")
 for img_name in images_with_noise:
     print(img_name)
+
 
 
 
