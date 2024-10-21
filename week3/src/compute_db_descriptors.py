@@ -42,9 +42,11 @@ def main():
 		if DESCRIPTOR_TYPE == 'LBP':
 			img = cv.imread(os.path.join(imgs_path, filename),cv.COLOR_BGR2GRAY)
 			hist = lbp_block_histogram(img,total_blocks = NUM_BLOCKS, bins = NUM_BINS)
+
+		elif DESCRIPTOR_TYPE == 'DCT':
+			hist = dct_block_histogram(img_bgr, total_blocks=NUM_BLOCKS, bins=NUM_BINS)
 		
-
-
+		# TODO: Add more texture descriptors here
 
 		index = int(filename.split('_')[-1].split('.')[0])
 

@@ -7,7 +7,7 @@ from tqdm import tqdm
 from compute_similarities import compute_similarities
 from average_precision import mapk
 from metrics import Metrics
-from texture_descriptors import lbp_block_histogram
+from texture_descriptors import lbp_block_histogram, dct_block_histogram
 
 # Get the path of the folder containing the museum dataset (BBDD)
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -21,7 +21,7 @@ def main():
 	parser.add_argument("query_path", help="Path to the query dataset")
 	parser.add_argument("--num_blocks", help="Number of blocks fot the block histogram", default=1)
 	parser.add_argument("--similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)", default="HISTCMP_HELLINGER")
-	parser.add_argument("--num_bins")
+	parser.add_argument("--num_bins", help="Number of bins for the histogram", default=16)
 	parser.add_argument("--k_value", help="Top k results", default=1)
 	parser.add_argument("--descriptor_type", help ="Descriptor texture type")
 	parser.add_argument("--is_test", help="True if we are testing the model (without ground truth)", default=False, type=bool)
@@ -36,7 +36,8 @@ def main():
 	descriptor_type = args.descriptor_type
 
 	# Select the appropriate similarity measure based on the command line argument. 
-	# For those distances that we have defined manually, we have assigned them a numerical ID.
+	# For those distances that we have defined manually, we have assigned
+	# them a numerical ID.
 	if similarity_measure == "HISTCMP_CORREL":
 		similarity_function = cv.HISTCMP_CORREL
 	elif similarity_measure == "HISTCMP_CHISQR":
@@ -76,10 +77,11 @@ def main():
 		if descriptor_type == 'LBP':
 			img = cv.imread(os.path.join(q_path, filename),cv.COLOR_BGR2GRAY)
 			hist = lbp_block_histogram(img,total_blocks = num_blocks,bins = num_bins)
-		
 
+		elif descriptor_type == 'DCT':
+			hist = dct_block_histogram(img_bgr, total_blocks=num_blocks, bins=num_bins)
 
-		
+		# TODO: Add more texture descriptors here
 
 		# Extract the index (numerical ID) from the filename and store histogram at the correct position
 		index = int(filename.split('.')[0])

@@ -41,24 +41,7 @@ def get_extreme_points(contour):
 		beta += 0.01
 		epsilon = beta * l
 		approx = cv.approxPolyDP(contour, epsilon, True)
-
-	# TODO: Fix this part for more than one artwork
-	# Step 2: If approxPolyDP does not return 4 points, we use cv2.goodFeaturesToTrack to get corners
-	#if len(approx) != 4:
-	#	# Use corner detection if polygon approximation didn't give us 4 corners
-	#	corners = cv.goodFeaturesToTrack(m, maxCorners=4, qualityLevel=0.2, minDistance=10)
-	#	corners = corners.astype(int).reshape(-1, 2)
-	#else:
 	corners = approx.reshape(-1, 2)
-
-	# (Optional) Uncomment to display the mask with the contours and corners
-	#mask = m.copy()
-	#cv.drawContours(mask, [approx], -1, (255, 0, 0), 2)  # Draw contour in blue color
-	#for corner in corners:
-	#	x, y = corner
-	#	cv.circle(mask, (x, y), 5, (255, 255, 255), -1)  # Draw corners in green color
-	#cv.imshow("Contours and Corners", mask)
-	#cv.waitKey(0)
 
 	# Step 3: Sort the corners based on their positions
 	ordered_corners = order_points(corners)
