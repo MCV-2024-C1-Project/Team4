@@ -19,10 +19,12 @@ def main():
 	# Argument parser
 	parser = argparse.ArgumentParser(description="")
 	parser.add_argument('--num_blocks', type=int, help='Number of blocks for block histogram')
+	parser.add_argument('--num_bins')
 	parser.add_argument('--descriptor_type')
 	args = parser.parse_args()
 
-	NUM_BLOCKS = args.num_blocks
+	NUM_BLOCKS = int(args.num_blocks)
+	NUM_BINS = int(args.num_bins)
 	DESCRIPTOR_TYPE = args.descriptor_type
 	
 
@@ -39,7 +41,7 @@ def main():
 
 		if DESCRIPTOR_TYPE == 'LBP':
 			img = cv.imread(os.path.join(imgs_path, filename),cv.COLOR_BGR2GRAY)
-			hist = lbp_block_histogram(img,total_blocks = NUM_BLOCKS)
+			hist = lbp_block_histogram(img,total_blocks = NUM_BLOCKS, bins = NUM_BINS)
 		
 
 

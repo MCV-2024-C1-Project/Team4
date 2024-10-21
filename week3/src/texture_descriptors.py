@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os 
 import pickle
 
-def lbp_block_histogram(image, total_blocks=16, R=1):
+def lbp_block_histogram(image, total_blocks=16, R=1, bins = 16):
     """
     Computes the concatenated LBP histograms for an image divided into a specified number of blocks.
     
@@ -47,8 +47,8 @@ def lbp_block_histogram(image, total_blocks=16, R=1):
             # Compute the LBP for the block
             lbp = local_binary_pattern(block, P, R, method="default")
             
-            # Compute the histogram using cv.calcHist
-            (hist, _) = np.histogram(lbp.ravel(),bins=np.arange(0, 2**P + 1),range=(0, 2**P))
+            
+            (hist, _) = np.histogram(lbp.ravel(),bins=bins)
             
             
             hist = np.float32(hist)

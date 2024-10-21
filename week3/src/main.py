@@ -21,12 +21,14 @@ def main():
 	parser.add_argument("query_path", help="Path to the query dataset")
 	parser.add_argument("--num_blocks", help="Number of blocks fot the block histogram", default=1)
 	parser.add_argument("--similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)", default="HISTCMP_HELLINGER")
+	parser.add_argument("--num_bins")
 	parser.add_argument("--k_value", help="Top k results", default=1)
 	parser.add_argument("--descriptor_type", help ="Descriptor texture type")
 	parser.add_argument("--is_test", help="True if we are testing the model (without ground truth)", default=False, type=bool)
 
 	args = parser.parse_args()
 	num_blocks = int(args.num_blocks)
+	num_bins = int(args.num_bins)
 	similarity_measure = args.similarity_measure
 	k_value = int(args.k_value)
 	q_path = os.path.join(base_path, args.query_path)
@@ -73,7 +75,7 @@ def main():
 
 		if descriptor_type == 'LBP':
 			img = cv.imread(os.path.join(q_path, filename),cv.COLOR_BGR2GRAY)
-			hist = lbp_block_histogram(img,total_blocks = num_blocks)
+			hist = lbp_block_histogram(img,total_blocks = num_blocks,bins = num_bins)
 		
 
 
