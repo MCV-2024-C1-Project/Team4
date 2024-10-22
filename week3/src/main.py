@@ -3,6 +3,7 @@ import os
 import cv2 as cv
 import argparse
 from tqdm import tqdm
+from matplotlib.image import imread
 
 from compute_similarities import compute_similarities
 from average_precision import mapk
@@ -62,6 +63,8 @@ def main():
 		similarity_function = Metrics.LORENTZIAN
 	elif similarity_measure == "Canberra":
 		similarity_function = Metrics.CANBERRA
+	elif similarity_measure == "Ssim":
+		similarity_function = Metrics.SSIM
 	else:
 		raise ValueError(f"Unknown similarity measure: {similarity_measure}")
 
@@ -85,7 +88,8 @@ def main():
 			hist = dct_block_histogram(img_bgr, total_blocks=num_blocks, bins=num_bins)
 		
 		elif descriptor_type == 'wavelet':
-			hist = wavelet_histogram(img_bgr, wavelet=wavelet_type, bins=num_bins, level=num_levels)
+			A = imread(os.path.join(q_path, filename))
+			hist = wavelet_descriptor(A, wavelet=wavelet_type, level=num_levels)
 
 		# TODO: Add more texture descriptors here
 
@@ -98,15 +102,15 @@ def main():
 
 	if descriptor_type == 'wavelet':
 		# Save query histograms to a pickle file
-		with open(os.path.join(q_path, f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels_{num_bins}_bins.pkl'), 'wb') as f:
+		with open(os.path.join(q_path, f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
 
 		# Load the precomputed image descriptors from '.pkl' files
 		# for both the query dataset  and the museum dataset (BBDD, computed offline)
-		with open(os.path.join(q_path,  f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels_{num_bins}_bins.pkl'), 'rb') as f:
+		with open(os.path.join(q_path,  f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels.pkl'), 'rb') as f:
 			query_histograms = pickle.load(f)
 
-		with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels_{num_bins}_bins.pkl'), 'rb') as f:
+		with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels.pkl'), 'rb') as f:
 			bbdd_histograms = pickle.load(f)
 
 	
@@ -134,7 +138,7 @@ def main():
 	if not is_test:
 		if descriptor_type == 'wavelet':
 			# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
-			with open(os.path.join(q_path, f'{descriptor_type}_{num_levels}_levels_{num_bins}_bins_{similarity_measure}_{wavelet_type}_type_{str(k_value)}_results.pkl'), 'wb') as f:
+			with open(os.path.join(q_path, f'{descriptor_type}_{num_levels}_levels_{similarity_measure}_{wavelet_type}_type_{str(k_value)}_results.pkl'), 'wb') as f:
 				pickle.dump(res_m, f)
 
 			# Evaluate the results using mAP@K if we are not in testing mode	

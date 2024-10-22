@@ -2,6 +2,7 @@ from typing import Any
 
 from metrics import compare_histograms
 import cv2 as cv
+from metrics import Metrics
 
 
 class MeasureType:
@@ -22,7 +23,7 @@ def compute_similarities(query_hist: Any, bbdd_histograms: Any, similarity_measu
     measure_type = MeasureType.DISTANCE
 
     # Check if the measure is a similarity measure
-    if similarity_measure == cv.HISTCMP_CORREL or similarity_measure == cv.HISTCMP_INTERSECT or similarity_measure == cv.HISTCMP_HELLINGER:
+    if similarity_measure == cv.HISTCMP_CORREL or similarity_measure == cv.HISTCMP_INTERSECT or similarity_measure == cv.HISTCMP_HELLINGER or similarity_measure == Metrics.SSIM:
         measure_type = MeasureType.SIMILARITY
 
     results = []

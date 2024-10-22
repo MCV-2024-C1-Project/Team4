@@ -113,50 +113,40 @@ def lbp_block_histogram(image, total_blocks=16, R=1, bins = 16):
     return histograms
 
 
-def wavelet_histogram(image, wavelet, bins, level):
-    """
-    Computes the concatenated Wavelet histograms for the entire image (without dividing into blocks).
+def resize_image(image, size=(256, 256)):
+    # Resize the image to a fixed size
+    return cv.resize(image, size, interpolation=cv.INTER_AREA)
 
-    :param image: Input grayscale image. If the input image is in color, it will be converted to grayscale.
-    :param wavelet: Type of wavelet to use ('db1', 'haar', etc.).
-    :param bins: Number of bins for the histogram.
-    :param level: Level of the wavelet decomposition.
-    :return: 1D array containing the concatenated histograms of all wavelet subbands.
-    """
-    # Convert image to grayscale
+def wavelet_descriptor(image, wavelet, level):
+    # Resize the image to a fixed size
+    image = resize_image(image, size=(256, 256))
+    
+    # Convert the image to grayscale if it's in RGB
     if len(image.shape) == 3:
-        gray_image = np.mean(image, -1)
-    else:
-        gray_image = image
+        image = np.mean(image, -1)
+    
+    # Perform wavelet decomposition
+    coeffs = pywt.wavedec2(image, wavelet=wavelet, level=level)
+    
+    # Normalize the approximation coefficients (coeffs[0]) to scale between -1 and 1
+    coeffs[0] /= np.abs(coeffs[0]).max()
 
-    # Apply wavelet decomposition (DWT) on the entire image
-    coeffs = pywt.wavedec2(gray_image, wavelet, level=level)
+    # Normalize the detail coefficients at each level, avoiding division by zero
+    for detail_level in range(level):
+        normalized_subbands = []
+        for i in range(len(coeffs[detail_level + 1])):
+            subband = coeffs[detail_level + 1][i]
+            max_val = np.abs(subband).max()
+            if max_val != 0:  # Ensure no division by zero
+                subband = subband / max_val
+            normalized_subbands.append(subband)
+        coeffs[detail_level + 1] = tuple(normalized_subbands)  # Reassign the normalized subbands
+    
+    # Convert the list of wavelet coefficients into a 2D array for use as a descriptor
+    arr, coeff_slices = pywt.coeffs_to_array(coeffs)
+    
+    # Flatten the array to use it as a feature vector
+    descriptor = arr.flatten()
+    
+    return descriptor
 
-    # List to store histograms
-    descriptors = []
-
-    # Iterate over all decomposition levels
-    for i, coeff in enumerate(coeffs):
-        if i == 0:
-            # Approximation coefficients (cA)
-            cA = coeff
-            hist, _ = np.histogram(cA.ravel(), bins=bins)
-        else:
-            # Detail coefficients (cH, cV, cD)
-            cH, cV, cD = coeff
-            # Compute histograms for each detail subband
-            for detail_coeff in [cH, cV, cD]:
-                hist_detail, _ = np.histogram(detail_coeff.ravel(), bins=bins)
-                hist_detail = np.float32(hist_detail)
-                eps = 1e-7
-                hist_detail /= (hist_detail.sum() + eps)  # Normalize the histogram
-                # Append the normalized histogram
-                descriptors = np.concatenate([descriptors, hist_detail])
-
-    # Normalize the approximation coefficients histogram
-    hist = np.float32(hist)
-    eps = 1e-7
-    hist /= (hist.sum() + eps)  # Normalize the histogram
-    descriptors = np.concatenate([descriptors, hist])
-
-    return descriptors

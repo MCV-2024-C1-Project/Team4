@@ -2,6 +2,7 @@ from enum import Enum
 
 import cv2 as cv
 import numpy as np
+from skimage.metrics import structural_similarity as ssim
 
 
 class Metrics(Enum):
@@ -12,6 +13,7 @@ class Metrics(Enum):
 	MANHATTAN = 10
 	LORENTZIAN = 20
 	CANBERRA = 30
+	SSIM = 40
 
 
 def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
@@ -35,6 +37,9 @@ def compare_histograms(hist1, hist2, method=cv.HISTCMP_CHISQR) -> float:
 		dist = np.sum(np.multiply(hist1, hist2))
 	elif method == cv.HISTCMP_CHISQR_ALT:
 		dist = 2*np.sum((pow((hist1-hist2),2))/(hist1+hist2+1e-10))
+	elif method == Metrics.SSIM:
+		data_range = hist1.max() - hist1.min()  # Assuming hist1 and hist2 have the same range
+		dist, _ = ssim(hist1, hist2, data_range=data_range, full=True)
 		
 	return dist
 

@@ -8,6 +8,7 @@ import cv2 as cv
 import pickle
 import argparse
 from tqdm import tqdm
+from matplotlib.image import imread
 
 from texture_descriptors import *
 
@@ -19,7 +20,7 @@ def main():
 	# Argument parser
 	parser = argparse.ArgumentParser(description="")
 	parser.add_argument('--num_blocks', type=int, help='Number of blocks for block histogram', default=4)
-	parser.add_argument('--num_bins')
+	parser.add_argument('--num_bins', type=int, help='Number of bins for histogram', default=16)
 	parser.add_argument('--num_levels', type=int, help='Number of wavelet decomposition levels')
 	parser.add_argument('--descriptor_type')
 	parser.add_argument('--wavelet_type', help='Type of wavelet to use (db1, haar)')
@@ -50,7 +51,8 @@ def main():
 			hist = dct_block_histogram(img_bgr, total_blocks=NUM_BLOCKS, bins=NUM_BINS)
 		
 		elif DESCRIPTOR_TYPE == 'wavelet':
-			hist = wavelet_histogram(img_bgr, wavelet=WAVELET_TYPE, bins=NUM_BINS, level=NUM_LEVELS)
+			A = imread(os.path.join(imgs_path, filename))
+			hist = wavelet_descriptor(A, wavelet=WAVELET_TYPE, level=NUM_LEVELS)
 		
 		# TODO: Add more texture descriptors here
 
@@ -61,7 +63,7 @@ def main():
 		histograms[index] = hist
 
 	if DESCRIPTOR_TYPE == 'wavelet':
-		with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{WAVELET_TYPE}_type_{NUM_LEVELS}_levels_{NUM_BINS}_bins.pkl'), 'wb') as f:
+		with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{WAVELET_TYPE}_type_{NUM_LEVELS}_levels.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
 	else:
 		with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{NUM_BLOCKS}_blocks_{NUM_BINS}_bins.pkl'), 'wb') as f:
