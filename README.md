@@ -705,9 +705,9 @@ mAP@1 for HSV: 0.7333333333333333
 
 Wavelet:
 
-python .\compute_db_descriptors.py --num_bins=16 --num_level=1 --descriptor_type=wavelet --wavelet_type=db1
+python .\compute_db_descriptors.py --num_level=5 --descriptor_type=wavelet --wavelet_type=db1
 
-python main.py ./data/qsd1_w3  --num_levels=1 --num_bins=16 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1 --wavelet_type=db1 --descriptor_type=wavelet
+python main.py ./data/qsd1_w3  --num_levels=5 --similarity_measure=Ssim --k_value=1 --wavelet_type=db1 --descriptor_type=wavelet
 
 
 ### Task 3: : Detect all the paintings (max 2 per image) + Remove background
