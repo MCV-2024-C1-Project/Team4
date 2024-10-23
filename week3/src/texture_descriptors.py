@@ -5,15 +5,19 @@ import pywt
 import matplotlib.pyplot as plt
 
 
-def dct_block_histogram(image, total_blocks=16, bins=16):
+def dct_block_histogram(image, total_blocks=16, bins=16, N=None):
     """
     Computes the concatenated DCT histograms for an image divided into a specified number of blocks.
 
     :param image: Input grayscale image. If the input image is in color, it will be converted to grayscale.
     :param total_blocks: Total number of blocks to divide the image into (must be a perfect square).
-    :param bins: Number of bins for the histogram.
+    :param bins: Number of bins for the histogram. If N is specified, this parameter is ignored.
+    :param N: Number of DCT coefficients to keep (zig-zag scanned). If specified, the histogram bins will be N.
     :return: 1D array containing the concatenated histograms of all blocks.
     """
+    assert total_blocks > 0, "The number of blocks must be greater than 0."
+    assert N is None or N > 0, "The number of DCT coefficients must be greater than 0."
+
     # Convert image to grayscale
     if len(image.shape) == 3:
         gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
@@ -43,8 +47,17 @@ def dct_block_histogram(image, total_blocks=16, bins=16):
             # Compute the DCT for the block
             dct = cv.dct(np.float32(block))
 
-            # Compute the histogram of the DCT coefficients
-            hist, _ = np.histogram(dct.ravel(), bins=bins)
+            if N is not None:
+                # Zig-zag scan the DCT coefficients
+                dct = np.concatenate([np.diagonal(dct[::-1, :], k)[::(2*(k % 2)-1)] for k in range(1-dct.shape[0], dct.shape[0])])
+                dct = dct[:N]
+
+                # Compute the histogram of the DCT coefficients
+                hist, _ = np.histogram(dct.ravel(), bins=N)
+            else:
+                # Compute the histogram of all DCT coefficients
+                hist, _ = np.histogram(dct.ravel(), bins=bins)
+
             hist = np.float32(hist)
             eps = 1e-7
             hist /= (hist.sum() + eps)

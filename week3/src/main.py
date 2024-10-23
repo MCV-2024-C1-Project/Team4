@@ -23,7 +23,8 @@ def main():
 	parser.add_argument("--num_blocks", help="Number of blocks fot the block histogram", default=1)
 	parser.add_argument("--similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)", default="HISTCMP_HELLINGER")
 	parser.add_argument("--num_bins", help="Number of bins for the histogram", default=16)
-	parser.add_argument('--num_levels')
+	parser.add_argument("--N", help="Number of DCT coefficients to keep", default=None)
+	parser.add_argument('--num_levels', help='Number of levels for the wavelet transform', default=None)
 	parser.add_argument("--k_value", help="Top k results", default=1)
 	parser.add_argument("--descriptor_type", help ="Descriptor texture type")
 	parser.add_argument("--is_test", help="True if we are testing the model (without ground truth)", default=False, type=bool)
@@ -37,7 +38,7 @@ def main():
 	q_path = os.path.join(base_path, args.query_path)
 	is_test = args.is_test
 	descriptor_type = args.descriptor_type
-	num_levels = int(args.num_levels)
+	num_levels = int(args.num_levels) if args.num_levels else None
 	wavelet_type = args.wavelet_type
 
 	# Select the appropriate similarity measure based on the command line argument. 
@@ -85,7 +86,7 @@ def main():
 			hist = lbp_block_histogram(img_bgr,total_blocks = num_blocks,bins = num_bins)
 
 		elif descriptor_type == 'DCT':
-			hist = dct_block_histogram(img_bgr, total_blocks=num_blocks, bins=num_bins)
+			hist = dct_block_histogram(img_bgr, total_blocks=num_blocks, bins=num_bins, N=int(args.N))
 		
 		elif descriptor_type == 'wavelet':
 			A = imread(os.path.join(q_path, filename))
@@ -112,8 +113,21 @@ def main():
 
 		with open(os.path.join(bbdd_path,  f'{descriptor_type}_histograms_{wavelet_type}_type_{num_levels}_levels.pkl'), 'rb') as f:
 			bbdd_histograms = pickle.load(f)
+	elif descriptor_type == 'DCT':
+		filename = f'{descriptor_type}_{num_blocks}_blocks_{num_bins}_bins.pkl'
+		if args.N is not None:
+			filename = f'{descriptor_type}_{num_blocks}_blocks_{args.N}_coefficients.pkl'
+		# Save query histograms to a pickle file
+		with open(os.path.join(q_path, filename), 'wb') as f:
+			pickle.dump(histograms, f)
 
-	
+		# Load the precomputed image descriptors from '.pkl' files
+		# for both the query dataset  and the museum dataset (BBDD, computed offline)
+		with open(os.path.join(q_path,  filename), 'rb') as f:
+			query_histograms = pickle.load(f)
+
+		with open(os.path.join(bbdd_path,  filename), 'rb') as f:
+			bbdd_histograms = pickle.load(f)
 	else:
 		# Save query histograms to a pickle file
 		with open(os.path.join(q_path, f'{descriptor_type}_histograms_{num_blocks}_blocks_{num_bins}_bins.pkl'), 'wb') as f:

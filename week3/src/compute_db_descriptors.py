@@ -24,12 +24,13 @@ def main():
 	parser.add_argument('--num_levels', type=int, help='Number of wavelet decomposition levels')
 	parser.add_argument('--descriptor_type')
 	parser.add_argument('--wavelet_type', help='Type of wavelet to use (db1, haar)')
+	parser.add_argument('--N', help='Number of DCT coefficients to keep', default=None)
 	args = parser.parse_args()
 
-	NUM_BLOCKS = int(args.num_blocks)
-	NUM_BINS = int(args.num_bins)
+	NUM_BLOCKS = int(args.num_blocks) if args.num_blocks else None
+	NUM_BINS = int(args.num_bins) if args.num_bins else None
 	DESCRIPTOR_TYPE = args.descriptor_type
-	NUM_LEVELS = int(args.num_levels)
+	NUM_LEVELS = int(args.num_levels) if args.num_levels else None
 	WAVELET_TYPE = args.wavelet_type
 	
 
@@ -48,7 +49,7 @@ def main():
 			hist = lbp_block_histogram(img_bgr,total_blocks = NUM_BLOCKS, bins = NUM_BINS)
 
 		elif DESCRIPTOR_TYPE == 'DCT':
-			hist = dct_block_histogram(img_bgr, total_blocks=NUM_BLOCKS, bins=NUM_BINS)
+			hist = dct_block_histogram(img_bgr, total_blocks=NUM_BLOCKS, bins=NUM_BINS, N=int(args.N))
 		
 		elif DESCRIPTOR_TYPE == 'wavelet':
 			A = imread(os.path.join(imgs_path, filename))
@@ -65,11 +66,15 @@ def main():
 	if DESCRIPTOR_TYPE == 'wavelet':
 		with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{WAVELET_TYPE}_type_{NUM_LEVELS}_levels.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
+	elif DESCRIPTOR_TYPE == 'DCT':
+		filename = f'{DESCRIPTOR_TYPE}_{NUM_BLOCKS}_blocks_{NUM_BINS}_bins.pkl'
+		if args.N is not None:
+			filename = f'{DESCRIPTOR_TYPE}_{NUM_BLOCKS}_blocks_{args.N}_coefficients.pkl'
+		with open(os.path.join(imgs_path, filename), 'wb') as f:
+			pickle.dump(histograms, f)
 	else:
 		with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_histograms_{NUM_BLOCKS}_blocks_{NUM_BINS}_bins.pkl'), 'wb') as f:
 			pickle.dump(histograms, f)
-	
-
 
 if __name__ == "__main__":
 	main()
