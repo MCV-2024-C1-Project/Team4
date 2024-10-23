@@ -158,6 +158,17 @@ def main():
 			# Evaluate the results using mAP@K if we are not in testing mode	
 			print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
 
+		elif descriptor_type == 'DCT':
+			# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
+			filename = f'{descriptor_type}_{num_blocks}_blocks_{num_bins}_bins_{similarity_measure}_{str(k_value)}_results.pkl'
+			if args.N is not None:
+				filename = f'{descriptor_type}_{num_blocks}_blocks_{args.N}_coefficients_{similarity_measure}_{str(k_value)}_results.pkl'
+			with open(os.path.join(q_path, filename), 'wb') as f:
+				pickle.dump(res_m, f)
+
+			# Evaluate the results using mAP@K if we are not in testing mode
+			print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
+
 		else:
 			# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
 			with open(os.path.join(q_path, f'{descriptor_type}_{num_blocks}_blocks_{num_bins}_bins_{similarity_measure}_{str(k_value)}_results.pkl'), 'wb') as f:
