@@ -78,6 +78,21 @@ def get_artworks_points(mask):
 	return contours
 
 
+def sort_contours(contours):
+	"""
+	Sort contours from top to bottom and left to right
+	:param contours: List of contours
+	:return: Sorted list of contours
+	"""
+	# Calculate the centroid (or top-left corner of bounding box) for sorting
+	def get_key(contour):
+		x, y, w, h = cv.boundingRect(contour)
+		return x
+
+	# Sort contours using the defined key
+	return sorted(contours, key=get_key)
+
+
 def remove_background(image_path):
 	"""
 	Remove the background from an image
@@ -112,8 +127,8 @@ def remove_background(image_path):
 
 	foreground = fill_surrounded_pixels(foreground)
 
-	# Get the contours of the artworks
-	contours = get_artworks_points(foreground)
+	# Get the sorted contours of the artworks
+	contours = sort_contours(get_artworks_points(foreground))
 
 	mask = np.zeros_like(foreground)
 	dsts = []

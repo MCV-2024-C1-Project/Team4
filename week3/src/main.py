@@ -78,6 +78,9 @@ def main():
 	# Get all the images of the QSD that have extension '.jpg'
 	files = [f for f in os.listdir(q_path) if f.endswith('.jpg')]
 	histograms = []
+
+	convert_y = False
+
 	for filename in tqdm(files, desc="Processing images", unit="image"):
 		# Read image (by default the color space of the loaded image is BGR) 
 		img_bgr = cv.imread(os.path.join(q_path, filename))
@@ -97,12 +100,30 @@ def main():
 
 		# TODO: Add more texture descriptors here
 
-		# Extract the index (numerical ID) from the filename and store histogram at the correct position
-		index = int(filename.split('.')[0])
+		# Extract the main index (before the underscore) and subindex (after the underscore if it exists)
+		if '_' in filename:
+			convert_y = True
+			main_index, sub_index = map(int, filename.split('.')[0].split('_'))
 
-		if len(histograms) <= index:
-			histograms.extend([None] * (index + 1 - len(histograms)))
-		histograms[index] = hist
+			# Ensure that the histograms array is large enough to accommodate the main index
+			if len(histograms) <= main_index:
+				histograms.extend([[] for _ in range(main_index + 1 - len(histograms))])
+
+			# Ensure that the sublist for the main index exists and extend it if necessary
+			if len(histograms[main_index]) <= sub_index:
+				histograms[main_index].extend([None] * (sub_index + 1 - len(histograms[main_index])))
+
+			# Store the histogram at the correct position
+			histograms[main_index][sub_index] = hist
+		else:
+			index = int(filename.split('.')[0])
+
+			if len(histograms) <= index:
+				histograms.extend([None] * (index + 1 - len(histograms)))
+			histograms[index] = hist
+
+	if convert_y:
+		y = [[[item] for item in sublist] for sublist in y]
 
 	if descriptor_type == 'wavelet':
 		# Save query histograms to a pickle file
@@ -147,8 +168,13 @@ def main():
 
 	# For each image in the query set, compute its similarity to all museum images (BBDD).
 	res_m = []
-	
 	for query_img_h in tqdm(query_histograms, desc="Processing images", unit="image"):
+		if len(query_img_h) <= 2:
+			res_m_sub = []
+			for query_img_h_sub in query_img_h:
+				res_m_sub.append(compute_similarities(query_img_h_sub, bbdd_histograms, similarity_function, k_value)[1])
+			res_m.append(res_m_sub)
+			continue
 		res_m.append(compute_similarities(query_img_h, bbdd_histograms, similarity_function, k_value)[1])
 	
 	# If we are not in testing mode
@@ -170,7 +196,7 @@ def main():
 				pickle.dump(res_m, f)
 
 			# Evaluate the results using mAP@K if we are not in testing mode
-			print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
+			print(f"mAP@{k_value} for {descriptor_type}: {np.mean([mapk(a, p, k_value) for a, p in zip(y, res_m)])}")
 
 		else:
 			# Save the top K indices of the museum images with the best similarity for each query image to a pickle file
