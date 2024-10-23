@@ -687,7 +687,8 @@ The Median filter generally performs best, but certain images, like **00006.jpg*
 | 00006.jpg -> SSIM: | 0.5234 |  0.4671 | **0.5303** |
 
 ### Task 2: Implement texture descriptors and evaluate query system (QSD1-W3) using only texture descriptors
-- **Evaluate query system (QSD1-W3) with noise removal using the best color descriptors from previous week:**
+
+#### Evaluate query system (QSD1-W3) with noise removal using the best color descriptors from previous week:
   
 ```bash
 # Block 3D color histograms
@@ -703,11 +704,81 @@ Processing images: 100%|██████████████████�
 mAP@1 for HSV: 0.7333333333333333
 ```
 
-Wavelet:
+#### Evaluate query system (QSD1-W3) with noise removal using texture descriptors:
 
-python .\compute_db_descriptors.py --num_level=5 --descriptor_type=wavelet --wavelet_type=db1
+- **LBP (Local Binary Pattern) descriptor:**
 
-python main.py ./data/qsd1_w3  --num_levels=5 --similarity_measure=Ssim --k_value=1 --wavelet_type=db1 --descriptor_type=wavelet
+```bash
+python .\compute_db_descriptors.py --descriptor_type=LBP --num_blocks=256  --num_bins=16
+python main.py ./data/qsd1_w3/images_without_noise  --descriptor_type=LBP --num_blocks=256 --num_bins=16 --similarity_measure=Manhattan --k_value=1
+# Result
+mAP@1 for LBP: 0.9666666666666667
+```
+
+- **DCT descriptor with all coefficients:**
+
+```bash
+python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=64  --num_bins=32
+python main.py ./data/qsd1_w3/images_without_noise  --descriptor_type=DCT --num_blocks=64 --num_bins=32 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1
+# Result
+mAP@1 for DCT: 0.9
+```
+
+- **DCT descriptor with N coefficients (zig-zag scan):**
+
+```bash
+python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=128  --N=100
+python main.py ./data/qsd1_w3/images_without_noise  --descriptor_type=DCT --num_blocks=128 --N=100 --similarity_measure=Lorentzian --k_value=1
+# Result
+mAP@1 for DCT: 0.9666666666666667
+```
+
+- **wavelet-based descriptor:**
+
+```bash
+python .\compute_db_descriptors.py --descriptor_type=wavelet --num_levels=1  --wavelet_type=db1
+python main.py ./data/qsd1_w3/images_without_noise  --descriptor_type=wavelet --wavelet_type=db1 --num_levels=1 --similarity_measure=Ssim --k_value=1 
+# Result
+mAP@1 for wavelet: 0.6
+```
+
+- **Evaluate query system (QSD1-W3) without noise removal using texture descriptors:**
+
+- **LBP (Local Binary Pattern) descriptor:**
+
+```bash
+python .\compute_db_descriptors.py --descriptor_type=LBP --num_blocks=256  --num_bins=16
+python main.py ./data/qsd1_w3  --descriptor_type=LBP --num_blocks=256 --num_bins=16 --similarity_measure=Manhattan --k_value=1
+# Result
+mAP@1 for LBP: 
+```
+
+- **DCT descriptor with all coefficients:**
+
+```bash
+python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=64  --num_bins=32
+python main.py ./data/qsd1_w3  --descriptor_type=DCT --num_blocks=64 --num_bins=32 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1
+# Result
+mAP@1 for DCT:
+```
+
+- **DCT descriptor with N coefficients (zig-zag scan):**
+
+```bash
+python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=128  --N=100
+python main.py ./data/qsd1_w3  --descriptor_type=DCT --num_blocks=128 --N=100 --similarity_measure=Lorentzian --k_value=1
+# Result
+mAP@1 for DCT: 
+```
+
+- **wavelet-based descriptor:**
+
+```bash
+python .\compute_db_descriptors.py --descriptor_type=wavelet --num_levels=1  --wavelet_type=db1
+python main.py ./data/qsd1_w3  --descriptor_type=wavelet --wavelet_type=db1 --num_levels=1 --similarity_measure=Ssim --k_value=1 
+# Result
+mAP@1 for wavelet: 
+```
 
 
 ### Task 3: : Detect all the paintings (max 2 per image) + Remove background
