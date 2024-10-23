@@ -820,6 +820,47 @@ The algorithm consists of several steps:
 
    where ![Equation](https://latex.codecogs.com/png.latex?%5Cmathbf%7Bp%7D) is the original point in the source image, ![Equation](https://latex.codecogs.com/png.latex?M) is the transformation matrix, and ![Equation](https://latex.codecogs.com/png.latex?%5Cmathbf%7Bp%27%7D) is the point in the transformed image.
 
+#### Usage:
+```bash
+# Without score computation
+python background_removal.py data/qsd2_w3
+# With score computation
+python background_removal.py data/qsd2_w3 --score=True
+
+## If using python3 and the script is not executable, use:
+python3 background_removal.py data/qsd2_w3
+python3 background_removal.py data/qsd2_w3 --score=True
+```
+
+<table>
+  <tr>
+    <td style="text-align: center;">
+      <img src="https://github.com/user-attachments/assets/6666b87c-ab11-4e25-b5b2-5a8c2d1d8400" alt="Imagen 1" width="400"/>
+      <p>Example Image</p>
+    </td>
+    <td style="text-align: center;">
+      <img src="https://github.com/user-attachments/assets/e451e8ce-844c-48ba-a4ae-74ec295aad14" alt="Imagen 2" width="400"/>
+      <p>Predicted Mask</p>
+    </td>
+    <td style="text-align: center;">
+      <img src="https://github.com/user-attachments/assets/ef1e8773-70cf-488d-8968-19f063a6f4a6" alt="Imagen 3" width="170"/>
+      <p>Cropped Image 1</p>
+    </td>
+    <td style="text-align: center;">
+      <img src="https://github.com/user-attachments/assets/7d8a1708-729f-46c4-8ec1-c4d167628d68" alt="Imagen 3" width="170"/>
+      <p>Cropped Image 2</p>
+    </td>
+  </tr>
+</table>
+
+#### Our results
+
+| Metric        | Value |
+|---------------|-------|
+| Global F1 Score | 0.99  |
+| Global Precision | 0.99  |
+| Global Recall    | 0.99  |
+
 ## Team Members
 
 This project was developed by the following team members:
