@@ -861,6 +861,175 @@ python3 background_removal.py data/qsd2_w3 --score=True
 | Global Precision | 0.99  |
 | Global Recall    | 0.99  |
 
+### Task 5: Remove background + Retrieval system (QSD2-W3)
+
+#### Without Noise Removal + With Background Removal
+
+- **LBP (Local Binary Pattern) descriptor:**
+
+```bash
+# Background Removal Offline
+python background_removal.py data/qsd2_w3
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=LBP --num_blocks=256  --num_bins=16
+python main.py ./data/qsd2_w3/masked  --descriptor_type=LBP --num_blocks=256 --num_bins=16 --similarity_measure=Manhattan --k_value=1
+# Result
+mAP@1 for LBP: 0.5333333333333333
+```
+
+- **DCT descriptor with all coefficients:**
+
+```bash
+# Background Removal Offline
+python background_removal.py data/qsd2_w3
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=64  --num_bins=32
+python main.py ./data/qsd2_w3/masked  --descriptor_type=DCT --num_blocks=64 --num_bins=32 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1
+# Result
+mAP@1 for DCT: 0.6333333333333333
+```
+
+- **DCT descriptor with N coefficients (zig-zag scan):**
+
+```bash
+# Background Removal Offline
+python background_removal.py data/qsd2_w3
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=128  --N=100
+python main.py ./data/qsd2_w3/masked  --descriptor_type=DCT --num_blocks=128 --N=100 --similarity_measure=Lorentzian --k_value=1
+# Result
+mAP@1 for DCT: 0.75
+```
+
+- **wavelet-based descriptor:**
+
+```bash
+# Background Removal Offline
+python background_removal.py data/qsd2_w3
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=wavelet --num_levels=1  --wavelet_type=db3
+python main.py ./data/qsd2_w3/masked  --descriptor_type=wavelet --wavelet_type=db3 --num_levels=1 --similarity_measure=Ssim --k_value=1 
+# Result
+mAP@1 for wavelet: 0.6
+```
+
+#### With Noise Removal + With Background Removal
+
+- **LBP (Local Binary Pattern) descriptor:**
+
+```bash
+# Median filter for noise removal Offline
+python .\noise_filtering.py ./data/qsd2_w3 --filter median
+# Background Removal Offline
+python background_removal.py data/qsd2_w3/images_without_noise
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=LBP --num_blocks=256  --num_bins=16
+python main.py ./data/qsd2_w3/images_without_noise/masked  --descriptor_type=LBP --num_blocks=256 --num_bins=16 --similarity_measure=Manhattan --k_value=1
+# Result
+mAP@1 for LBP: 0.6333333333333333
+```
+
+- **DCT descriptor with all coefficients:**
+
+```bash
+# Median filter for noise removal Offline
+python .\noise_filtering.py ./data/qsd2_w3 --filter median
+# Background Removal Offline
+python background_removal.py data/qsd2_w3/images_without_noise
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=64  --num_bins=32
+python main.py ./data/qsd2_w3/images_without_noise/masked  --descriptor_type=DCT --num_blocks=64 --num_bins=32 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1
+# Result
+mAP@1 for DCT: 0.65
+```
+
+- **DCT descriptor with N coefficients (zig-zag scan):**
+
+```bash
+# Median filter for noise removal Offline
+python .\noise_filtering.py ./data/qsd2_w3 --filter median
+# Background Removal Offline
+python background_removal.py data/qsd2_w3/images_without_noise
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=128  --N=100
+python main.py ./data/qsd2_w3/images_without_noise/masked  --descriptor_type=DCT --num_blocks=128 --N=100 --similarity_measure=Lorentzian --k_value=1
+# Result
+mAP@1 for DCT: 0.7666666666666667
+```
+
+- **wavelet-based descriptor:**
+
+```bash
+# Median filter for noise removal Offline
+python .\noise_filtering.py ./data/qsd2_w3 --filter median
+# Background Removal Offline
+python background_removal.py data/qsd2_w3/images_without_noise
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=wavelet --num_levels=1  --wavelet_type=db3
+python main.py ./data/qsd2_w3/images_without_noise/masked  --descriptor_type=wavelet --wavelet_type=db3 --num_levels=1 --similarity_measure=Ssim --k_value=1 
+# Result
+mAP@1 for wavelet: 0.5333333333333333
+```
+
+#### With Background Removal + With Noise Removal
+
+- **LBP (Local Binary Pattern) descriptor:**
+
+```bash
+# Background Removal Offline
+python background_removal.py data/qsd2_w3
+# Median filter for noise removal Offline
+python .\noise_filtering.py ./data/qsd2_w3/masked --filter median
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=LBP --num_blocks=256  --num_bins=16
+python main.py ./data/qsd2_w3/masked/images_without_noise  --descriptor_type=LBP --num_blocks=256 --num_bins=16 --similarity_measure=Manhattan --k_value=1
+# Result
+mAP@1 for LBP: 0.5666666666666667
+```
+
+- **DCT descriptor with all coefficients:**
+
+```bash
+# Background Removal Offline
+python background_removal.py data/qsd2_w3
+# Median filter for noise removal Offline
+python .\noise_filtering.py ./data/qsd2_w3/masked --filter median
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=64  --num_bins=32
+python main.py ./data/qsd2_w3/masked/images_without_noise  --descriptor_type=DCT --num_blocks=64 --num_bins=32 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1
+# Result
+mAP@1 for DCT: 0.6166666666666667
+```
+
+- **DCT descriptor with N coefficients (zig-zag scan):**
+
+```bash
+# Background Removal Offline
+python background_removal.py data/qsd2_w3
+# Median filter for noise removal Offline
+python .\noise_filtering.py ./data/qsd2_w3/masked --filter median
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=128  --N=100
+python main.py ./data/qsd2_w3/masked/images_without_noise  --descriptor_type=DCT --num_blocks=128 --N=100 --similarity_measure=Lorentzian --k_value=1
+# Result
+mAP@1 for DCT: 0.7666666666666667
+```
+
+- **wavelet-based descriptor:**
+
+```bash
+# Background Removal Offline
+python background_removal.py data/qsd2_w3
+# Median filter for noise removal Offline
+python .\noise_filtering.py ./data/qsd2_w3/masked --filter median
+# Retrieval system (QSD2-W3)
+python .\compute_db_descriptors.py --descriptor_type=wavelet --num_levels=1  --wavelet_type=db3
+python main.py ./data/qsd2_w3/masked/images_without_noise  --descriptor_type=wavelet --wavelet_type=db3 --num_levels=1 --similarity_measure=Ssim --k_value=1 
+# Result
+mAP@1 for wavelet: 0.6
+```
+
+
 ## Team Members
 
 This project was developed by the following team members:
