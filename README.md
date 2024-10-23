@@ -750,7 +750,7 @@ mAP@1 for wavelet: 0.6
 python .\compute_db_descriptors.py --descriptor_type=LBP --num_blocks=256  --num_bins=16
 python main.py ./data/qsd1_w3  --descriptor_type=LBP --num_blocks=256 --num_bins=16 --similarity_measure=Manhattan --k_value=1
 # Result
-mAP@1 for LBP: 
+mAP@1 for LBP: 0.7666666666666667
 ```
 
 - **DCT descriptor with all coefficients:**
@@ -759,7 +759,7 @@ mAP@1 for LBP:
 python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=64  --num_bins=32
 python main.py ./data/qsd1_w3  --descriptor_type=DCT --num_blocks=64 --num_bins=32 --similarity_measure=HISTCMP_CHISQR_ALT --k_value=1
 # Result
-mAP@1 for DCT:
+mAP@1 for DCT: 0.8666666666666667
 ```
 
 - **DCT descriptor with N coefficients (zig-zag scan):**
@@ -768,7 +768,7 @@ mAP@1 for DCT:
 python .\compute_db_descriptors.py --descriptor_type=DCT --num_blocks=128  --N=100
 python main.py ./data/qsd1_w3  --descriptor_type=DCT --num_blocks=128 --N=100 --similarity_measure=Lorentzian --k_value=1
 # Result
-mAP@1 for DCT: 
+mAP@1 for DCT: 0.9666666666666667
 ```
 
 - **wavelet-based descriptor:**
@@ -777,7 +777,7 @@ mAP@1 for DCT:
 python .\compute_db_descriptors.py --descriptor_type=wavelet --num_levels=1  --wavelet_type=db1
 python main.py ./data/qsd1_w3  --descriptor_type=wavelet --wavelet_type=db1 --num_levels=1 --similarity_measure=Ssim --k_value=1 
 # Result
-mAP@1 for wavelet: 
+mAP@1 for wavelet: 0.6333333333333333
 ```
 
 
