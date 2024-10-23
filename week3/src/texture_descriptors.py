@@ -68,7 +68,7 @@ def dct_block_histogram(image, total_blocks=16, bins=16, N=None):
     return descriptors
 
 
-def lbp_block_histogram(image, total_blocks=16, R=1, bins = 16):
+def lbp_block_histogram(image, total_blocks=16, R=2, bins = 16):
     """
     Computes the concatenated LBP histograms for an image divided into a specified number of blocks.
     

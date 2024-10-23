@@ -49,7 +49,10 @@ def main():
 			hist = lbp_block_histogram(img_bgr,total_blocks = NUM_BLOCKS, bins = NUM_BINS)
 
 		elif DESCRIPTOR_TYPE == 'DCT':
-			hist = dct_block_histogram(img_bgr, total_blocks=NUM_BLOCKS, bins=NUM_BINS, N=int(args.N))
+			if args.N == None:
+				hist = dct_block_histogram(img_bgr, total_blocks=NUM_BLOCKS, bins=NUM_BINS, N=args.N)
+			else:
+				hist = dct_block_histogram(img_bgr, total_blocks=NUM_BLOCKS, bins=NUM_BINS, N=int(args.N))
 		
 		elif DESCRIPTOR_TYPE == 'wavelet':
 			A = imread(os.path.join(imgs_path, filename))
