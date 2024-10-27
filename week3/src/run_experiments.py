@@ -4,7 +4,7 @@ import subprocess
 venv_python = r"D:\Team4\.venv\Scripts\python.exe"
 
 # Define the parameters for blocks, bins, similarity measures, and descriptor type
-block_sizes = [16, 64, 128, 256, 512]
+block_sizes = [64, 128, 256]
 N_values = [5, 10, 100, 500, 1000]
 similarity_measures = [
 	"Lorentzian", "Manhattan", "HISTCMP_HELLINGER", "HISTCMP_CHISQR_ALT"
@@ -12,7 +12,7 @@ similarity_measures = [
 
 descriptor_type = "DCT"
 
-data_path = ".\\data\\qsd1_w3\\images_without_noise"
+data_path = ".\\data\\qsd2_w3\\masked\\images_without_noise"
 
 
 # Loop over all combinations of block sizes, bin sizes, and similarity measures
