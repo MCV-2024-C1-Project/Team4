@@ -122,7 +122,7 @@ def main():
 				histograms.extend([None] * (index + 1 - len(histograms)))
 			histograms[index] = hist
 
-	if convert_y:
+	if convert_y and not is_test:
 		y = [[[item] for item in sublist] for sublist in y]
 
 	if descriptor_type == 'wavelet':
@@ -206,15 +206,13 @@ def main():
 			# Evaluate the results using mAP@K if we are not in testing mode	
 			print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
 
-	'''
 	# Save the 'blind' results for the test query set 
 	if is_test:
-		subdirectory_path = os.path.join(q_path, color_space)
-		os.makedirs(subdirectory_path, exist_ok=True)
-		output_file_path = os.path.join(subdirectory_path, 'result.pkl')
+		#subdirectory_path = os.path.join(q_path, color_space)
+		#os.makedirs(subdirectory_path, exist_ok=True)
+		output_file_path = os.path.join(q_path, 'result.pkl')
 		with open(output_file_path, 'wb') as f:
 			pickle.dump(res_m, f)
-	'''
 
 if __name__ == '__main__':
 	main()

@@ -5,7 +5,7 @@ import os
 import tqdm
 
 from metrics import global_f1_score
-from utils import order_points
+from utils import order_points, plot_mask_with_points
 
 
 def fill_surrounded_pixels(foreground):
@@ -31,7 +31,7 @@ def fill_surrounded_pixels(foreground):
 	return new_mask
 
 
-def get_extreme_points(contour):
+def get_extreme_points(contour, mask):
 	# Step 1: Approximate the contour to a polygon (epsilon can be adjusted)
 	beta = 0.02
 	l = cv.arcLength(contour, True)
@@ -42,6 +42,9 @@ def get_extreme_points(contour):
 		epsilon = beta * l
 		approx = cv.approxPolyDP(contour, epsilon, True)
 	corners = approx.reshape(-1, 2)
+
+	if len(corners) == 3:
+		return corners
 
 	# Step 3: Sort the corners based on their positions
 	ordered_corners = order_points(corners)
@@ -93,12 +96,28 @@ def sort_contours(contours):
 	return sorted(contours, key=get_key)
 
 
+def get_farthest_points(pts):
+	max_dist = 0
+	farthest_pair = (pts[0], pts[1])  # Initialize with a pair
+
+	# Calculate distances between every pair of points
+	for i in range(len(pts)):
+		for j in range(i + 1, len(pts)):
+			dist = np.linalg.norm(pts[i] - pts[j])
+			if dist > max_dist:
+				max_dist = dist
+				farthest_pair = (pts[i], pts[j])
+
+	return np.array([farthest_pair[0], farthest_pair[1]], dtype="float32")
+
+
 def remove_background(image_path):
 	"""
 	Remove the background from an image
 	:param image_path: Path to the image
 	:return: The image with the background removed and the mask
 	"""
+	# Step 1: GrabCut to remove the background
 	# Read image
 	image = cv.imread(image_path)
 	image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
@@ -120,6 +139,7 @@ def remove_background(image_path):
 	# Create mask where sure and likely foreground are 1
 	mask2 = np.where((mask == cv.GC_FGD) | (mask == cv.GC_PR_FGD), 1, 0).astype('uint8')
 
+	# Step 2: Morphological operations and filling surrounded pixels
 	# Opening + Closing to remove noise
 	kernel = np.ones((3, 3), np.uint8)
 	mask2 = cv.morphologyEx(mask2, cv.MORPH_OPEN, kernel)
@@ -138,7 +158,18 @@ def remove_background(image_path):
 
 		cv.drawContours(mask, [contour], -1, (255, 255, 255), thickness=cv.FILLED)
 
-		pts1 = np.array(get_extreme_points(contour), dtype="float32")
+		pts1 = np.array(get_extreme_points(contour, mask.copy()), dtype="float32")
+
+		# If only three points, find the farthest two points
+		if len(pts1) == 3:
+			pts1 = get_farthest_points(pts1)
+			pts1 = [pts1[0], pts1[1], [pts1[1][0], pts1[0][1]], [pts1[0][0], pts1[1][1]]]
+			pts1 = order_points(np.array(pts1))
+			pts1 = np.array(pts1, dtype="float32")
+
+			# Print points to the mask for debugging
+			# plot_mask_with_points(mask, pts1.astype(int))
+
 		pts2 = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype="float32")
 
 		# Apply perspective transform
