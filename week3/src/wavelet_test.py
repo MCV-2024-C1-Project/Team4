@@ -3,7 +3,12 @@ import numpy as np
 import pywt
 import matplotlib.pyplot as plt
 from matplotlib.image import imread
+import cv2 as cv
 
+def resize_image(image, size=(256, 256)):
+    # Resize the image to a fixed size
+    return cv.resize(image, size, interpolation=cv.INTER_AREA)
+    
 # Get the path of the folder containing the museum dataset (BBDD)
 # This assumes your images are stored in the "BBDD" and "qsd1_w3" folders.
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -15,14 +20,15 @@ plt.rcParams['figure.figsize'] = [16, 16]
 plt.rcParams.update({'font.size': 18})  # Update the font size for plots
 
 # Load the image from the query folder
-A = imread(os.path.join(q_path, "00000.jpg"))
+A = imread(os.path.join(q_path, "00015.jpg"))
 
 # Convert the image to grayscale by averaging across the color channels (RGB to grayscale)
 B = np.mean(A, -1)
+B = resize_image(B, size=(256, 256))
 
 # Perform wavelet decomposition with n levels
-n = 3  # Number of decomposition levels
-w = 'db1'  # Type of wavelet to use (Daubechies wavelet with 1 vanishing moment)
+n = 1  # Number of decomposition levels
+w = 'haar'  # Type of wavelet to use (Daubechies wavelet with 1 vanishing moment)
 
 # Decompose the grayscale image into wavelet coefficients
 coeffs = pywt.wavedec2(B, wavelet=w, level=n)
