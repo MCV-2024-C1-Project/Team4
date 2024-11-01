@@ -31,31 +31,6 @@ def fill_surrounded_pixels(foreground):
 	return new_mask
 
 
-def get_extreme_points(contour, mask):
-	# Step 1: Approximate the contour to a polygon (epsilon can be adjusted)
-	beta = 0.02
-	l = cv.arcLength(contour, True)
-	epsilon = beta * l
-	approx = cv.approxPolyDP(contour, epsilon, True)
-	while len(approx) > 4:
-		beta += 0.01
-		epsilon = beta * l
-		approx = cv.approxPolyDP(contour, epsilon, True)
-	corners = approx.reshape(-1, 2)
-
-	if len(corners) == 3:
-		return corners
-
-	# Step 3: Sort the corners based on their positions
-	ordered_corners = order_points(corners)
-	ordered_corners = ordered_corners.astype(int)
-
-	# (Optional) Uncomment to display the mask with the points
-	# plot_mask_with_points(mask, ordered_corners)
-
-	return ordered_corners
-
-
 def get_artworks_points(mask):
 	"""
 	Get the points of the two largest artworks in the mask
@@ -75,7 +50,7 @@ def get_artworks_points(mask):
 	# Step 4: Return the largest contour if the second largest is less than 90% of the largest otherwise return both
 	area1 = cv.contourArea(contours[0])
 	area2 = cv.contourArea(contours[1])
-	if (area1 - area2) > area1*0.9:
+	if (area1 - area2) > area1*0.95:
 		return [contours[0]]
 
 	return contours
@@ -83,32 +58,132 @@ def get_artworks_points(mask):
 
 def sort_contours(contours):
 	"""
-	Sort contours from top to bottom and left to right
+	Sort contours from top to bottom and left to right.
+	Only sort left to right if contours are close in vertical alignment.
+
 	:param contours: List of contours
 	:return: Sorted list of contours
 	"""
-	# Calculate the centroid (or top-left corner of bounding box) for sorting
+
+	# Calculate the centroid or top-left corner of bounding box for each contour
 	def get_key(contour):
 		x, y, w, h = cv.boundingRect(contour)
-		return x
+		return (y, x)  # Sort primarily by y (top to bottom), then by x (left to right)
 
-	# Sort contours using the defined key
-	return sorted(contours, key=get_key)
+	# Sort contours by y first, then by x, with an additional check for same-row alignment
+	sorted_contours = sorted(contours, key=get_key)
+
+	# Ensure contours on the same row are sorted left to right
+	final_sorted = []
+	current_row = []
+	current_y = None
+
+	for contour in sorted_contours:
+		x, y, w, h = cv.boundingRect(contour)
+
+		# Start a new row if y difference is significant (not in the same row)
+		if current_y is None or abs(y - current_y) > h / 2:  # New row threshold
+			if current_row:
+				# Sort the current row by x (left to right) before adding to final list
+				current_row.sort(key=lambda c: cv.boundingRect(c)[0])
+				final_sorted.extend(current_row)
+				current_row = []
+			current_y = y  # Set the new row reference
+
+		current_row.append(contour)
+
+	# Add the last row after sorting
+	if current_row:
+		current_row.sort(key=lambda c: cv.boundingRect(c)[0])
+		final_sorted.extend(current_row)
+
+	return final_sorted
 
 
-def get_farthest_points(pts):
-	max_dist = 0
-	farthest_pair = (pts[0], pts[1])  # Initialize with a pair
+def get_s_and_v_masks(hsv_image):
+	"""
+	Get the S and V masks for the image
+	:param hsv_image: The HSV image
+	:return: The S and V masks
+	"""
+	# Separate the HSV channels
+	H, S, V = cv.split(hsv_image)
 
-	# Calculate distances between every pair of points
-	for i in range(len(pts)):
-		for j in range(i + 1, len(pts)):
-			dist = np.linalg.norm(pts[i] - pts[j])
-			if dist > max_dist:
-				max_dist = dist
-				farthest_pair = (pts[i], pts[j])
+	# Extract top 10 rows, bottom 10 rows, left 10 columns, and right 10 columns
+	top_S = S[:10, :]
+	bottom_S = S[-10:, :]
+	left_S = S[:, :10]
+	right_S = S[:, -10:]
 
-	return np.array([farthest_pair[0], farthest_pair[1]], dtype="float32")
+	top_V = V[:10, :]
+	bottom_V = V[-10:, :]
+	left_V = V[:, :10]
+	right_V = V[:, -10:]
+
+	# Combine each channel's border pixels separately
+	S_border_pixels = np.concatenate((top_S.flatten(), bottom_S.flatten(), left_S.flatten(), right_S.flatten()))
+	V_border_pixels = np.concatenate((top_V.flatten(), bottom_V.flatten(), left_V.flatten(), right_V.flatten()))
+
+	if np.max(S_border_pixels) > 255 * 0.70:
+		upper_bound = np.percentile(S_border_pixels, 80)  # 97th percentile
+		S_border_pixels = S_border_pixels[(S_border_pixels <= upper_bound)]
+	if np.min(V_border_pixels) < 255 * 0.30:
+		lower_bound = np.percentile(V_border_pixels, 20)  # 3th percentile
+		V_border_pixels = V_border_pixels[(V_border_pixels >= lower_bound)]
+
+	return np.max(S_border_pixels), np.min(V_border_pixels)
+
+
+def old_bg_removal(image_hsv):
+	threshold_s, threshold_v = get_s_and_v_masks(image_hsv)
+
+	# Take S channel and create a mask so that each pixel with a saturation level below or equal
+	# to the threshold is set to 0 (background) and S_levels > th are set to 1 (painting)
+	s = image_hsv[:, :, 1]
+	s = np.where(s < threshold_s + 1, 0, 1)
+
+	# Take V channel and create a mask so that each pixel with a Value level above or equal
+	# to the threshold is set to 0 (background) and V_levels < th are set to 1 (painting)
+	v = image_hsv[:, :, 2]
+	v = np.where(v > threshold_v - 1, 0, 1)  # Any value above 255 will be part of our mask
+
+	# Combine our two masks based on S and V into a single "Foreground"
+	foreground = np.where((s == 0) & (v == 0), 0, 1).astype(np.uint8)
+	foreground[:10, :] = 0
+	foreground[-10:, :] = 0
+	foreground[:, :10] = 0
+	foreground[:, -10:] = 0
+	foreground = fill_surrounded_pixels(foreground)
+
+	# Opening -> removes foreground objects smaller than the kernel
+	kernel = np.ones((5, 5), np.uint8)
+	opening = cv.morphologyEx(foreground, cv.MORPH_OPEN, kernel)
+
+	return opening
+
+
+def apply_square_mask(mask):
+	# Image dimensions
+	height, width = mask.shape
+
+	# Step 1: Find the first row with more white than black from the top
+	top_row = next(i for i in range(height) if np.sum(mask[i, :] == 1) > 0)
+
+	# Step 2: Find the first row with more white than black from the bottom
+	bottom_row = next(i for i in range(height - 1, -1, -1) if np.sum(mask[i, :] == 1) > 0)
+
+	# Step 3: Find the first column with more white than black from the left
+	left_col = next(j for j in range(width) if np.sum(mask[:, j] == 1) > 0)
+
+	# Step 4: Find the first column with more white than black from the right
+	right_col = next(j for j in range(width - 1, -1, -1) if np.sum(mask[:, j] == 1) > 0)
+
+	# Create a new mask to draw the square
+	mask = np.zeros_like(mask, dtype=np.uint8)
+
+	# Fill the area inside the square with white
+	mask[top_row:bottom_row + 1, left_col:right_col + 1] = 1
+	return mask
 
 
 def remove_background(image_path):
@@ -122,63 +197,84 @@ def remove_background(image_path):
 	image = cv.imread(image_path)
 	image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
 
+	#cv.imshow("Original image", image)
+	#cv.waitKey(0)
+
+	old_bg_mask = old_bg_removal(image)
+	#cv.imshow("Foreground 1", old_bg_mask*255)
+	#cv.waitKey(0)
+
 	# Create an empty mask
-	mask = np.zeros(image.shape[:2], np.uint8)
+	mask = np.ones(image.shape[:2], np.uint8)
+	mask[old_bg_mask == 0] = cv.GC_BGD  # Surely background
+	mask[old_bg_mask > 0] = cv.GC_PR_FGD  # Probable foreground
+
+	# Define the edges of the image as definite background
+	mask[:10, :] = cv.GC_BGD  # Top 10 rows
+	mask[-10:, :] = cv.GC_BGD  # Bottom 10 rows
+	mask[:, :10] = cv.GC_BGD  # Left 10 columns
+	mask[:, -10:] = cv.GC_BGD  # Right 10 columns
 
 	# Define background and foreground models
 	bgdModel = np.zeros((1, 65), np.float64)
 	fgdModel = np.zeros((1, 65), np.float64)
 
-	# Define rectangle (x, y, width, height) around the artwork
-	height, width = image.shape[:2]
-	rect = (10, 10, width - 20, height - 20)  # Adjust as needed
-
 	# Apply GrabCut
-	cv.grabCut(image, mask, rect, bgdModel, fgdModel, 5, cv.GC_INIT_WITH_RECT)
+	cv.grabCut(image, mask, None, bgdModel, fgdModel, 5, cv.GC_INIT_WITH_MASK)
 
 	# Create mask where sure and likely foreground are 1
 	mask2 = np.where((mask == cv.GC_FGD) | (mask == cv.GC_PR_FGD), 1, 0).astype('uint8')
 
+	#cv.imshow("GrabCut mask", mask2*255)
+	#cv.waitKey(0)
+
 	# Step 2: Morphological operations and filling surrounded pixels
 	# Opening + Closing to remove noise
-	kernel = np.ones((3, 3), np.uint8)
+	kernel = np.ones((15, 15), np.uint8)
 	mask2 = cv.morphologyEx(mask2, cv.MORPH_OPEN, kernel)
 	foreground = cv.morphologyEx(mask2, cv.MORPH_CLOSE, kernel)
 
 	foreground = fill_surrounded_pixels(foreground)
 
+	#cv.imshow("Foreground - Step 2", foreground*255)
+	#cv.waitKey(0)
+
 	# Get the sorted contours of the artworks
 	contours = sort_contours(get_artworks_points(foreground))
 
-	mask = np.zeros_like(foreground)
 	dsts = []
+	masks = []
 	for contour in contours:
-		# Find the bounding box of the non-background region
-		_, _, width, height = cv.boundingRect(contour)
+		mask = np.zeros_like(foreground)
+		cv.drawContours(mask, [contour], -1, (1, 1, 1), thickness=cv.FILLED)
+		mask = apply_square_mask(mask)
 
-		cv.drawContours(mask, [contour], -1, (255, 255, 255), thickness=cv.FILLED)
+		#cv.imshow("Mask", mask * 255)
+		#cv.waitKey(0)
 
-		pts1 = np.array(get_extreme_points(contour, mask.copy()), dtype="float32")
+		# Get image masked
+		dst = image * mask[:, :, np.newaxis]
 
-		# If only three points, find the farthest two points
-		if len(pts1) == 3:
-			pts1 = get_farthest_points(pts1)
-			pts1 = [pts1[0], pts1[1], [pts1[1][0], pts1[0][1]], [pts1[0][0], pts1[1][1]]]
-			pts1 = order_points(np.array(pts1))
-			pts1 = np.array(pts1, dtype="float32")
+		#cv.imshow("Image masked", dst)
+		#cv.waitKey(0)
 
-			# Print points to the mask for debugging
-			# plot_mask_with_points(mask, pts1.astype(int))
+		# Remove all rows and cols with black pixels (zeros)
+		non_zero_rows = np.any(dst != 0, axis=(1, 2))
+		non_zero_cols = np.any(dst != 0, axis=(0, 2))
+		dst = dst[non_zero_rows][:, non_zero_cols]
 
-		pts2 = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype="float32")
+		#cv.imshow("Image masked 2", dst)
+		#cv.waitKey(0)
 
-		# Apply perspective transform
-		M = cv.getPerspectiveTransform(pts1, pts2)
-		dst = cv.warpPerspective(image, M, (width, height))
 		dst = cv.cvtColor(dst, cv.COLOR_HSV2BGR)
-		dsts.append(dst)
+		#cv.imshow("Final image", dst)
+		#cv.waitKey(0)
 
-	return dsts, mask*255
+		dsts.append(dst)
+		masks.append(mask)
+
+	combined_mask = np.any(masks, axis=0).astype(np.uint8)
+	return dsts, combined_mask
 
 
 def load_masks(imgs_path):
