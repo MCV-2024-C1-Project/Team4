@@ -13,10 +13,10 @@ def sift(img):
     sift = cv.SIFT_create()
     kp, des = sift.detectAndCompute(gray,None)
     
-    img=cv.drawKeypoints(gray,kp,img)
+    #img=cv.drawKeypoints(gray,kp,img)
     
-    cv.imshow('dst',img)
-    cv.waitKey(0) 
+    #cv.imshow('dst',img)
+    #cv.waitKey(0) 
 
     return kp, des
 
@@ -34,10 +34,10 @@ def orb(img):
     # compute the descriptors with ORB
     kp, des = orb.compute(gray, kp)
 
-    img=cv.drawKeypoints(gray,kp,img)
+    #img=cv.drawKeypoints(gray,kp,img)
     
-    cv.imshow('dst',img)
-    cv.waitKey(0) 
+    #cv.imshow('dst',img)
+    #cv.waitKey(0) 
 
     return kp, des
 
@@ -76,9 +76,15 @@ def match(des1, des2, des_type):
         bf = cv.BFMatcher(cv.NORM_L2)
         matches = bf.knnMatch(des1,des2,k=2)
 
-    return matches
-    
+    good = []
+    for m,n in matches:
+     if m.distance < 0.75*n.distance:
+        good.append([m])
 
+
+    return good
+    
+'''
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 folder_path = os.path.join(base_path, "./data/qsd1_w4")
 folder_path_bbdd = os.path.join(base_path, "./data/BBDD")
@@ -86,61 +92,40 @@ folder_path_bbdd = os.path.join(base_path, "./data/BBDD")
 # Get all images with .jpg extension
 image_path_1 = os.path.join(folder_path, "00001.jpg")
 
-image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00096.jpg")
+image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00097.jpg")
 
 image_path_3 = os.path.join(folder_path_bbdd, "bbdd_00150.jpg")
 
 img1 = cv.imread(image_path_1)
 
-#kp1, des1 = orb(img1)
-des1 = daisy_descriptor(img1)
+kp1, des1 = sift(img1)
+
 
 img2 = cv.imread(image_path_2)
-#kp2, des2 = orb(img2)
-des2 = daisy_descriptor(img2)
+kp2, des2 = sift(img2)
+
 
 img3 = cv.imread(image_path_3)
-#kp3, des3 = orb(img3)
-des3 = daisy_descriptor(img3)
+kp3, des3 = sift(img3)
 
-matches = match(des1, des2, 'daisy')
+
+matches = match(des1, des2, 'sift')
 print(len(matches))
-good = []
-for m,n in matches:
-    if m.distance < 0.75*n.distance:
-        good.append([m])
 
-print(len(good))
-
-'''
-#img12 = cv.drawMatches(img1,kp1,img2,kp2,good,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-img12 = cv.drawMatchesKnn(img1,kp1,img2,kp2,good,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+img12 = cv.drawMatchesKnn(img1,kp1,img2,kp2,matches,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
 plt.imshow(img12),plt.show()
-'''
 
 
-matches = match(des1, des3, 'daisy')
+
+matches = match(des1, des3, 'sift')
 print(len(matches))
-good = []
-for m,n in matches:
-    if m.distance < 0.75*n.distance:
-        good.append([m])
 
-print(len(good))
-
-'''
 #img13 = cv.drawMatches(img1,kp1,img3,kp3,good,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-img13 = cv.drawMatchesKnn(img1,kp1,img3,kp3,good,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+img13 = cv.drawMatchesKnn(img1,kp1,img3,kp3,matches,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
  
 plt.imshow(img13),plt.show()
+
 '''
 
 
-'''
-img = cv.imread(image_path_1)
-orb(img)
-
-img = cv.imread(image_path_1)
-daisy_descriptor(img)
-'''

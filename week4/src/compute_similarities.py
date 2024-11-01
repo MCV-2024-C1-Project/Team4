@@ -3,8 +3,53 @@ from typing import Any
 from metrics import compare_histograms
 import cv2 as cv
 from metrics import Metrics
+from keypoint_detection import * 
+
+def compute_similarities(query_descriptors: Any, bbdd_descriptors: Any, des_type: str, k: int = 1) -> tuple[list, list]:
+    """
+    Computes the similarities between the query descriptors and the BBDD descriptors.
+    
+    :param query_descriptors: descriptors of the query image.
+    :param bbdd_descriptors: list of descriptors for each image in the BBDD.
+    :param des_type: type of descriptor (e.g., 'sift', 'orb', 'daisy').
+    :param k: number of top results to return.
+    :return: top k results and the indices of the associated images in the BBDD.
+    """
+
+    results = []
+    
+    for idx, bbdd_desc in enumerate(bbdd_descriptors):
+        if bbdd_desc is None:
+            num_good_matches = 0  # Si bbdd_desc es None, asignar 0
+            results.append((idx, num_good_matches))
+        else:
+            matches = match(query_descriptors, bbdd_desc, des_type)
+            num_good_matches = len(matches)  # Contar las coincidencias
+            results.append((idx, num_good_matches))
+
+        
+
+    # Agregar el resultado a la lista
+    
+       
+    print(results) 
+    # Sort results by the number of good matches in descending order (more matches is better)
+    results.sort(key=lambda x: x[1], reverse=True)
+    print(results)
+
+    # Get the indices of the results
+    results_idx = [result[0] for result in results]
+
+    
+
+    # Return the k best matches
+    return results[:k], results_idx[:k]
 
 
+
+
+
+'''
 class MeasureType:
     DISTANCE = "distance"
     SIMILARITY = "similarity"
@@ -46,3 +91,4 @@ def compute_similarities(query_hist: Any, bbdd_histograms: Any, similarity_measu
 
     # Return the k best matches
     return results[:k], results_idx[:k]
+'''
