@@ -17,11 +17,19 @@ def compute_similarities(query_descriptors: Any, bbdd_descriptors: Any, des_type
     """
 
     results = []
+    
     for idx, bbdd_desc in enumerate(bbdd_descriptors):
         # Use the match function to find the number of matches between query and BBDD descriptors
-        matches = match(query_descriptors, bbdd_desc, des_type)
-        num_good_matches = len(matches)
-        results.append((idx, num_good_matches))  # Save index and number of good matches
+           if bbdd_desc is None:
+            num_good_matches = 0  # Si bbdd_desc es None, asignar 0
+           else:
+        # Usar la función match para encontrar el número de coincidencias
+            matches = match(query_descriptors, bbdd_desc, des_type)
+            num_good_matches = len(matches)  # Contar las coincidencias
+
+    # Agregar el resultado a la lista
+    results.append((idx, num_good_matches))
+       
         
     # Sort results by the number of good matches in descending order (more matches is better)
     results.sort(key=lambda x: x[1], reverse=True)
