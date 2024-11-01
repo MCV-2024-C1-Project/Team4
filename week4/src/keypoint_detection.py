@@ -48,8 +48,8 @@ def daisy_descriptor(img):
 
     descs, descs_img = daisy(gray, step=180, radius=58, rings=2, histograms=6, orientations=8, visualize=True)
 
-    #cv.imshow('dst',descs_img)
-    #cv.waitKey(0) 
+    cv.imshow('dst',descs_img)
+    cv.waitKey(0) 
 
     return descs.reshape(-1, descs.shape[2]).astype(np.float32)
 
@@ -84,7 +84,7 @@ def match(des1, des2, des_type):
 
     return good
     
-
+'''
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 folder_path = os.path.join(base_path, "./data/qsd1_w4")
 folder_path_bbdd = os.path.join(base_path, "./data/BBDD")
@@ -126,6 +126,6 @@ img13 = cv.drawMatchesKnn(img1,kp1,img3,kp3,matches,None,flags=cv.DrawMatchesFla
  
 plt.imshow(img13),plt.show()
 
-
+'''
 
 

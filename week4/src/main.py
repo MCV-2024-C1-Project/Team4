@@ -130,10 +130,10 @@ def main():
 		if len(query_img_h) <= 2:
 			res_m_sub = []
 			for query_img_h_sub in query_img_h:
-				res_m_sub.append(compute_similarities(query_img_h_sub, bbdd_histograms, similarity_function, k_value)[1])
+				res_m_sub.append(compute_similarities(query_img_h_sub, bbdd_histograms, descriptor_type, k_value)[1])
 			res_m.append(res_m_sub)
 			continue
-		res_m.append(compute_similarities(query_img_h, bbdd_histograms, similarity_function, k_value)[1])
+		res_m.append(compute_similarities(query_img_h, bbdd_histograms, descriptor_type, k_value)[1])
 	
 	# If we are not in testing mode
 	if not is_test:
