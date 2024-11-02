@@ -1,9 +1,6 @@
 import pickle
-import os
-import cv2 as cv
 import argparse
 from tqdm import tqdm
-from matplotlib.image import imread
 
 from compute_similarities import compute_similarities
 from average_precision import mapk
@@ -22,7 +19,7 @@ def main():
 	parser.add_argument("query_path", help="Path to the query dataset")
 	parser.add_argument("--similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)", default="HISTCMP_HELLINGER")
 	parser.add_argument("--k_value", help="Top k results", default=1)
-	parser.add_argument("--descriptor_type", help ="Descriptor texture type")
+	parser.add_argument("--descriptor_type", help="Descriptor type")
 	parser.add_argument("--is_test", help="True if we are testing the model (without ground truth)", default=False, type=bool)
 	
 

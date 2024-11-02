@@ -9,14 +9,14 @@ import matplotlib.pyplot as plt
 def sift(img):
 
     gray= cv.cvtColor(img,cv.COLOR_BGR2GRAY)
-    
+
     sift = cv.SIFT_create(nfeatures=400)
     kp, des = sift.detectAndCompute(gray,None)
-    
+
     #img=cv.drawKeypoints(gray,kp,img)
-    
+
     #cv.imshow('dst',img)
-    #cv.waitKey(0) 
+    #cv.waitKey(0)
 
     return kp, des
 
@@ -27,31 +27,43 @@ def orb(img):
 
     # Initiate ORB detector
     orb = cv.ORB_create()
-    
+
     # find the keypoints with ORB
     kp = orb.detect(gray,None)
-    
+
     # compute the descriptors with ORB
     kp, des = orb.compute(gray, kp)
 
     #img=cv.drawKeypoints(gray,kp,img)
-    
+
     #cv.imshow('dst',img)
-    #cv.waitKey(0) 
+    #cv.waitKey(0)
 
     return kp, des
 
 
 def daisy_descriptor(img):
-    
+
     gray= cv.cvtColor(img,cv.COLOR_BGR2GRAY)
 
     descs, descs_img = daisy(gray, step=180, radius=58, rings=2, histograms=6, orientations=8, visualize=True)
 
     cv.imshow('dst',descs_img)
-    cv.waitKey(0) 
+    cv.waitKey(0)
 
     return descs.reshape(-1, descs.shape[2]).astype(np.float32)
+
+
+def compute_std_dev_of_distances(matches):
+    """
+    Compute the standard deviation of distances for a list of cv2.DMatch objects.
+
+    :param matches: List of cv2.DMatch objects
+    :return: Standard deviation of distances
+    """
+    distances = [match[0].distance for match in matches]
+    return np.std(distances)
+
 
 def match(des1, des2, des_type):
 
@@ -77,13 +89,12 @@ def match(des1, des2, des_type):
         matches = bf.knnMatch(des1,des2,k=2)
 
     good = []
-    for m,n in matches:
-     if m.distance < 0.75*n.distance:
-        good.append([m])
-
+    for m, n in matches:
+        if m.distance < 0.75*n.distance:
+            good.append([m])
 
     return good
-    
+
 '''
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 folder_path = os.path.join(base_path, "./data/qsd1_w4")

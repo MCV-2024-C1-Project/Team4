@@ -5,6 +5,7 @@ import cv2 as cv
 from metrics import Metrics
 from keypoint_detection import * 
 
+
 def compute_similarities(query_descriptors: Any, bbdd_descriptors: Any, des_type: str, k: int = 1) -> tuple[list, list]:
     """
     Computes the similarities between the query descriptors and the BBDD descriptors.
@@ -25,22 +26,21 @@ def compute_similarities(query_descriptors: Any, bbdd_descriptors: Any, des_type
         else:
             matches = match(query_descriptors, bbdd_desc, des_type)
             num_good_matches = len(matches)  # Contar las coincidencias
-            results.append((idx, num_good_matches))
+            std_dev = compute_std_dev_of_distances(matches)  # Standard deviation of distances
+            results.append((idx, num_good_matches, std_dev))
 
-        
-
-    # Agregar el resultado a la lista
-    
-       
-    print(results) 
     # Sort results by the number of good matches in descending order (more matches is better)
     results.sort(key=lambda x: x[1], reverse=True)
-    print(results)
 
     # Get the indices of the results
     results_idx = [result[0] for result in results]
 
-    
+    threshold = 2 if des_type == 'sift' else 1.8
+
+    if len(results) > 1 and results[0][1] < threshold * results[1][1]:
+        result = (-1, -1, -1)
+        results.insert(0, result)
+        results_idx.insert(0, -1)
 
     # Return the k best matches
     return results[:k], results_idx[:k]
