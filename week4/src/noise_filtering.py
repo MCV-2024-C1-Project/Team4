@@ -75,11 +75,11 @@ print("Images with noise:")
 for img_name in images_with_noise:
     print(img_name)
 
-'''
-with open(folder_path + "/augmentations.pkl", 'rb') as f:
+
+with open(folder_path + "/gt_corresps.pkl", 'rb') as f:
 			y = pickle.load(f) 
                   
 print(y)
-'''
+
 
 
