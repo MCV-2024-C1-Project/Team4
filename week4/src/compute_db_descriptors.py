@@ -41,6 +41,8 @@ def main():
 			kp, des = sift(img_bgr)
 		elif DESCRIPTOR_TYPE == 'orb':
 			kp, des = orb(img_bgr)
+		elif DESCRIPTOR_TYPE == 'daisy':
+			des = daisy_descriptor(img_bgr)
 			
 
 		index = int(filename.split('_')[-1].split('.')[0])
