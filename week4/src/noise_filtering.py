@@ -39,7 +39,7 @@ images_with_noise = []
 # Function to apply the selected filter
 def apply_filter(img, filter_type):
     if filter_type == 'median':
-        return cv2.medianBlur(img, 5)  # Median filter (kernel size 5)
+        return cv2.medianBlur(img, 3)  # Median filter (kernel size 5)
     elif filter_type == 'nlm':
         return cv2.fastNlMeansDenoisingColored(img, None, 30, 30, 3, 15)  # Non-local Means filter
     elif filter_type == 'gaussian':
@@ -61,7 +61,7 @@ for image_path in tqdm(image_paths, desc="Processing Images", unit="image"):
     ssim_value, _ = ssim(gray_original, gray_filtered, full=True)
     # SSIM of 1 indicates that the images are identical; 0 indicates no structural correlation.
 
-    if ssim_value > 0.56:
+    if ssim_value > 0.7:
         # Save original image
         shutil.copy(image_path, os.path.join(output_dir, os.path.basename(image_path)))
     else:

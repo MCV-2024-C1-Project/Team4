@@ -48,7 +48,7 @@ def daisy_descriptor(img):
     gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
     h,w = gray.shape
 
-    S = np.floor(w/10)
+    S = np.floor(w/20)
     R = 15
     Q = 3
     H = 8
@@ -122,25 +122,26 @@ def daisy_match(descs1, descs2):
     ratio_threshold = 0.6
     good_matches = ratios < ratio_threshold
 
-    # Display matching indices (or their coordinates if you need to visualize)
-    matches = [(i, min_dist_indices12[i]) for i in range(len(min_dist_indices12)) if good_matches[i]]
 
-    return len(matches)
+    return ratios[good_matches]
 
 def test_daisy():
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     folder_path = os.path.join(base_path, "./data/qsd1_w4")
     folder_path_bbdd = os.path.join(base_path, "./data/BBDD")
     image_path_1 = os.path.join(folder_path, "00001.jpg")
-    image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00023.jpg")
-    image_path_3 = os.path.join(folder_path_bbdd, "bbdd_00024.jpg")
+    image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00150.jpg")
+    image_path_3 = os.path.join(folder_path_bbdd, "bbdd_00003.jpg")
     img1 = cv.imread(image_path_1)
     img2 = cv.imread(image_path_2)
     img3 = cv.imread(image_path_3)
 
-    descs1 = daisy_descriptor(img1)
-    descs2 = daisy_descriptor(img2)
-    descs3 = daisy_descriptor(img3)
+    descs1 = daisy_descriptor(img1).astype(np.float32)
+    descs2 = daisy_descriptor(img2).astype(np.float32)
+    descs3 = daisy_descriptor(img3).astype(np.float32)
+
+    match(descs1, descs2, 'daisy')
+    match(descs1, descs3, 'daisy')
 
   
 #test_daisy()
