@@ -10,7 +10,7 @@ def sift(img):
 
     gray= cv.cvtColor(img,cv.COLOR_BGR2GRAY)
     
-    sift = cv.SIFT_create()
+    sift = cv.SIFT_create(nfeatures=400)
     kp, des = sift.detectAndCompute(gray,None)
     
     #img=cv.drawKeypoints(gray,kp,img)
