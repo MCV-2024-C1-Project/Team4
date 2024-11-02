@@ -1050,7 +1050,7 @@ mAP@1 for wavelet: 0.6
     │   ├── plot_results.py
     │   └── print_dict.py
     
-### Task 1: Keypoints detection and descriptors computation
+### Task 1: Keypoint Detection and Descriptor Computation
 
 The script `keypoint_detection.py` provides functions to detect keypoints and generate their descriptors using three methods: SIFT, ORB, and DAISY. Each method offers different advantages in terms of computation cost, robustness, and invariance to scale, rotation, and illumination changes.
 
@@ -1096,6 +1096,10 @@ def daisy_descriptor(img):
     # Reshape descriptors to a 2D array and convert to float32 for compatibility
     return descs.reshape(-1, descs.shape[2]).astype(np.float32)
 ```
+
+### Task 2: Find tentative matches based on similarity of local appearance and verify matches
+
+
 
 ## Team Members
 
