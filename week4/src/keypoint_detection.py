@@ -4,6 +4,7 @@ import glob
 import os
 from skimage.feature import daisy
 import matplotlib.pyplot as plt
+from scipy.spatial import distance
 
 
 def sift(img):
@@ -47,23 +48,24 @@ def orb(img):
 
 def daisy_descriptor(img):
 
-    # Convert the image from BGR to grayscale, as DAISY operates on single-channel images
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+    h,w = gray.shape
 
-    # Compute the DAISY descriptors for the grayscale image
-    # Parameters:
-    # - step: spacing between descriptors
-    # - radius: radius of the outermost ring
-    # - rings, histograms, orientations: control the DAISY descriptor structure
-    # - visualize: if True, returns a visualization of the descriptors
-    descs, descs_img = daisy(gray, step=180, radius=58, rings=2, histograms=6, orientations=8, visualize=True)
+    S = np.floor(w/20)
+    R = 15
+    Q = 3
+    H = 8
 
+    descs, descs_img = daisy(gray, step=int(S), radius=R, rings=Q, histograms=Q+1, orientations=H, normalization='daisy' ,visualize=True)
+    #print(descs.shape)
+    # Reshape to have a list of feature vectors
+    descs_reshaped = descs.reshape(-1, descs.shape[-1])
+    # descs dimension --> (P,Q,R) 
+    #cv.imshow('dst', descs_img)
+    #cv.waitKey(0)
+    #print(descs_reshaped.shape)
 
-    cv.imshow('dst',descs_img)
-    cv.waitKey(0)
-
-    # Reshape descriptors to a 2D array and convert to float32 for compatibility
-    return descs.reshape(-1, descs.shape[2]).astype(np.float32)
+    return descs_reshaped
 
 
 def compute_std_dev_of_distances(matches):
@@ -107,6 +109,45 @@ def match(des1, des2, des_type):
 
     return good
 
+def daisy_match(descs1, descs2):
+
+    # Compute pairwise distances between descriptors
+    dists12 = distance.cdist(descs1, descs2, 'euclidean')
+
+    # Find the closest matches
+    min_dist_indices12 = np.argmin(dists12, axis=1)
+
+    # Compute the two smallest distances for each descriptor in desc1
+    sorted_dists = np.sort(dists12, axis=1)
+    ratios = sorted_dists[:, 0] / (sorted_dists[:, 1] + 1e-8)  # Adding small value to avoid division by zero
+
+    # Threshold for Lowe's ratio test
+    ratio_threshold = 0.6
+    good_matches = ratios < ratio_threshold
+
+
+    return ratios[good_matches]
+
+def test_daisy():
+    base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    folder_path = os.path.join(base_path, "./data/qsd1_w4")
+    folder_path_bbdd = os.path.join(base_path, "./data/BBDD")
+    image_path_1 = os.path.join(folder_path, "00001.jpg")
+    image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00150.jpg")
+    image_path_3 = os.path.join(folder_path_bbdd, "bbdd_00003.jpg")
+    img1 = cv.imread(image_path_1)
+    img2 = cv.imread(image_path_2)
+    img3 = cv.imread(image_path_3)
+
+    descs1 = daisy_descriptor(img1).astype(np.float32)
+    descs2 = daisy_descriptor(img2).astype(np.float32)
+    descs3 = daisy_descriptor(img3).astype(np.float32)
+
+    match(descs1, descs2, 'daisy')
+    match(descs1, descs3, 'daisy')
+
+  
+#test_daisy()
 '''
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 folder_path = os.path.join(base_path, "./data/qsd1_w4")

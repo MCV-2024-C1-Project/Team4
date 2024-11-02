@@ -17,47 +17,16 @@ def main():
 	# Read the arguments from the command line
 	parser = argparse.ArgumentParser(description="Retrieve results and compute mAP@k")
 	parser.add_argument("query_path", help="Path to the query dataset")
-	parser.add_argument("--similarity_measure", help="Similarity Measure (e.g., HISTCMP_HELLINGER, HISTCMP_CHISQR_ALT)", default="HISTCMP_HELLINGER")
 	parser.add_argument("--k_value", help="Top k results", default=1)
 	parser.add_argument("--descriptor_type", help="Descriptor type")
 	parser.add_argument("--is_test", help="True if we are testing the model (without ground truth)", default=False, type=bool)
 	
 
 	args = parser.parse_args()
-	similarity_measure = args.similarity_measure
 	k_value = int(args.k_value)
 	q_path = os.path.join(base_path, args.query_path)
 	is_test = args.is_test
 	descriptor_type = args.descriptor_type
-	
-
-	# Select the appropriate similarity measure based on the command line argument. 
-	# For those distances that we have defined manually, we have assigned
-	# them a numerical ID.
-	if similarity_measure == "HISTCMP_CORREL":
-		similarity_function = cv.HISTCMP_CORREL
-	elif similarity_measure == "HISTCMP_CHISQR":
-		similarity_function = cv.HISTCMP_CHISQR
-	elif similarity_measure == "HISTCMP_INTERSECT":
-		similarity_function = cv.HISTCMP_INTERSECT
-	elif similarity_measure == "HISTCMP_BHATTACHARYYA":
-		similarity_function = cv.HISTCMP_BHATTACHARYYA
-	elif similarity_measure == "HISTCMP_HELLINGER":
-		similarity_function = cv.HISTCMP_HELLINGER
-	elif similarity_measure == "HISTCMP_CHISQR_ALT":
-		similarity_function = cv.HISTCMP_CHISQR_ALT
-	elif similarity_measure == "HISTCMP_KL_DIV":
-		similarity_function = cv.HISTCMP_KL_DIV
-	elif similarity_measure == "Manhattan":
-		similarity_function = Metrics.MANHATTAN
-	elif similarity_measure == "Lorentzian":
-		similarity_function = Metrics.LORENTZIAN
-	elif similarity_measure == "Canberra":
-		similarity_function = Metrics.CANBERRA
-	elif similarity_measure == "Ssim":
-		similarity_function = Metrics.SSIM
-	else:
-		raise ValueError(f"Unknown similarity measure: {similarity_measure}")
 
 	# If we are not testing, we get the provided GT to evaluate the results 
 	# obatined for the QSD1
@@ -80,6 +49,9 @@ def main():
 
 		elif descriptor_type == 'orb':
 			kp, des = orb(img_bgr)
+		elif descriptor_type == 'daisy':
+			des = daisy_descriptor(img_bgr)
+			des = des.astype(np.float32)
 			
 		
 
