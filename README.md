@@ -1029,6 +1029,73 @@ python main.py ./data/qsd2_w3/masked/images_without_noise  --descriptor_type=wav
 mAP@1 for wavelet: 0.6
 ```
 
+<h2 align="center">WEEK 4: Tasks</h2>
+
+### Project Structure
+
+    week4/
+    ├── evaluation/
+    │   ├── bbox_iou.py
+    │   └── evaluation_funcs.py
+    ├── src/
+    │   ├── average_precision.py
+    │   ├── compute_db_descriptors.py
+    │   ├── compute_descriptors.py
+    │   ├── compute_img_descriptors.py
+    │   ├── compute_similarities.py
+    │   ├── main.py
+    │   ├── metrics.py
+    │   └── utils.py
+    ├── utils/
+    │   ├── plot_results.py
+    │   └── print_dict.py
+    
+### Task 1: Keypoints detection and descriptors computation
+
+The script `keypoint_detection.py` provides functions to detect keypoints and generate their descriptors using three methods: SIFT, ORB, and DAISY. Each method offers different advantages in terms of computation cost, robustness, and invariance to scale, rotation, and illumination changes.
+
+- **SIFT (Scale-Invariant Feature Transform):**
+
+SIFT is a method for detecting and describing keypoints that is invariant to scale, rotation, and illumination, making it ideal for robust feature matching across images. It identifies keypoints by detecting extrema in scale-space, refining their location, assigning orientation, and generating a distinctive descriptor for each.
+
+```bash
+def sift(img):
+    gray= cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+    # Initiate SIFT detector
+    sift = cv.SIFT_create(nfeatures=400)
+    # find the keypoints and compute the descriptors with SIFT
+    kp, des = sift.detectAndCompute(gray,None)
+    return kp, des
+```
+
+- **ORB (Oriented FAST and Rotated BRIEF):**
+
+ORB is a fast and efficient alternative to SIFT, combining the FAST keypoint detector and a modified BRIEF descriptor. It is designed to be rotation-invariant and has a low computation cost, which makes it suitable for real-time applications, especially on devices with limited resources. Unlike SIFT and SURF, ORB is patent-free.
+
+```bash
+def orb(img):
+    gray= cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+    # Initiate ORB detector
+    orb = cv.ORB_create()
+    # find the keypoints with ORB
+    kp = orb.detect(gray,None)
+    # compute the descriptors with ORB
+    kp, des = orb.compute(gray, kp)
+    return kp, des
+```
+
+- **DAISY:**
+
+DAISY is a descriptor that leverages gradient orientation histograms and is structured for fast, dense feature extraction. It’s often used in applications where dense representations of local features are needed, such as bag-of-features models in image recognition tasks. DAISY is robust to minor geometric and photometric transformations, making it a versatile choice.
+
+```bash
+def daisy_descriptor(img):
+    gray= cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+    # Compute the DAISY descriptors
+    descs, descs_img = daisy(gray, step=180, radius=58, rings=2, histograms=6, orientations=8, visualize=True)
+    # Reshape descriptors to a 2D array and convert to float32 for compatibility
+    return descs.reshape(-1, descs.shape[2]).astype(np.float32)
+```
 
 ## Team Members
 
