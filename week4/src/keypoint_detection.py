@@ -45,6 +45,9 @@ def orb(img):
 
     return kp, des
 
+    import cv2 as cv
+import numpy as np
+
 
 def daisy_descriptor(img):
 
@@ -102,12 +105,42 @@ def match(des1, des2, des_type):
         bf = cv.BFMatcher(cv.NORM_L2)
         matches = bf.knnMatch(des1,des2,k=2)
 
+
     good = []
-    for m, n in matches:
-        if m.distance < 0.75*n.distance:
-            good.append([m])
+    for match_pair in matches:
+        # Check if we have two matches for this descriptor
+        if len(match_pair) == 2:
+            m, n = match_pair
+            if m.distance < 0.75 * n.distance:  # Apply the ratio test
+                good.append(m)  # Append the best match only
 
     return good
+
+def bidirectional_match(query_descriptors, bbdd_descriptors, des_type):
+    # Create a BFMatcher object based on the descriptor type
+    if des_type == 'sift' or des_type == 'orb':
+        bf = cv.BFMatcher(cv.NORM_L2 if des_type == 'sift' else cv.NORM_HAMMING, crossCheck=False)
+    else:
+        raise ValueError("Descriptor type not supported for bidirectional matching")
+
+    # Perform forward matching (query to BBDD)
+    matches_q_to_bbdd = bf.knnMatch(query_descriptors, bbdd_descriptors, k=1)
+
+    # Perform reverse matching (BBDD to query)
+    matches_bbdd_to_q = bf.knnMatch(bbdd_descriptors, query_descriptors, k=1)
+
+    # Filter matches that are mutual in both directions (bidirectional matches)
+    bidirectional_matches = []
+    for m in matches_q_to_bbdd:
+        if len(m) == 1:
+            match = m[0]
+            # Check if this match is in the reverse match set
+            reverse_match = matches_bbdd_to_q[match.trainIdx]
+            if len(reverse_match) == 1 and reverse_match[0].trainIdx == match.queryIdx:
+                bidirectional_matches.append(match)
+
+    return bidirectional_matches
+
 
 def daisy_match(descs1, descs2):
 

@@ -6,9 +6,47 @@ from metrics import Metrics
 from keypoint_detection import * 
 
 
+def compute_similarities_bidirectional(query_descriptors: Any, bbdd_descriptors: Any, des_type: str, k: int = 1) -> tuple[list, list]:
+    results = []
+    
+    for idx, bbdd_desc in enumerate(bbdd_descriptors):
+        if bbdd_desc is None:
+            num_good_matches = 0
+            results.append((idx, num_good_matches))
+        else:
+            # Get matches from query to BBDD
+            matches_query_to_bbdd = match(query_descriptors, bbdd_desc, des_type)
+            num_good_matches = len(matches_query_to_bbdd)
+
+            # If there are matches, check for bidirectional matching
+            if num_good_matches > 0:
+                # Check if matches are reciprocal
+                matches_bbdd_to_query = match(bbdd_desc, query_descriptors, des_type)
+                if len(matches_bbdd_to_query) > 0:
+                    # If there's a valid reciprocal match, count it as a good match
+                    num_good_matches = min(num_good_matches, len(matches_bbdd_to_query))
+                else:
+                    num_good_matches = 0  # No reciprocal match found, set to zero
+
+            results.append((idx, num_good_matches))
+    
+    results.sort(key=lambda x: x[1], reverse=True)
+    results_idx = [result[0] for result in results]
+
+    threshold = 1.7 if des_type == 'sift' else 1.8
+
+    if len(results) > 1 and results[0][1] < threshold * results[1][1]:
+        result = (-1, -1)
+        results.insert(0, result)
+        results_idx.insert(0, -1)
+
+    return results[:k], results_idx[:k]
+
+
+
 def compute_similarities(query_descriptors: Any, bbdd_descriptors: Any, des_type: str, k: int = 1) -> tuple[list, list]:
     """
-    Computes the similarities between the query descriptors and the BBDD descriptors.
+    Computes the similarities between the query descriptors and the BBDD descriptors using bidirectional matching.
     
     :param query_descriptors: descriptors of the query image.
     :param bbdd_descriptors: list of descriptors for each image in the BBDD.
@@ -17,34 +55,49 @@ def compute_similarities(query_descriptors: Any, bbdd_descriptors: Any, des_type
     :return: top k results and the indices of the associated images in the BBDD.
     """
 
+    # Initialize an empty list to store the results of matches
     results = []
     
+    # Loop through each descriptor in the reference (BBDD) descriptors list
     for idx, bbdd_desc in enumerate(bbdd_descriptors):
+        # If the current descriptor is None, set the number of good matches to 0
         if bbdd_desc is None:
-            num_good_matches = 0  # Si bbdd_desc es None, asignar 0
+            num_good_matches = 0
             results.append((idx, num_good_matches))
         else:
+            # Compute bidirectional matches between the query and the current reference descriptor
             matches = match(query_descriptors, bbdd_desc, des_type)
-            num_good_matches = len(matches)  # Contar las coincidencias
-            std_dev = compute_std_dev_of_distances(matches)  # Standard deviation of distances
-            results.append((idx, num_good_matches, std_dev))
+            
+            # Count the number of good bidirectional matches
+            num_good_matches = len(matches)
+            
+            # Calculate the standard deviation of match distances (helps to gauge match quality)
+            #std_dev = compute_std_dev_of_distances(matches) if matches else float('inf')
+            
+            # Append the index of the reference descriptor, the number of good matches, and the standard deviation
+            #results.append((idx, num_good_matches, std_dev))
+            results.append((idx, num_good_matches))
 
-    # Sort results by the number of good matches in descending order (more matches is better)
+    # Sort results by the number of good matches in descending order
+    # (Higher number of matches indicates a better similarity)
     results.sort(key=lambda x: x[1], reverse=True)
 
-    # Get the indices of the results
+    # Extract only the indices of the sorted results
     results_idx = [result[0] for result in results]
 
-    threshold = 2 if des_type == 'sift' else 1.8
+    # Set a threshold value based on descriptor type to help identify unknown images
+    threshold = 1.7 if des_type == 'sift' else 1.8
 
+    # Check if the top match is significantly better than the second-best match
+    # This helps to identify cases where there may be no good match in the dataset
     if len(results) > 1 and results[0][1] < threshold * results[1][1]:
+        # Insert a placeholder (-1) result at the top to indicate an unknown image
         result = (-1, -1, -1)
         results.insert(0, result)
         results_idx.insert(0, -1)
 
-    # Return the k best matches
+    # Return the top k matches (with their similarity scores and indices)
     return results[:k], results_idx[:k]
-
 
 
 

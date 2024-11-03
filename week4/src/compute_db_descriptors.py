@@ -19,15 +19,16 @@ def main():
 
 	# Argument parser
 	parser = argparse.ArgumentParser(description="")
+	parser.add_argument("bbdd_path", help="Path to the query dataset")
 	parser.add_argument('--descriptor_type')
 	args = parser.parse_args()
 
 	DESCRIPTOR_TYPE = args.descriptor_type
 
-	
 
 	# Compute descriptors for the BBDD images (offline)
-	imgs_path = os.path.join(base_path, "data", "BBDD")
+	imgs_path = os.path.join(base_path, args.bbdd_path)
+	
 	# Get all the images of the BBDD that have extension '.jpg'
 	files = [f for f in os.listdir(imgs_path) if f.endswith('.jpg')]
 	files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
@@ -36,6 +37,9 @@ def main():
 	for filename in tqdm(files, desc="Processing images", unit="image"):
 		# Read image (by default the color space of the loaded image is BGR) 
 		img_bgr = cv.imread(os.path.join(imgs_path, filename))
+
+		# Resize the image to 256x256
+		img_bgr = cv.resize(img_bgr, (256, 256))
 
 		if DESCRIPTOR_TYPE == 'sift':
 			kp, des = sift(img_bgr)

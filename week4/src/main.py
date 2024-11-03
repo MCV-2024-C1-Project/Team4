@@ -2,7 +2,7 @@ import pickle
 import argparse
 from tqdm import tqdm
 
-from compute_similarities import compute_similarities
+from compute_similarities import compute_similarities_bidirectional
 from average_precision import mapk
 from metrics import Metrics
 from keypoint_detection import *
@@ -44,11 +44,15 @@ def main():
 		# Read image (by default the color space of the loaded image is BGR) 
 		img_bgr = cv.imread(os.path.join(q_path, filename))
 
+		# Resize the image to 256x256
+		img_bgr = cv.resize(img_bgr, (256, 256))
+
 		if descriptor_type == 'sift':
 			kp, des = sift(img_bgr)
 
 		elif descriptor_type == 'orb':
 			kp, des = orb(img_bgr)
+
 		elif descriptor_type == 'daisy':
 			des = daisy_descriptor(img_bgr)
 			des = des.astype(np.float32)
@@ -86,24 +90,26 @@ def main():
 
 		
 	with open(os.path.join(q_path,  f'{descriptor_type}_descriptors.pkl'), 'rb') as f:
-		query_histograms = pickle.load(f)
+		query_descriptors = pickle.load(f)
 
 	with open(os.path.join(bbdd_path,  f'{descriptor_type}_descriptors.pkl'), 'rb') as f:
-		bbdd_histograms = pickle.load(f)
+		bbdd_descriptors = pickle.load(f)
 	
 	
 
 	# For each image in the query set, compute its similarity to all museum images (BBDD).
 	res_m = []
-	for query_img_h in tqdm(query_histograms, desc="Processing images", unit="image"):
+	for query_img_h in tqdm(query_descriptors, desc="Processing images", unit="image"):
 		if len(query_img_h) <= 2:
 			res_m_sub = []
 			for query_img_h_sub in query_img_h:
-				res_m_sub.append(compute_similarities(query_img_h_sub, bbdd_histograms, descriptor_type, k_value)[1])
+				res_m_sub.append(compute_similarities_bidirectional(query_img_h_sub, bbdd_descriptors, descriptor_type, k_value)[1])
 			res_m.append(res_m_sub)
 			continue
-		res_m.append(compute_similarities(query_img_h, bbdd_histograms, descriptor_type, k_value)[1])
+		res_m.append(compute_similarities_bidirectional(query_img_h, bbdd_descriptors, descriptor_type, k_value)[1])
 	
+	print(res_m)
+
 	# If we are not in testing mode
 	if not is_test:
 		
