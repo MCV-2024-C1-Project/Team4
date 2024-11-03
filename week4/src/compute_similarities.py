@@ -63,16 +63,23 @@ def compute_similarities_daisy(query_descriptors: Any, bbdd_descriptors: Any, k:
 
     best_match_index = -1
     min_score = float('inf')
-
+    mins = []
+    th = 0.83
     for idx, bbdd_desc in enumerate(bbdd_descriptors):
         radius = 5
         local_scores = compute_local_scores(query_descriptors, bbdd_desc, radius)
-        total_score = np.sum(local_scores)
+        local_scores_vector = np.reshape(local_scores,-1)
+        local_scores_vector = np.sort(local_scores_vector)
+        ratio = local_scores_vector[0]/(local_scores_vector[1]+1e-8)
 
-        if total_score < min_score:
-            min_score = total_score
+        if local_scores_vector[0] < min_score:
+            mins.append(min_score)
+            min_score = local_scores_vector[0]
             best_match_index = idx
 
+    ratio = min_score/np.max([min(mins), 1e-8])
+    if ratio > th:
+        best_match_index = -1
 
 
     # Return the k best matches
