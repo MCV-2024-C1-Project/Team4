@@ -1097,8 +1097,76 @@ def daisy_descriptor(img):
     return descs.reshape(-1, descs.shape[2]).astype(np.float32)
 ```
 
-### Task 2: Find tentative matches based on similarity of local appearance and verify matches
+### Task 2: Finding Tentative Matches and Verifying Matches
 
+In Task 2, the primary objective is to identify potential matches between query images and a database (BBDD) of images based on the similarity of their local appearance. This process involves implementing a systematic approach to discard queries that do not correspond to any known images in the dataset.
+
+#### Methodology Overview
+
+The matching process begins by computing similarities between the descriptors of each query image and those in the database. Various similarity metrics are applied during this matching process, allowing flexible comparisons based on the descriptor type (e.g., SIFT, ORB, DAISY).
+
+A key aspect of the implementation is ensuring that the matching is **bidirectional**. This is achieved by verifying that both the query descriptors and the database descriptors point to each other as good matches. This bidirectional approach enhances the reliability of the matches and reduces the chance of false positives.
+
+To further refine the matching process, thresholds are established based on the number of matches found. A ratio of the first-best match distance to the second-best match distance is employed as a criterion to identify queries that may not correspond to any known images. The thresholds are optimized to balance precision and recall, typically derived from an analysis of the development set.
+
+#### Code Implementation
+
+The implementation is centered around the `compute_similarities_bidirectional` function, which computes the similarities between the query descriptors and the BBDD descriptors:
+
+```python
+def compute_similarities_bidirectional(query_descriptors: Any, bbdd_descriptors: Any, des_type: str, k: int = 1) -> tuple[list, list]:
+    results = []
+    
+    for idx, bbdd_desc in enumerate(bbdd_descriptors):
+        if bbdd_desc is None:
+            num_good_matches = 0
+            results.append((idx, num_good_matches))
+        else:
+            # Get matches from query to BBDD
+            matches_query_to_bbdd = match(query_descriptors, bbdd_desc, des_type)
+            num_good_matches = len(matches_query_to_bbdd)
+
+            # If there are matches, check for bidirectional matching
+            if num_good_matches > 0:
+                # Check if matches are reciprocal
+                matches_bbdd_to_query = match(bbdd_desc, query_descriptors, des_type)
+                if len(matches_bbdd_to_query) > 0:
+                    # If there's a valid reciprocal match, count it as a good match
+                    num_good_matches = min(num_good_matches, len(matches_bbdd_to_query))
+                else:
+                    num_good_matches = 0  # No reciprocal match found, set to zero
+
+            results.append((idx, num_good_matches))
+    
+    results.sort(key=lambda x: x[1], reverse=True)
+    results_idx = [result[0] for result in results]
+
+    threshold = 1.7 if des_type == 'sift' else 1.8
+
+    if len(results) > 1 and results[0][1] < threshold * results[1][1]:
+        result = (-1, -1)
+        results.insert(0, result)
+        results_idx.insert(0, -1)
+
+    return results[:k], results_idx[:k]
+```
+
+
+
+### Task 3: Evaluate the system on QSD1-W4, map@k 
+
+#### Evaluate system based on keypoint descriptors on QSD1-W4
+
+```bash
+python .\compute_db_descriptors.py ./data/BBDD --descriptor_type=sift
+
+python .\noise_filtering.py ./data/qsd1_w4 --filter=median
+python .\background_removal.py ./data/qsd1_w4/images_without_noise
+python .\main.py ./data/qsd1_w4/images_without_noise/masked --k_value=1 --descriptor_type=sift 
+```
+
+
+#### Compare your best query system from previous week on QSD1-W4
 
 
 ## Team Members
