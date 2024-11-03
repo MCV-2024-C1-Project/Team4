@@ -15,18 +15,10 @@ bbdd_path = os.path.join(base_path, "data", "BBDD")
 def main():
 
 	# Read the arguments from the command line
-	parser = argparse.ArgumentParser(description="Retrieve results and compute mAP@k")
-	parser.add_argument("query_path", help="Path to the query dataset")
-	parser.add_argument("--k_value", help="Top k results", default=1)
-	parser.add_argument("--descriptor_type", help="Descriptor type")
-	parser.add_argument("--is_test", help="True if we are testing the model (without ground truth)", default=False, type=bool)
-	
-
-	args = parser.parse_args()
-	k_value = int(args.k_value)
-	q_path = os.path.join(base_path, args.query_path)
-	is_test = args.is_test
-	descriptor_type = args.descriptor_type
+	k_value = 1
+	q_path = os.path.join(base_path, "data/qsd1_w4/images_without_noise/masked")
+	is_test = False
+	descriptor_type = "daisy"
 
 	# If we are not testing, we get the provided GT to evaluate the results 
 	# obatined for the QSD1
@@ -34,6 +26,7 @@ def main():
 		with open(q_path + "/gt_corresps.pkl", 'rb') as f:
 			y = pickle.load(f) 
 
+	'''
 	# Get all the images of the QSD that have extension '.jpg'
 	files = [f for f in os.listdir(q_path) if f.endswith('.jpg')]
 	descriptors = []
@@ -50,8 +43,8 @@ def main():
 		elif descriptor_type == 'orb':
 			kp, des = orb(img_bgr)
 		elif descriptor_type == 'daisy':
-			img_bgr = cv.resize(img_bgr, dsize=(256, 256), interpolation=cv.INTER_AREA)
-			des, shape = daisy_descriptor(img_bgr)
+			des = daisy_descriptor(img_bgr)
+			des = des.astype(np.float32)
 			
 		
 
@@ -76,14 +69,14 @@ def main():
 			if len(descriptors) <= index:
 				descriptors.extend([None] * (index + 1 - len(descriptors)))
 			descriptors[index] = des
-
+	
 	if convert_y and not is_test:
 		y = [[[item] for item in sublist] for sublist in y]
 
 	
 	with open(os.path.join(q_path, f'{descriptor_type}_descriptors.pkl'), 'wb') as f:
 		pickle.dump(descriptors, f)
-
+	'''
 		
 	with open(os.path.join(q_path,  f'{descriptor_type}_descriptors.pkl'), 'rb') as f:
 		query_histograms = pickle.load(f)
@@ -114,14 +107,6 @@ def main():
 		# Evaluate the results using mAP@K if we are not in testing mode	
 		print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
 
-		
-	# Save the 'blind' results for the test query set 
-	if is_test:
-		#subdirectory_path = os.path.join(q_path, color_space)
-		#os.makedirs(subdirectory_path, exist_ok=True)
-		output_file_path = os.path.join(q_path, 'result.pkl')
-		with open(output_file_path, 'wb') as f:
-			pickle.dump(res_m, f)
 
 if __name__ == '__main__':
 	main()

@@ -48,21 +48,21 @@ def daisy_descriptor(img):
     gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
     h,w = gray.shape
 
-    S = np.floor(w/20)
+    S = np.floor(w/15)
     R = 15
     Q = 3
-    H = 8
+    H = 5
 
-    descs, descs_img = daisy(gray, step=int(S), radius=R, rings=Q, histograms=Q+1, orientations=H, normalization='daisy' ,visualize=True)
+    descs = daisy(gray, step=int(S), radius=R, rings=Q, histograms=H, orientations=H, visualize=False)
     #print(descs.shape)
     # Reshape to have a list of feature vectors
-    descs_reshaped = descs.reshape(-1, descs.shape[-1])
+    #descs_reshaped = descs.reshape(-1, descs.shape[-1])
     # descs dimension --> (P,Q,R) 
     #cv.imshow('dst', descs_img)
     #cv.waitKey(0)
     #print(descs_reshaped.shape)
 
-    return descs_reshaped
+    return descs, descs.shape
 
 
 def compute_std_dev_of_distances(matches):
@@ -123,7 +123,7 @@ def daisy_match(descs1, descs2):
     good_matches = ratios < ratio_threshold
 
 
-    return ratios[good_matches]
+    return ratios[good_matches], good_matches, sorted_dists
 
 def test_daisy():
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -140,8 +140,8 @@ def test_daisy():
     descs2 = daisy_descriptor(img2).astype(np.float32)
     descs3 = daisy_descriptor(img3).astype(np.float32)
 
-    match(descs1, descs2, 'daisy')
-    match(descs1, descs3, 'daisy')
+    daisy_match(descs1, descs2)
+    daisy_match(descs1, descs3)
 
   
 #test_daisy()
