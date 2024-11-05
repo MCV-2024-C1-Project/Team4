@@ -2,7 +2,7 @@ import pickle
 import argparse
 from tqdm import tqdm
 
-from compute_similarities import compute_similarities_bidirectional
+from compute_similarities import compute_similarities_bidirectional, compute_similarities_daisy
 from average_precision import mapk
 from metrics import Metrics
 from keypoint_detection import *
@@ -45,17 +45,17 @@ def main():
 		img_bgr = cv.imread(os.path.join(q_path, filename))
 
 		# Resize the image to 256x256
-		img_bgr = cv.resize(img_bgr, (256, 256))
-
 		if descriptor_type == 'sift':
+			img_bgr = cv.resize(img_bgr, (256, 256))
 			kp, des = sift(img_bgr)
 
 		elif descriptor_type == 'orb':
+			img_bgr = cv.resize(img_bgr, (256, 256))
 			kp, des = orb(img_bgr)
 
 		elif descriptor_type == 'daisy':
-			des = daisy_descriptor(img_bgr)
-			des = des.astype(np.float32)
+			img_bgr = cv.resize(img_bgr, (256, 256), interpolation=cv.INTER_AREA)
+			des, shape = daisy_descriptor(img_bgr)
 			
 		
 
@@ -103,10 +103,16 @@ def main():
 		if len(query_img_h) <= 2:
 			res_m_sub = []
 			for query_img_h_sub in query_img_h:
-				res_m_sub.append(compute_similarities_bidirectional(query_img_h_sub, bbdd_descriptors, descriptor_type, k_value)[1])
+				if descriptor_type == 'daisy':
+					res_m_sub.append(compute_similarities_daisy(query_img_h_sub, bbdd_descriptors, k_value)[1])
+				else:
+					res_m_sub.append(compute_similarities_bidirectional(query_img_h_sub, bbdd_descriptors, descriptor_type, k_value)[1])
 			res_m.append(res_m_sub)
 			continue
-		res_m.append(compute_similarities_bidirectional(query_img_h, bbdd_descriptors, descriptor_type, k_value)[1])
+		if descriptor_type == 'daisy':
+			res_m.append(compute_similarities_daisy(query_img_h, bbdd_descriptors, k_value)[1])
+		else:
+			res_m.append(compute_similarities_bidirectional(query_img_h, bbdd_descriptors, descriptor_type, k_value)[1])
 	
 	print(res_m)
 
