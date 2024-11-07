@@ -45,8 +45,36 @@ def orb(img):
 
     return kp, des
 
-    import cv2 as cv
-import numpy as np
+def orb_daisy_desc(img):
+    gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+    
+    # Initiate ORB Detector and find keypoints
+    orb = cv.ORB_create(nfeatures=200)
+    kp_orb = orb.detect(gray, None)
+
+    # Compute descriptors using Daisy
+    patch_size = 50
+    descs = []
+    if len(kp_orb) == 0:
+        y = int(gray.shape[0]//2)
+        x = int(gray.shape[1]//2)
+        patch = gray[max(0, y-patch_size//2) : y+patch_size//2, max(0, x-patch_size//2) : x+patch_size//2]
+        desc, descs_img = daisy(patch, step=25, radius=15, rings=3, histograms=6, orientations=10, visualize=True)
+        descs.append(np.reshape(desc, -1))
+    else:
+        for kp in kp_orb:
+            x = int(kp.pt[0])
+            y = int(kp.pt[1])
+
+            patch = gray[max(0, y-patch_size//2) : y+patch_size//2, max(0, x-patch_size//2) : x+patch_size//2]
+
+            if patch.shape[0] > 0 and patch_size.shape[1] > 0:
+                desc, descs_img = daisy(patch, step=25, radius=15, rings=3, histograms=6, orientations=10, visualize=True)
+                descs.append(np.reshape(desc, -1))
+    
+    descs = np.array(descs)
+
+    return descs
 
 
 def daisy_descriptor(img):

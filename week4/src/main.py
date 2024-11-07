@@ -2,7 +2,7 @@ import pickle
 import argparse
 from tqdm import tqdm
 
-from compute_similarities import compute_similarities_bidirectional, compute_similarities_daisy
+from compute_similarities import *
 from average_precision import mapk
 from metrics import Metrics
 from keypoint_detection import *
@@ -55,7 +55,7 @@ def main():
 
 		elif descriptor_type == 'daisy':
 			img_bgr = cv.resize(img_bgr, (256, 256), interpolation=cv.INTER_AREA)
-			des, shape = daisy_descriptor(img_bgr)
+			des = orb_daisy_desc(img_bgr)
 			
 		
 
@@ -81,7 +81,7 @@ def main():
 				descriptors.extend([None] * (index + 1 - len(descriptors)))
 			descriptors[index] = des
 
-	if convert_y and not is_test:
+	if convert_y and not is_test and not (descriptor_type=='daisy'):
 		y = [[[item] for item in sublist] for sublist in y]
 
 	

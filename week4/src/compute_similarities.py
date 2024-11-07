@@ -105,96 +105,42 @@ def compute_similarities(query_descriptors: Any, bbdd_descriptors: Any, des_type
 
 
 def compute_similarities_daisy(query_descriptors: Any, bbdd_descriptors: Any, k: int = 1) -> tuple[list, list]:
-    """
-    Computes the similarities between the query descriptors and the BBDD descriptors using bidirectional matching.
-    
-    :param query_descriptors: descriptors of the query image.
-    :param bbdd_descriptors: list of descriptors for each image in the BBDD.
-    :param des_type: type of descriptor (e.g., 'sift', 'orb', 'daisy').
-    :param k: number of top results to return.
-    :return: top k results and the indices of the associated images in the BBDD.
-    """
-
-    best_match_idx = -1
+    best_match_index = -1
     min_score = float('inf')
-    mins_scores = []
-    th = 0.83
-    radius = 5
-
-    # Loop through each descriptor in the reference (BBDD) descriptors list
-    for idx, bbdd_desc in enumerate(bbdd_descriptors):
-        local_scores = compute_local_scores(query_descriptors, bbdd_desc, radius)
-        local_scores_vector = np.reshape(local_scores, -1)
-        local_scores_vector = np.sort(local_scores_vector)
-        ratio = local_scores_vector[0]/(local_scores_vector[1]+1e-8)
-
-        if local_scores_vector[0]<min_score:
-            mins_scores.append(min_score)
-            min_score = local_scores_vector[0]
-            best_match_idx = idx
-
-        ratio = mins_scores/np.max([min(mins_scores),1e-8])
-        if ratio > th:
-            best_match_idx = -1
-
-        return min_score, best_match_idx
-    
-def euclidean_distance(desc1, desc2):
-    return np.linalg.norm(desc1-desc2)
-
-def neigh_distance(i, j, query, bbdd, radius):
-    # Base case: if delta is very small, return a large number to indicate no valid neighbor
-    if radius <= 1:
-        return float('inf')
-   
-    # Get the descriptor at point i in the query image
-    desc_i = query[i]
-
-    # Find neighbors of j at distance delta in the template
-    neighbors = get_neighbors(j, radius, bbdd.shape[:2])
     distances = []
+    mins = []
+    th = 0.83
 
-    # Calculate distances to neighbors
-    for k in neighbors:
-        desc_k = bbdd[k]
-        distances.append(euclidean_distance(desc_i, desc_k))
-   
-    # Find the minimum distance in this neighborhood
-    min_dist = min(distances)
-    kmin = neighbors[np.argmin(distances)]  # Get the neighbor with minimum distance
+    for idx, bbdd_desc in enumerate(bbdd_descriptors):
+        if len(bbdd_desc) == 0:
+            if len(query_descriptors) == 0:
+                min_score = 0
+                best_match_index = idx
+        else:
+            for kp_desc in query_descriptors:
+                dist = np.linalg.norm(bbdd_desc-kp_desc, axis=1)
+                distances.append(np.sort(dist)[0])
+            
+            if len(distances) > 1:
+                local_scores_vector = np.reshape(distances, -1)
+                local_scores_vector = np.sort(local_scores_vector)
+                mean0 = np.mean(local_scores_vector[:1])
+            else:
+                local_scores_vector = distances[0]
+                mean0 = local_scores_vector
+            
+            if mean0 < min_score:
+                mins.append(min_score)
+                min_score = mean0
+                best_match_index = idx
+    
+    ratio = min_score/np.max([min(mins), 1e-8])
+    if ratio > th:
+        best_match_index = -1
+    
+    return min_score, best_match_index
 
-    # Recursively compute the neighborhood distance with a smaller radius
-    return min(min_dist, neigh_distance(i, kmin, query, bbdd, radius / 2))
 
-def get_neighbors(j, radius, shape):
-    # Function to get neighbors around point j within a radius delta
-    neighbors = []
-    y, x = j
-    for dy in range(-int(radius), int(radius) + 1):
-        for dx in range(-int(radius), int(radius) + 1):
-            if dy**2 + dx**2 <= radius**2:  # Ensure within radius
-                ny, nx = y + dy, x + dx
-                if 0 <= ny < shape[0] and 0 <= nx < shape[1]:
-                    neighbors.append((ny, nx))
-    return neighbors
-
-def compute_local_scores(query, bbdd, radius):
-    out_result = np.zeros(query.shape[:2])
-    for i in range(query.shape[0]):
-        for j in range(query.shape[1]):
-            desc_i = query[i, j]
-            desc_j = bbdd[i, j]
-           
-            # Compute local descriptor distance
-            ld = euclidean_distance(desc_i, desc_j)
-
-            # Compute neighborhood distance
-            nd = neigh_distance((i, j), (i, j), query, bbdd, radius)
-
-            # Store the minimum of local and neighborhood distances
-            out_result[i, j] = min(ld, nd)
-
-    return out_result
 
 '''
 class MeasureType:
