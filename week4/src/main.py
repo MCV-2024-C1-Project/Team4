@@ -2,7 +2,7 @@ import pickle
 import argparse
 from tqdm import tqdm
 
-from compute_similarities import compute_similarities, compute_similarities_daisy
+from compute_similarities import *
 from average_precision import mapk
 from metrics import Metrics
 from keypoint_detection import *
@@ -50,8 +50,10 @@ def main():
 		elif descriptor_type == 'orb':
 			kp, des = orb(img_bgr)
 		elif descriptor_type == 'daisy':
+			#img_bgr = cv.resize(img_bgr, dsize=(128, 128), interpolation=cv.INTER_AREA)
+			#des, shape = daisy_descriptor(img_bgr)
 			img_bgr = cv.resize(img_bgr, dsize=(256, 256), interpolation=cv.INTER_AREA)
-			des, shape = daisy_descriptor(img_bgr)
+			des = orb_daisy_desc(img_bgr)
 			
 		
 
@@ -77,8 +79,9 @@ def main():
 				descriptors.extend([None] * (index + 1 - len(descriptors)))
 			descriptors[index] = des
 
-	if convert_y and not is_test:
-		y = [[[item] for item in sublist] for sublist in y]
+
+#	if convert_y and not is_test:
+#		y = [[[item] for item in sublist] for sublist in y]
 
 	
 	with open(os.path.join(q_path, f'{descriptor_type}_descriptors.pkl'), 'wb') as f:
@@ -99,11 +102,11 @@ def main():
 		if len(query_img_h) <= 2:
 			res_m_sub = []
 			for query_img_h_sub in query_img_h:
-				res_m_sub.append(compute_similarities_daisy(query_img_h_sub, bbdd_histograms, k_value)[1])
+				res_m_sub.append(compute_similarities_daisy2(query_img_h_sub, bbdd_histograms, k_value)[1])
 			res_m.append(res_m_sub)
 			continue
-		res_m.append(compute_similarities_daisy(query_img_h, bbdd_histograms, k_value)[1])
-	
+		res_m.append(compute_similarities_daisy2(query_img_h, bbdd_histograms, k_value)[1])
+	print(res_m)
 	# If we are not in testing mode
 	if not is_test:
 		

@@ -41,7 +41,8 @@ def main():
 			kp, des = orb(img_bgr)
 		elif DESCRIPTOR_TYPE == 'daisy':
 			img_bgr = cv.resize(img_bgr, dsize=(256, 256), interpolation=cv.INTER_AREA)
-			des, shape = daisy_descriptor(img_bgr)
+			#des, shape = daisy_descriptor(img_bgr)
+			des = orb_daisy_desc(img_bgr)
 			
 
 		index = int(filename.split('_')[-1].split('.')[0])
@@ -54,8 +55,7 @@ def main():
 	
 	with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_descriptors.pkl'), 'wb') as f:
 		pickle.dump(descriptors, f)
-	with open(os.path.join(imgs_path, f'{DESCRIPTOR_TYPE}_descriptorsShape.pkl'), 'wb') as f:
-		pickle.dump(shape, f)
+
 	
 
 		

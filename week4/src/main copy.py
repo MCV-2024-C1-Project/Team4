@@ -2,7 +2,7 @@ import pickle
 import argparse
 from tqdm import tqdm
 
-from compute_similarities import compute_similarities, compute_similarities_daisy
+from compute_similarities import *
 from average_precision import mapk
 from metrics import Metrics
 from keypoint_detection import *
@@ -92,10 +92,12 @@ def main():
 		if len(query_img_h) <= 2:
 			res_m_sub = []
 			for query_img_h_sub in query_img_h:
-				res_m_sub.append(compute_similarities_daisy(query_img_h_sub, bbdd_histograms, k_value)[1])
+				res_m_sub.append(compute_similarities_daisy2(query_img_h_sub, bbdd_histograms, k_value)[1])
 			res_m.append(res_m_sub)
 			continue
-		res_m.append(compute_similarities_daisy(query_img_h, bbdd_histograms, k_value)[1])
+		res_m.append(compute_similarities_daisy2(query_img_h, bbdd_histograms, k_value)[1])
+	print(res_m)
+	
 	
 	# If we are not in testing mode
 	if not is_test:

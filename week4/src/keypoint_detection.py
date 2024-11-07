@@ -42,6 +42,38 @@ def orb(img):
 
     return kp, des
 
+def orb_daisy_desc(img):
+    gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+    desc1 = daisy_descriptor(img)
+    # Initiate ORB detector
+    orb = cv.ORB_create(nfeatures=200)
+
+    # find the keypoints with ORB
+    kp_orb = orb.detect(gray, None)
+
+    # Compute descriptors using DAISY
+    patch_size = 50
+    descs = []
+    if len(kp_orb) == 0:
+        y = int(gray.shape[0]//2)
+        x = int(gray.shape[1]//2)
+        patch = gray[max(0, y-patch_size//2):y+patch_size//2, max(0, x-patch_size//2):x+patch_size//2]
+        desc, descs_img = daisy(patch, step=25, radius=15, rings=3, histograms=6, orientations=10, visualize=True)
+        descs.append(np.reshape(desc, -1))
+    else:
+        for kp in kp_orb:
+            x = int(kp.pt[0])
+            y = int(kp.pt[1])
+
+            patch = gray[max(0, y-patch_size//2):y+patch_size//2, max(0, x-patch_size//2):x+patch_size//2]
+            if patch.shape[0] > 0 and patch.shape[1] > 0:
+                desc, descs_img = daisy(patch, step=25, radius=15, rings=3, histograms=6, orientations=10, visualize=True)
+                descs.append(np.reshape(desc, -1))
+
+    descs = np.array(descs)
+
+    return descs
+
 
 def daisy_descriptor(img):
 
@@ -93,11 +125,8 @@ def match(des1, des2, des_type):
         matches = bf.knnMatch(des1,des2,k=2)
 
     elif des_type == 'daisy':
-
-        #bf = cv.BFMatcher(cv.NORM_L2, crossCheck=True)
-        #matches = bf.match(des1,des2)
         bf = cv.BFMatcher(cv.NORM_L2)
-        matches = bf.knnMatch(des1,des2,k=2)
+        matches = bf.knnMatch(des1.astype(np.float32),des2.astype(np.float32),k=2)
 
     good = []
     for m, n in matches:
@@ -127,21 +156,12 @@ def daisy_match(descs1, descs2):
 
 def test_daisy():
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    folder_path = os.path.join(base_path, "./data/qsd1_w4")
+    folder_path = os.path.join(base_path, "./data/qsd1_w4/images_without_noise/masked/00018_1.jpg")
     folder_path_bbdd = os.path.join(base_path, "./data/BBDD")
-    image_path_1 = os.path.join(folder_path, "00001.jpg")
-    image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00150.jpg")
-    image_path_3 = os.path.join(folder_path_bbdd, "bbdd_00003.jpg")
-    img1 = cv.imread(image_path_1)
-    img2 = cv.imread(image_path_2)
-    img3 = cv.imread(image_path_3)
+    img1 = cv.imread(folder_path)
 
-    descs1 = daisy_descriptor(img1).astype(np.float32)
-    descs2 = daisy_descriptor(img2).astype(np.float32)
-    descs3 = daisy_descriptor(img3).astype(np.float32)
+    descs1 = orb_daisy_desc(img1)
 
-    daisy_match(descs1, descs2)
-    daisy_match(descs1, descs3)
 
   
 #test_daisy()
