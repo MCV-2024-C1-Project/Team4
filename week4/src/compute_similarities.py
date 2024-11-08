@@ -37,9 +37,9 @@ def compute_similarities_bidirectional(query_descriptors: Any, bbdd_descriptors:
     results.sort(key=lambda x: x[1], reverse=True)
     results_idx = [result[0] for result in results]
 
-    threshold = 1.7 if des_type == 'sift' else 1.8
+    threshold = 1.7 if des_type == 'sift' or des_type == 'daisy' else 1.8
 
-    if len(results) > 1 and results[0][1] < threshold * results[1][1]:
+    if len(results) > 1 and results[0][1] < threshold * results[1][1] or results[0][1] == 0:
         result = (-1, -1)
         results.insert(0, result)
         results_idx.insert(0, -1)

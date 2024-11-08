@@ -82,7 +82,7 @@ def main():
 				descriptors.extend([None] * (index + 1 - len(descriptors)))
 			descriptors[index] = des
 
-	if convert_y and not is_test and not (descriptor_type=='daisy'):
+	if convert_y and not is_test:
 		y = [[[item] for item in sublist] for sublist in y]
 
 	
@@ -104,16 +104,11 @@ def main():
 		if len(query_img_h) <= 2:
 			res_m_sub = []
 			for query_img_h_sub in query_img_h:
-				if descriptor_type == 'daisy':
-					res_m_sub.append(compute_similarities_daisy(query_img_h_sub, bbdd_descriptors, k_value)[1])
-				else:
-					res_m_sub.append(compute_similarities_bidirectional(query_img_h_sub, bbdd_descriptors, descriptor_type, k_value)[1])
+				res_m_sub.append(compute_similarities_bidirectional(query_img_h_sub, bbdd_descriptors, descriptor_type, k_value)[1])
 			res_m.append(res_m_sub)
 			continue
-		if descriptor_type == 'daisy':
-			res_m.append(compute_similarities_daisy(query_img_h, bbdd_descriptors, k_value)[1])
-		else:
-			res_m.append(compute_similarities_bidirectional(query_img_h, bbdd_descriptors, descriptor_type, k_value)[1])
+
+		res_m.append(compute_similarities_bidirectional(query_img_h, bbdd_descriptors, descriptor_type ,k_value)[1])
 	
 	print(res_m)
 

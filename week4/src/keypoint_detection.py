@@ -49,10 +49,10 @@ def orb_daisy_desc(img):
     gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
     
     # Initiate ORB Detector and find keypoints
-    orb = cv.ORB_create(nfeatures=200)
+    orb = cv.ORB_create()
     kp_orb = orb.detect(gray, None)
-    img = cv.drawKeypoints(gray, kp_orb, img, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    cv.imwrite("orb_keypoints.jpg", img)
+    #img = cv.drawKeypoints(gray, kp_orb, img, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    #cv.imwrite("orb_keypoints.jpg", img)
 
     # Compute descriptors using Daisy
     patch_size = 50
@@ -137,7 +137,9 @@ def match(des1, des2, des_type):
 
         #bf = cv.BFMatcher(cv.NORM_L2, crossCheck=True)
         #matches = bf.match(des1,des2)
-        bf = cv.BFMatcher(cv.NORM_L2)
+        des1 = des1.astype(np.float32)
+        des2 = des2.astype(np.float32)
+        bf = cv.BFMatcher(cv.NORM_L1)
         matches = bf.knnMatch(des1,des2,k=2)
 
 
@@ -201,7 +203,7 @@ def test_daisy():
     folder_path = os.path.join(base_path, "./data/qsd1_w4")
     folder_path_bbdd = os.path.join(base_path, "./data/BBDD")
     image_path_1 = os.path.join(folder_path, "00001.jpg")
-    image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00188.jpg")
+    image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00000.jpg")
     image_path_3 = os.path.join(folder_path_bbdd, "bbdd_00003.jpg")
     img1 = cv.imread(image_path_1)
     img2 = cv.imread(image_path_2)
