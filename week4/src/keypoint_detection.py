@@ -38,7 +38,7 @@ def orb(img):
     # compute the descriptors with ORB
     kp, des = orb.compute(gray, kp)
 
-    #img=cv.drawKeypoints(gray,kp,img)
+    #img=cv.drawKeypoints(img,kp,img)
 
     #cv.imshow('dst',img)
     #cv.waitKey(0)
@@ -212,7 +212,23 @@ def test_daisy():
     descs1 = orb_daisy_desc(img2)
 
 
-  
+'''
+base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+folder_path = os.path.join(base_path, "./data/qsd1_w4/images_without_noise/masked")
+image_path_0 = os.path.join(folder_path, "00024_0.jpg")
+image_path_1 = os.path.join(folder_path, "00024_1.jpg")
+
+img0 = cv.imread(image_path_0)
+
+kp0, des0 = orb(img0)
+
+img1 = cv.imread(image_path_1)
+
+kp1, des1 = orb(img1)
+'''
+
+
+
 #test_daisy()
 '''
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -243,7 +259,7 @@ kp3, des3 = sift(img3)
 matches = match(des1, des2, 'sift')
 print(len(matches))
 
-img12 = cv.drawMatchesKnn(img1,kp1,img2,kp2,matches,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+img12 = cv.drawMatches(img1, kp1, img2, kp2, matches, None, flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
 plt.imshow(img12),plt.show()
 
@@ -252,10 +268,19 @@ plt.imshow(img12),plt.show()
 matches = match(des1, des3, 'sift')
 print(len(matches))
 
-#img13 = cv.drawMatches(img1,kp1,img3,kp3,good,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-img13 = cv.drawMatchesKnn(img1,kp1,img3,kp3,matches,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
- 
-plt.imshow(img13),plt.show()
+img13 = cv.drawMatches(img1,kp1,img3,kp3,matches,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+
+
+
+matches = match(des3, des1, 'sift')
+img31 = cv.drawMatches(img3,kp3,img1,kp1,matches,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+
+img13_rgb = cv.cvtColor(img13, cv.COLOR_BGR2RGB)
+plt.imshow(img13_rgb)
+plt.show()
+
+img31_rgb = cv.cvtColor(img31, cv.COLOR_BGR2RGB)
+plt.imshow(img31_rgb)
+plt.show()
+
 '''
-
-
