@@ -127,7 +127,7 @@ def main():
 #		f1_measure = f1_score(y,res_m)
 		# Evaluate the results using mAP@K if we are not in testing mode	
 		print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
-		print(f"F1_score for {descriptor_type}: {f1_measure}")
+		#print(f"F1_score for {descriptor_type}: {f1_measure}")
 
 		
 	# Save the 'blind' results for the test query set 
