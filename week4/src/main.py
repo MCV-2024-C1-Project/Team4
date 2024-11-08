@@ -6,6 +6,7 @@ from compute_similarities import *
 from average_precision import mapk
 from metrics import Metrics
 from keypoint_detection import *
+from sklearn.metrics import f1_score
 
 # Get the path of the folder containing the museum dataset (BBDD)
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -123,8 +124,10 @@ def main():
 		with open(os.path.join(q_path, f'{descriptor_type}_descriptors_{str(k_value)}_results.pkl'), 'wb') as f:
 			pickle.dump(res_m, f)
 
+		f1_measure = f1_score(y,res_m)
 		# Evaluate the results using mAP@K if we are not in testing mode	
 		print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
+		print(f"F1_score for {descriptor_type}: {f1_measure}")
 
 		
 	# Save the 'blind' results for the test query set 

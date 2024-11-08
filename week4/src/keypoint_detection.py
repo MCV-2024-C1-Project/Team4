@@ -51,6 +51,8 @@ def orb_daisy_desc(img):
     # Initiate ORB Detector and find keypoints
     orb = cv.ORB_create(nfeatures=200)
     kp_orb = orb.detect(gray, None)
+    img = cv.drawKeypoints(gray, kp_orb, img, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    cv.imwrite("orb_keypoints.jpg", img)
 
     # Compute descriptors using Daisy
     patch_size = 50
@@ -68,10 +70,21 @@ def orb_daisy_desc(img):
 
             patch = gray[max(0, y-patch_size//2) : y+patch_size//2, max(0, x-patch_size//2) : x+patch_size//2]
 
-            if patch.shape[0] > 0 and patch_size.shape[1] > 0:
+            if patch.shape[0] > 0 and patch.shape[1] > 0:
                 desc, descs_img = daisy(patch, step=25, radius=15, rings=3, histograms=6, orientations=10, visualize=True)
+                #desc, descs_img = daisy(patch, step=180, radius=58, rings=3, histograms=6, orientations=10, visualize=True)
                 descs.append(np.reshape(desc, -1))
-    
+
+    # Plot the DAISY descriptor visualization
+    plt.figure()
+    plt.imshow(descs_img)
+    plt.title("DAISY Descriptor Visualization")
+    plt.axis("off")  # Hide axes
+
+    # Save the visualization as an image file
+    plt.savefig("daisy_descriptor_visualization.png")
+    plt.show()
+
     descs = np.array(descs)
 
     return descs
@@ -187,21 +200,17 @@ def test_daisy():
     folder_path = os.path.join(base_path, "./data/qsd1_w4")
     folder_path_bbdd = os.path.join(base_path, "./data/BBDD")
     image_path_1 = os.path.join(folder_path, "00001.jpg")
-    image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00150.jpg")
+    image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00188.jpg")
     image_path_3 = os.path.join(folder_path_bbdd, "bbdd_00003.jpg")
     img1 = cv.imread(image_path_1)
     img2 = cv.imread(image_path_2)
     img3 = cv.imread(image_path_3)
 
-    descs1 = daisy_descriptor(img1).astype(np.float32)
-    descs2 = daisy_descriptor(img2).astype(np.float32)
-    descs3 = daisy_descriptor(img3).astype(np.float32)
+    descs1 = orb_daisy_desc(img2)
 
-    match(descs1, descs2, 'daisy')
-    match(descs1, descs3, 'daisy')
 
   
-#test_daisy()
+test_daisy()
 '''
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 folder_path = os.path.join(base_path, "./data/qsd1_w4")
