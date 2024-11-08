@@ -124,7 +124,7 @@ def main():
 		with open(os.path.join(q_path, f'{descriptor_type}_descriptors_{str(k_value)}_results.pkl'), 'wb') as f:
 			pickle.dump(res_m, f)
 
-		f1_measure = f1_score(y,res_m)
+#		f1_measure = f1_score(y,res_m)
 		# Evaluate the results using mAP@K if we are not in testing mode	
 		print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
 		print(f"F1_score for {descriptor_type}: {f1_measure}")

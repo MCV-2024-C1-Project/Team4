@@ -75,6 +75,7 @@ def orb_daisy_desc(img):
                 #desc, descs_img = daisy(patch, step=180, radius=58, rings=3, histograms=6, orientations=10, visualize=True)
                 descs.append(np.reshape(desc, -1))
 
+    '''
     # Plot the DAISY descriptor visualization
     plt.figure()
     plt.imshow(descs_img)
@@ -84,7 +85,7 @@ def orb_daisy_desc(img):
     # Save the visualization as an image file
     plt.savefig("daisy_descriptor_visualization.png")
     plt.show()
-
+    '''
     descs = np.array(descs)
 
     return descs
@@ -210,7 +211,7 @@ def test_daisy():
 
 
   
-test_daisy()
+#test_daisy()
 '''
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 folder_path = os.path.join(base_path, "./data/qsd1_w4")
