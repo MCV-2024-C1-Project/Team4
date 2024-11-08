@@ -45,27 +45,65 @@ def orb(img):
 
     return kp, des
 
+def orb_daisy_desc(img):
+    gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+    
+    # Initiate ORB Detector and find keypoints
+    orb = cv.ORB_create(nfeatures=200)
+    kp_orb = orb.detect(gray, None)
+    img = cv.drawKeypoints(gray, kp_orb, img, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    cv.imwrite("orb_keypoints.jpg", img)
+
+    # Compute descriptors using Daisy
+    patch_size = 50
+    descs = []
+    if len(kp_orb) == 0:
+        y = int(gray.shape[0]//2)
+        x = int(gray.shape[1]//2)
+        patch = gray[max(0, y-patch_size//2) : y+patch_size//2, max(0, x-patch_size//2) : x+patch_size//2]
+        desc, descs_img = daisy(patch, step=25, radius=15, rings=3, histograms=6, orientations=10, visualize=True)
+        descs.append(np.reshape(desc, -1))
+    else:
+        for kp in kp_orb:
+            x = int(kp.pt[0])
+            y = int(kp.pt[1])
+
+            patch = gray[max(0, y-patch_size//2) : y+patch_size//2, max(0, x-patch_size//2) : x+patch_size//2]
+
+            if patch.shape[0] > 0 and patch.shape[1] > 0:
+                desc, descs_img = daisy(patch, step=25, radius=15, rings=3, histograms=6, orientations=10, visualize=True)
+                #desc, descs_img = daisy(patch, step=180, radius=58, rings=3, histograms=6, orientations=10, visualize=True)
+                descs.append(np.reshape(desc, -1))
+
+    '''
+    # Plot the DAISY descriptor visualization
+    plt.figure()
+    plt.imshow(descs_img)
+    plt.title("DAISY Descriptor Visualization")
+    plt.axis("off")  # Hide axes
+
+    # Save the visualization as an image file
+    plt.savefig("daisy_descriptor_visualization.png")
+    plt.show()
+    '''
+    descs = np.array(descs)
+
+    return descs
+
 
 def daisy_descriptor(img):
 
     gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
     h,w = gray.shape
 
-    S = np.floor(w/20)
+    S = np.floor(w/15)
     R = 15
     Q = 3
-    H = 8
+    H = 5
 
-    descs, descs_img = daisy(gray, step=int(S), radius=R, rings=Q, histograms=Q+1, orientations=H, normalization='daisy' ,visualize=True)
-    #print(descs.shape)
-    # Reshape to have a list of feature vectors
-    descs_reshaped = descs.reshape(-1, descs.shape[-1])
-    # descs dimension --> (P,Q,R) 
-    #cv.imshow('dst', descs_img)
-    #cv.waitKey(0)
-    #print(descs_reshaped.shape)
+    descs = daisy(gray, step=int(S), radius=R, rings=Q, histograms=H, orientations=H, normalization='daisy' ,visualize=False)
 
-    return descs_reshaped
+    return descs, descs.shape
 
 
 def compute_std_dev_of_distances(matches):
@@ -163,18 +201,14 @@ def test_daisy():
     folder_path = os.path.join(base_path, "./data/qsd1_w4")
     folder_path_bbdd = os.path.join(base_path, "./data/BBDD")
     image_path_1 = os.path.join(folder_path, "00001.jpg")
-    image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00150.jpg")
+    image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00188.jpg")
     image_path_3 = os.path.join(folder_path_bbdd, "bbdd_00003.jpg")
     img1 = cv.imread(image_path_1)
     img2 = cv.imread(image_path_2)
     img3 = cv.imread(image_path_3)
 
-    descs1 = daisy_descriptor(img1).astype(np.float32)
-    descs2 = daisy_descriptor(img2).astype(np.float32)
-    descs3 = daisy_descriptor(img3).astype(np.float32)
+    descs1 = orb_daisy_desc(img2)
 
-    match(descs1, descs2, 'daisy')
-    match(descs1, descs3, 'daisy')
 
 '''
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

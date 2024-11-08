@@ -2,10 +2,11 @@ import pickle
 import argparse
 from tqdm import tqdm
 
-from compute_similarities import compute_similarities_bidirectional
+from compute_similarities import *
 from average_precision import mapk
 from metrics import Metrics
 from keypoint_detection import *
+from sklearn.metrics import f1_score
 
 # Get the path of the folder containing the museum dataset (BBDD)
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -45,17 +46,17 @@ def main():
 		img_bgr = cv.imread(os.path.join(q_path, filename))
 
 		# Resize the image to 256x256
-		img_bgr = cv.resize(img_bgr, (256, 256))
-
 		if descriptor_type == 'sift':
+			img_bgr = cv.resize(img_bgr, (256, 256))
 			kp, des = sift(img_bgr)
 
 		elif descriptor_type == 'orb':
+			img_bgr = cv.resize(img_bgr, (256, 256))
 			kp, des = orb(img_bgr)
 
 		elif descriptor_type == 'daisy':
-			des = daisy_descriptor(img_bgr)
-			des = des.astype(np.float32)
+			img_bgr = cv.resize(img_bgr, (256, 256), interpolation=cv.INTER_AREA)
+			des = orb_daisy_desc(img_bgr)
 			
 		
 
@@ -81,7 +82,7 @@ def main():
 				descriptors.extend([None] * (index + 1 - len(descriptors)))
 			descriptors[index] = des
 
-	if convert_y and not is_test:
+	if convert_y and not is_test and not (descriptor_type=='daisy'):
 		y = [[[item] for item in sublist] for sublist in y]
 
 	
@@ -103,10 +104,16 @@ def main():
 		if len(query_img_h) <= 2:
 			res_m_sub = []
 			for query_img_h_sub in query_img_h:
-				res_m_sub.append(compute_similarities_bidirectional(query_img_h_sub, bbdd_descriptors, descriptor_type, k_value)[1])
+				if descriptor_type == 'daisy':
+					res_m_sub.append(compute_similarities_daisy(query_img_h_sub, bbdd_descriptors, k_value)[1])
+				else:
+					res_m_sub.append(compute_similarities_bidirectional(query_img_h_sub, bbdd_descriptors, descriptor_type, k_value)[1])
 			res_m.append(res_m_sub)
 			continue
-		res_m.append(compute_similarities_bidirectional(query_img_h, bbdd_descriptors, descriptor_type, k_value)[1])
+		if descriptor_type == 'daisy':
+			res_m.append(compute_similarities_daisy(query_img_h, bbdd_descriptors, k_value)[1])
+		else:
+			res_m.append(compute_similarities_bidirectional(query_img_h, bbdd_descriptors, descriptor_type, k_value)[1])
 	
 	print(res_m)
 
@@ -117,8 +124,10 @@ def main():
 		with open(os.path.join(q_path, f'{descriptor_type}_descriptors_{str(k_value)}_results.pkl'), 'wb') as f:
 			pickle.dump(res_m, f)
 
+#		f1_measure = f1_score(y,res_m)
 		# Evaluate the results using mAP@K if we are not in testing mode	
 		print(f"mAP@{k_value} for {descriptor_type}: {mapk(y, res_m, k_value)}")
+		#print(f"F1_score for {descriptor_type}: {f1_measure}")
 
 		
 	# Save the 'blind' results for the test query set 

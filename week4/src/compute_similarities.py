@@ -1,7 +1,11 @@
 from typing import Any
 
 from metrics import compare_histograms
+from skimage import color, data
+from skimage.feature import daisy
+from scipy.spatial import distance
 import cv2 as cv
+import numpy as np  
 from metrics import Metrics
 from keypoint_detection import * 
 
@@ -99,6 +103,42 @@ def compute_similarities(query_descriptors: Any, bbdd_descriptors: Any, des_type
     # Return the top k matches (with their similarity scores and indices)
     return results[:k], results_idx[:k]
 
+
+def compute_similarities_daisy(query_descriptors: Any, bbdd_descriptors: Any, k: int = 1) -> tuple[list, list]:
+    best_match_index = -1
+    min_score = float('inf')
+    distances = []
+    mins = []
+    th = 0.83
+
+    for idx, bbdd_desc in enumerate(bbdd_descriptors):
+        if len(bbdd_desc) == 0:
+            if len(query_descriptors) == 0:
+                min_score = 0
+                best_match_index = idx
+        else:
+            for kp_desc in query_descriptors:
+                dist = np.linalg.norm(bbdd_desc-kp_desc, axis=1)
+                distances.append(np.sort(dist)[0])
+            
+            if len(distances) > 1:
+                local_scores_vector = np.reshape(distances, -1)
+                local_scores_vector = np.sort(local_scores_vector)
+                mean0 = np.mean(local_scores_vector[:1])
+            else:
+                local_scores_vector = distances[0]
+                mean0 = local_scores_vector
+            
+            if mean0 < min_score:
+                mins.append(min_score)
+                min_score = mean0
+                best_match_index = idx
+    
+    ratio = min_score/np.max([min(mins), 1e-8])
+    if ratio > th:
+        best_match_index = -1
+    
+    return min_score, best_match_index
 
 
 

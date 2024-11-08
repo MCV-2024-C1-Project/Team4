@@ -39,15 +39,17 @@ def main():
 		img_bgr = cv.imread(os.path.join(imgs_path, filename))
 
 		# Resize the image to 256x256
-		img_bgr = cv.resize(img_bgr, (256, 256))
+		
 
 		if DESCRIPTOR_TYPE == 'sift':
+			img_bgr = cv.resize(img_bgr, (256, 256))
 			kp, des = sift(img_bgr)
 		elif DESCRIPTOR_TYPE == 'orb':
+			img_bgr = cv.resize(img_bgr, (256, 256))
 			kp, des = orb(img_bgr)
 		elif DESCRIPTOR_TYPE == 'daisy':
-			des = daisy_descriptor(img_bgr)
-			des = des.astype(np.float32)
+			img_bgr = cv.resize(img_bgr, (256, 256), interpolation=cv.INTER_AREA)
+			des = orb_daisy_desc(img_bgr)
 			
 
 		index = int(filename.split('_')[-1].split('.')[0])
