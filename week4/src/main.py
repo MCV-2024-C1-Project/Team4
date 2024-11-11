@@ -65,7 +65,7 @@ def main():
 			convert_y = True
 			main_index, sub_index = map(int, filename.split('.')[0].split('_'))
 
-			# Ensure that the histograms array is large enough to accommodate the main index
+			# Ensure that the descriptors array is large enough to accommodate the main index
 			if len(descriptors) <= main_index:
 				descriptors.extend([[] for _ in range(main_index + 1 - len(descriptors))])
 
@@ -104,11 +104,11 @@ def main():
 		if len(query_img_h) <= 2:
 			res_m_sub = []
 			for query_img_h_sub in query_img_h:
-				res_m_sub.append(compute_similarities_bidirectional(query_img_h_sub, bbdd_descriptors, descriptor_type, k_value)[1])
+				res_m_sub.append(compute_similarities(query_img_h_sub, bbdd_descriptors, descriptor_type, k_value)[1])
 			res_m.append(res_m_sub)
 			continue
 
-		res_m.append(compute_similarities_bidirectional(query_img_h, bbdd_descriptors, descriptor_type ,k_value)[1])
+		res_m.append(compute_similarities(query_img_h, bbdd_descriptors, descriptor_type ,k_value)[1])
 	
 	print(res_m)
 

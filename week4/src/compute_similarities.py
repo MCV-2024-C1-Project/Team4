@@ -34,16 +34,25 @@ def compute_similarities_bidirectional(query_descriptors: Any, bbdd_descriptors:
 
             results.append((idx, num_good_matches))
     
+    # Sort results by the number of good matches in descending order
+    # (Higher number of matches indicates a better similarity)
     results.sort(key=lambda x: x[1], reverse=True)
+
+    # Extract only the indices of the sorted results
     results_idx = [result[0] for result in results]
 
+    # Set a threshold value based on descriptor type to help identify unknown images
     threshold = 1.7 if des_type == 'sift' or des_type == 'daisy' else 1.8
 
+    # Check if the top match is significantly better than the second-best match
+    # This helps to identify cases where there may be no good match in the dataset
     if len(results) > 1 and results[0][1] < threshold * results[1][1] or results[0][1] == 0:
+        # Insert a placeholder (-1) result at the top to indicate an unknown image
         result = (-1, -1)
         results.insert(0, result)
         results_idx.insert(0, -1)
 
+    # Return the top k matches (with their similarity scores and indices)
     return results[:k], results_idx[:k]
 
 

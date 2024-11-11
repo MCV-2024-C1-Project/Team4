@@ -17,7 +17,8 @@ def sift(img):
     # find the keypoints and compute the descriptors with SIFT
     kp, des = sift.detectAndCompute(gray,None)
 
-    #img=cv.drawKeypoints(gray,kp,img)
+    #img=cv.drawKeypoints(img,kp,img, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    #img=cv.drawKeypoints(img,kp,img)
 
     #cv.imshow('dst',img)
     #cv.waitKey(0)
@@ -38,6 +39,7 @@ def orb(img):
     # compute the descriptors with ORB
     kp, des = orb.compute(gray, kp)
 
+    #img=cv.drawKeypoints(img,kp,img, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     #img=cv.drawKeypoints(img,kp,img)
 
     #cv.imshow('dst',img)
@@ -74,18 +76,17 @@ def orb_daisy_desc(img):
                 desc, descs_img = daisy(patch, step=25, radius=15, rings=3, histograms=6, orientations=10, visualize=True)
                 #desc, descs_img = daisy(patch, step=180, radius=58, rings=3, histograms=6, orientations=10, visualize=True)
                 descs.append(np.reshape(desc, -1))
+        
+            # Plot the DAISY descriptor visualization
+            plt.figure()
+            plt.imshow(descs_img)
+            plt.title("DAISY Descriptor Visualization")
+            plt.axis("off")  # Hide axes
+            
+            # Save the visualization as an image file
+            plt.savefig("daisy_descriptor_visualization.png")
+            plt.show()
 
-    '''
-    # Plot the DAISY descriptor visualization
-    plt.figure()
-    plt.imshow(descs_img)
-    plt.title("DAISY Descriptor Visualization")
-    plt.axis("off")  # Hide axes
-
-    # Save the visualization as an image file
-    plt.savefig("daisy_descriptor_visualization.png")
-    plt.show()
-    '''
     descs = np.array(descs)
 
     return descs
@@ -153,30 +154,28 @@ def match(des1, des2, des_type):
 
     return good
 
-def bidirectional_match(query_descriptors, bbdd_descriptors, des_type):
-    # Create a BFMatcher object based on the descriptor type
-    if des_type == 'sift' or des_type == 'orb':
-        bf = cv.BFMatcher(cv.NORM_L2 if des_type == 'sift' else cv.NORM_HAMMING, crossCheck=False)
-    else:
-        raise ValueError("Descriptor type not supported for bidirectional matching")
+def match_no_good(des1, des2, des_type):
 
-    # Perform forward matching (query to BBDD)
-    matches_q_to_bbdd = bf.knnMatch(query_descriptors, bbdd_descriptors, k=1)
+    if des_type == 'sift':
 
-    # Perform reverse matching (BBDD to query)
-    matches_bbdd_to_q = bf.knnMatch(bbdd_descriptors, query_descriptors, k=1)
+        bf = cv.BFMatcher(cv.NORM_L2, crossCheck=True)
+        matches = bf.match(des1,des2)
 
-    # Filter matches that are mutual in both directions (bidirectional matches)
-    bidirectional_matches = []
-    for m in matches_q_to_bbdd:
-        if len(m) == 1:
-            match = m[0]
-            # Check if this match is in the reverse match set
-            reverse_match = matches_bbdd_to_q[match.trainIdx]
-            if len(reverse_match) == 1 and reverse_match[0].trainIdx == match.queryIdx:
-                bidirectional_matches.append(match)
+    elif des_type == 'orb':
 
-    return bidirectional_matches
+        bf = cv.BFMatcher(cv.NORM_L2, crossCheck=True)
+        matches = bf.match(des1,des2)
+
+    elif des_type == 'daisy':
+
+        #bf = cv.BFMatcher(cv.NORM_L2, crossCheck=True)
+        #matches = bf.match(des1,des2)
+        des1 = des1.astype(np.float32)
+        des2 = des2.astype(np.float32)
+        bf = cv.BFMatcher(cv.NORM_L1)
+        matches = bf.knnMatch(des1,des2,k=2)
+
+    return matches
 
 
 def daisy_match(descs1, descs2):
@@ -230,29 +229,31 @@ kp1, des1 = orb(img1)
 
 
 #test_daisy()
-'''
+
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-folder_path = os.path.join(base_path, "./data/qsd1_w4")
+folder_path = os.path.join(base_path, "./data/qsd1_w4/images_without_noise/masked")
 folder_path_bbdd = os.path.join(base_path, "./data/BBDD")
 
 # Get all images with .jpg extension
-image_path_1 = os.path.join(folder_path, "00001.jpg")
+image_path_1 = os.path.join(folder_path, "00001_0.jpg")
 
 image_path_2 = os.path.join(folder_path_bbdd, "bbdd_00097.jpg")
 
 image_path_3 = os.path.join(folder_path_bbdd, "bbdd_00150.jpg")
 
 img1 = cv.imread(image_path_1)
+img1 = cv.resize(img1, (256, 256))
 
 kp1, des1 = sift(img1)
 
-print(kp1)
+#print(kp1)
 
 img2 = cv.imread(image_path_2)
 kp2, des2 = sift(img2)
 
 
 img3 = cv.imread(image_path_3)
+img3 = cv.resize(img3, (256, 256))
 kp3, des3 = sift(img3)
 
 
@@ -273,6 +274,7 @@ img13 = cv.drawMatches(img1,kp1,img3,kp3,matches,None,flags=cv.DrawMatchesFlags_
 
 
 matches = match(des3, des1, 'sift')
+print(len(matches))
 img31 = cv.drawMatches(img3,kp3,img1,kp1,matches,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
 img13_rgb = cv.cvtColor(img13, cv.COLOR_BGR2RGB)
@@ -283,4 +285,3 @@ img31_rgb = cv.cvtColor(img31, cv.COLOR_BGR2RGB)
 plt.imshow(img31_rgb)
 plt.show()
 
-'''
